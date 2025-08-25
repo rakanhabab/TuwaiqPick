@@ -17,6 +17,9 @@ TABLES = {
     "Table B": (410, 225, 500, 250),
 }
 
+TableALatestID = ""
+TableBLatestID = ""
+
 def on_zone_change(track_id: int, new_zone: str | None, old_zone: str | None):
     print(f"[event] track {track_id}: {old_zone} -> {new_zone}")
 
