@@ -1,43 +1,27 @@
 import os
+from pathlib import Path
+from dotenv import load_dotenv, find_dotenv
 import psycopg2
-from dotenv import load_dotenv
 
-# If .env is not in the same folder as this script, do:
-# from dotenv import find_dotenv
-# load_dotenv(find_dotenv())
-load_dotenv()
+dotenv_path = find_dotenv(usecwd=True) or str(Path(__file__).with_name(".env"))
+load_dotenv(dotenv_path)
 
-def env(name, default=""):
-    return (os.getenv(name, default) or "").strip()
+def _env(key: str, default: str = "") -> str:
+    val = os.getenv(key, default)
+    return (val or "").strip()
 
-DB_USER = env("DB_USER")
-DB_PASS = env("DB_PASS")
-DB_HOST = env("DB_HOST")
-DB_PORT = env("DB_PORT")
-DB_NAME = env("DB_NAME")
+def get_connection():
+    host = _env("DB_HOST")
+    port = _env("DB_PORT", "5432")
+    name = _env("DB_NAME")
+    user = _env("DB_USER")
+    pw   = _env("DB_PASS")
+    fullstring = _env("connectionURL")
 
-# Option A: DSN string (includes SSL)
-dsn = (
-    f"dbname={DB_NAME} "
-    f"user={DB_USER} "
-    f"password={DB_PASS} "
-    f"host={DB_HOST} "
-    f"port={DB_PORT} "
-    f"sslmode=require"
-)
+    # Fail fast if host is missing; prevents accidental localhost fallback
+    if not host or host.lower() in ("localhost", "127.0.0.1", "::1"):
+        raise RuntimeError(
+            f"Invalid DB_HOST={host!r}. Check your .env is loaded and points to the Pooler host."
+        )
 
-print(dsn)
-
-try:
-    conn = psycopg2.connect(dsn)
-    print("Connection successful!")
-
-    with conn.cursor() as cur:
-        cur.execute("SELECT NOW();")
-        print("Current Time:", cur.fetchone())
-
-    conn.close()
-    print("Connection closed.")
-except Exception as e:
-    print("Failed to connect:", e)
-    print("Debug vars:", repr(DB_HOST), repr(DB_PORT))  # helps catch stray spaces/newlines
+    return psycopg2.connect(fullstring)
