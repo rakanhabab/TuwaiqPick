@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <title>إدارة المخزون</title>
+  <link rel="stylesheet" href="../assets/css/base.css">
+  <link rel="stylesheet" href="../assets/css/layout.css">
+  <link rel="stylesheet" href="../assets/css/inventory.css">
+</head>
+<body>
+  <div id="appHeader"></div>
+  <div class="app-layout">
+    <div id="appSidebar"></div>
+    <main class="app-main">
+      <section class="panel">
+        <div class="row">
+          <input placeholder="بحث عن منتج...">
+          <select>
+            <option>الكل</option><option>حرج</option><option>منخفض</option><option>جيد</option>
+          </select>
+          <button class="btn">إضافة منتج</button>
+        </div>
+        <table class="grid">
+          <thead><tr><th>المنتج</th><th>الفرع</th><th>الكمية</th><th>إجراءات</th></tr></thead>
+          <tbody id="invRows"><tr><td colspan="4">—</td></tr></tbody>
+        </table>
+      </section>
+    </main>
+  </div>
+  <script type="module" src="../assets/js/boot.js"></script>
+  <script type="module" src="../assets/js/inventory.js"></script>
+</body>
+</html>

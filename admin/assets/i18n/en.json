@@ -1,0 +1,14 @@
+{
+  "lang.toggle": "AR",
+  "header.account": "Account",
+  "header.logout": "Logout",
+  "nav.dashboard": "Dashboard",
+  "nav.vision": "Vision Console",
+  "nav.inventory": "Inventory",
+  "nav.branches": "Branches",
+  "nav.complaints": "Complaints",
+  "chatbot.title": "Assistant",
+  "chatbot.greet": "Hi 👋, how can I help?",
+  "chatbot.send": "Send",
+  "chatbot.placeholder": "Ask about a product, branch, or complaint..."
+}

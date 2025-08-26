@@ -1,0 +1,15 @@
+.app-header{display:flex;justify-content:space-between;align-items:center;padding:10px 16px;background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:10}
+.header-right,.header-left{display:flex;align-items:center;gap:10px}
+.app-layout{display:grid;grid-template-columns:280px 1fr;gap:16px;max-width:1400px;margin:16px auto;padding:0 16px}
+.app-sidebar{background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px;height:calc(100vh - 100px);position:sticky;top:84px;overflow:auto}
+.app-main{min-height:60vh}
+.nav{display:flex;flex-direction:column;gap:8px;margin-bottom:12px}
+.nav-link{padding:10px;border:1px solid var(--line);border-radius:10px}
+.nav-link:hover{background:#fafafa}
+.panel.stack{display:flex;flex-direction:column;gap:16px}
+.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.kpi-card{border:1px solid var(--line);border-radius:12px;padding:12px;background:#fff}
+.kpi-title{color:var(--muted);font-size:14px}
+.kpi-value{font-size:24px;font-weight:800;margin-top:6px}
+.charts{background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px}
+.sidebar-section{margin-top:12px}
