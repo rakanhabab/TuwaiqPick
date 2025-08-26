@@ -148,30 +148,18 @@ def create_invoice(payload: InvoiceCreate):
         # 3) Insert invoice
         # payment_id left NULL here; timestamp assumed default NOW() in DB
 
-        cur.execute(
-            """
-            SELECT id
-            FROM payment_methods
-            WHERE user_id = %s AND is_default = TRUE
-            """,
-            (payload.user_id,),
-        )
-        paymentID = cur.fetchone()
-        if paymentID[0] is None:
-            status = "unpaid"
-        else:
-            status = "paid"
+        status = "paid"
 
         cur.execute(
             """
-            INSERT INTO invoices (user_id, branch_id, payment_id, total_amount, products_and_quantites, status)
+            INSERT INTO invoices (user_id, branch_id, payment_id, total_amount, products_and_quantities, status)
             VALUES (%s, %s, %s, %s, %s, %s)
-            RETURNING id, user_id, branch_id, payment_id, timestamp, total_amount, products_and_quantites, status
+            RETURNING id, user_id, branch_id, payment_id, timestamp, total_amount, products_and_quantities, status
             """,
             (
                 payload.user_id,
-                "851af67f-45a7-4774-b793-39a74c2e2a40",
-                paymentID[0],
+                "130df862-b9e2-4233-8d67-d87a3d3b8323",
+                "2067d440-e179-4d2a-a0bd-6a1c7cd18a86",
                 total_amount,
                 Json(items_detailed),  # psycopg2 will cast to JSON/JSONB
                 status,
@@ -182,7 +170,7 @@ def create_invoice(payload: InvoiceCreate):
         cur.close()
         conn.close()
 
-        colnames = ["id", "user_id", "branch_id", "payment_id", "timestamp", "total_amount", "products_and_quantites", "status"]
+        colnames = ["id", "user_id", "branch_id", "payment_id", "timestamp", "total_amount", "products_and_quantities", "status"]
         return dict(zip(colnames, created))
 
     except HTTPException:
@@ -193,11 +181,12 @@ def create_invoice(payload: InvoiceCreate):
             conn.rollback()
         except Exception:
             pass
+        print("Error:", e)
         raise HTTPException(status_code=500, detail=str(e))
 
-"""
+""" normalize_invoice_or_ticket_items
 DECLARE
-  out_items jsonb := '[]'::jsonb;
+  out_items jsonb := '[]'::jsonb
 BEGIN
   IF jsonb_typeof(_items) IS DISTINCT FROM 'array' THEN
     RAISE EXCEPTION 'products_and_quantities must be a JSON array of objects';

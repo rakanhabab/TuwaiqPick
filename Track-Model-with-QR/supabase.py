@@ -25,3 +25,5 @@ def get_connection():
         )
 
     return psycopg2.connect(fullstring)
+
+get_connection()

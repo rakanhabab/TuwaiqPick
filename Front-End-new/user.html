@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>دكان فيجين - لوحة المستخدم</title>
+  <meta name="description" content="لوحة تحكم المستخدم - دكان فيجين" />
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin defer></script>
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/user.css">
+</head>
+<body>
+  <!-- User Dashboard -->
+  <div class="view active">
+    <!-- Header -->
+    <header class="header">
+      <div class="wrap">
+        <div class="brand">
+          <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDYiIGhlaWdodD0iNDYiIHZpZXdCb3g9IjAgMCA0NiA0NiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjQ2IiBoZWlnaHQ9IjQ2IiByeD0iOCIgZmlsbD0idXJsKCNncmFkaWVudDApIi8+CjxkZWZzPgo8bGluZWFyR3JhZGllbnQgaWQ9ImdyYWRpZW50MCIgeDE9IjAiIHkxPSIwIiB4Mj0iNDYiIHkyPSI0NiIgZ3JhZGllbnRVbml0cz0idXNlclNwYWNlT25Vc2UiPgo8c3RvcCBzdG9wLWNvbG9yPSIjZjk3MzE2Ii8+CjxzdG9wIG9mZnNldD0iMSIgc3RvcC1jb2xvcj0iIzhjNWNmNiIvPgo8L2xpbmVhckdyYWRpZW50Pgo8L2RlZnM+Cjwvc3ZnPgo=" alt="Dukkan Vision">
+          <span>دكان فيجين</span>
+        </div>
+        <div class="grow"></div>
+        <div class="account">
+          <div class="info">
+            <div id="accName">مرحباً</div>
+            <div id="accEmail">—</div>
+            <button class="logout" onclick="logout()">تسجيل الخروج</button>
+          </div>
+        </div>
+        <div class="account-btn-container">
+          <button class="account-btn" onclick="toggleAccountMenu()">معلومات الحساب</button>
+          
+          <!-- Account Dropdown Menu -->
+          <div class="account-dropdown" id="accountDropdown">
+            <div class="dropdown-header">
+              <div class="user-avatar">
+                <div class="avatar-gradient"></div>
+              </div>
+              <div class="user-info">
+                <div class="brand-name">دكان فيجين</div>
+                <div class="user-name" id="dropdownName">ASSIEL O SARDIDI</div>
+                <div class="user-email" id="dropdownEmail">assie55lsar@gmail.com</div>
+              </div>
+            </div>
+            
+            <div class="dropdown-content">
+              <button class="dropdown-btn logout-btn" onclick="logout()">
+                تسجيل الخروج
+              </button>
+              
+              <div class="qr-section">
+                <div class="qr-code" id="dropdownQR">
+                  <!-- QR Code will be generated here -->
+                </div>
+                <div class="qr-label">QR Code</div>
+              </div>
+              
+              <button class="dropdown-btn account-info-btn" onclick="showAccountInfo()">
+                معلومات الحساب
+              </button>
+            </div>
+          </div>
+        </div>
+        
+        <!-- الباركود في أقصى اليسار -->
+        <div class="barcode-container" style="position: relative; display: inline-block; margin-left: 20px;">
+          <div class="barcode-small" id="smallBarcode" style="
+            width: 80px;
+            height: 80px;
+            background:
+              linear-gradient(90deg, #000 1px, transparent 1px),
+              linear-gradient(0deg, #000 1px, transparent 1px);
+            background-size: 8px 8px;
+            border: 2px solid #000;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+          " onclick="showBarcodePage()" title="اضغط لعرض صفحة محاكاة مسح الباركود">
+            <!-- QR Code Corners -->
+            <div style="
+              position: absolute;
+              top: 8px;
+              left: 8px;
+              width: 16px;
+              height: 16px;
+              background: #000;
+              border-radius: 3px;
+            "></div>
+            <div style="
+              position: absolute;
+              top: 8px;
+              right: 8px;
+              width: 16px;
+              height: 16px;
+              background: #000;
+              border-radius: 3px;
+            "></div>
+            <div style="
+              position: absolute;
+              bottom: 8px;
+              left: 8px;
+              width: 16px;
+              height: 16px;
+              background: #000;
+              border-radius: 3px;
+            "></div>
+            <!-- Center Logo -->
+            <div style="
+              position: absolute;
+              top: 50%;
+              left: 50%;
+              transform: translate(-50%, -50%);
+              width: 8px;
+              height: 8px;
+              background: #000;
+              border-radius: 50%;
+            "></div>
+            <!-- Data Points -->
+            <div style="
+              position: absolute;
+              top: 32px;
+              left: 32px;
+              width: 2px;
+              height: 2px;
+              background: #000;
+              border-radius: 1px;
+            "></div>
+            <div style="
+              position: absolute;
+              top: 40px;
+              left: 40px;
+              width: 2px;
+              height: 2px;
+              background: #000;
+              border-radius: 1px;
+            "></div>
+            <div style="
+              position: absolute;
+              top: 48px;
+              left: 32px;
+              width: 2px;
+              height: 2px;
+              background: #000;
+              border-radius: 1px;
+            "></div>
+            <div style="
+              position: absolute;
+              top: 32px;
+              left: 48px;
+              width: 2px;
+              height: 2px;
+              background: #000;
+              border-radius: 1px;
+            "></div>
+            <!-- Data Points -->
+            <div style="
+              position: absolute;
+              bottom: 5px;
+              left: 50%;
+              transform: translateX(-50%);
+              background: rgba(255,255,255,0.9);
+              color: #000;
+              padding: 2px 4px;
+              border-radius: 3px;
+              font-size: 8px;
+              font-weight: bold;
+              white-space: nowrap;
+            ">QR Code</div>
+          </div>
+          <div style="
+            position: absolute;
+            top: -30px;
+            right: 0;
+            background: #333;
+            color: white;
+            padding: 6px 10px;
+            border-radius: 6px;
+            font-size: 11px;
+            white-space: nowrap;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+          " id="barcodeTooltip">اضغط لعرض صفحة محاكاة مسح الباركود</div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main">
+      <div class="wrap">
+        <!-- Dashboard Content -->
+        <div id="page-dashboard" class="page active">
+          <div class="dashboard-grid">
+            <!-- Left Column -->
+            <div class="left-column">
+              <!-- Data Summary Cards -->
+              <div class="data-summary">
+                <div class="summary-cards">
+                  <div class="summary-card yellow">
+                    <div class="card-content">
+                      <div class="card-title">إجمالي المصروف</div>
+                      <div class="card-value" id="kSpend">1560.34 ر.س</div>
+                      <canvas id="sparkSpend" width="100" height="30"></canvas>
+                    </div>
+                  </div>
+                  <div class="summary-card green">
+                    <div class="card-content">
+                      <div class="card-title">عدد الزيارات</div>
+                      <div class="card-value" id="kVisits">102</div>
+                      <canvas id="sparkVisits" width="100" height="30"></canvas>
+                    </div>
+                  </div>
+                  <div class="summary-card yellow">
+                    <div class="card-content">
+                      <div class="card-title">أكثر فرع زيارة</div>
+                      <div class="card-value" id="kTop">Twq Pick - الرياض</div>
+                      <canvas id="sparkTop" width="100" height="30"></canvas>
+                    </div>
+                  </div>
+                  <div class="summary-card green">
+                    <div class="card-content">
+                      <div class="card-title">متوسط الفاتورة</div>
+                      <div class="card-value" id="kAvg">65.14 ر.س</div>
+                      <canvas id="sparkAvg" width="100" height="30"></canvas>
+                    </div>
+                  </div>
+                </div>
+                <button class="btn btn-purple" onclick="updateData()">تحديث البيانات</button>
+              </div>
+
+              <!-- Map Section -->
+              <div class="map-section">
+                <div class="card">
+                  <h3>خريطة الفروع - السعودية</h3>
+                  <div id="map" style="height: 400px; width: 100%; border-radius: 8px;"></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Right Column -->
+            <div class="right-column">
+              <!-- Virtual Assistant -->
+              <div class="assistant-section">
+                <div class="card">
+                  <h3>المساعد الافتراضي</h3>
+                  <div class="assistant-greeting">مرحباً .. كيف أقدر أخدمك؟</div>
+                  <div class="chat-input">
+                    <textarea placeholder="اسأل عن منتج، فاتورة" id="chatInput" rows="4"></textarea>
+                    <button class="btn btn-red" onclick="sendMessage()">إرسال</button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Invoices Section -->
+              <div class="invoices-section">
+                <div class="card">
+                  <h3>الفواتير</h3>
+                  <div class="invoices-list" id="invoicesList">
+                    <div class="invoice-item">
+                      <div class="invoice-info">
+                        <div class="invoice-id">#1028</div>
+                        <div class="invoice-date">2025-08-03</div>
+                      </div>
+                      <div class="invoice-amount">31.40 ر.س</div>
+                      <button class="btn btn-purple btn-sm">استعراض</button>
+                    </div>
+                    <div class="invoice-item">
+                      <div class="invoice-info">
+                        <div class="invoice-id">#1019</div>
+                        <div class="invoice-date">2025-07-22</div>
+                      </div>
+                      <div class="invoice-amount">15.90 ر.س</div>
+                      <button class="btn btn-purple btn-sm">استعراض</button>
+                    </div>
+                    <div class="invoice-item">
+                      <div class="invoice-info">
+                        <div class="invoice-id">#1007</div>
+                        <div class="invoice-date">2025-07-03</div>
+                      </div>
+                      <div class="invoice-amount">31.50 ر.س</div>
+                      <button class="btn btn-purple btn-sm">استعراض</button>
+                    </div>
+                  </div>
+                  <div class="invoices-link">
+                    <a href="#" onclick="showSubpage('invoices')">إدارة فواتيري -</a>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Product Search -->
+              <div class="search-section">
+                <div class="card">
+                  <h3>ابحث عن توافر المنتجات</h3>
+                  <div class="search-input">
+                    <input type="text" placeholder="مثال: حليب قليل الدسم" id="productSearch">
+                    <button class="btn btn-gradient" onclick="searchProducts()">بحث</button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Contact Form -->
+              <div class="contact-section">
+                <div class="card">
+                  <h3>تواصل معنا</h3>
+                  <form id="contactForm">
+                    <input type="text" placeholder="اسمك" id="contactName" required>
+                    <input type="tel" placeholder="رقم الجوال" id="contactPhone" required>
+                    <textarea placeholder="رسالتك" id="contactMessage" rows="4" required></textarea>
+                    <button type="submit" class="btn btn-gradient">ارسال</button>
+                  </form>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Barcode Page -->
+        <div id="page-barcode" class="page">
+          <div class="main">
+            <div class="sidebar">
+              <div class="card">
+                <h3>طريقة الاستخدام</h3>
+                <ol>
+                  <li>افتح باركود <strong>دكان فيجين</strong> عند الدخول.</li>
+                  <li>وجّه الباركود إلى جهاز القارئ على البوابة.</li>
+                  <li>بعد الإذن بالدخول، التقط وأعد المنتجات بحرّية.</li>
+                  <li>غادر المتجر — الفاتورة تُرسل إلى بريدك.</li>
+                </ol>
+                <button class="back" id="backDash">➡ رجوع</button>
+              </div>
+              <div class="bar">
+                <h4>محاكاة المسح</h4>
+                <p class="helper">هذا فقط للاختبار داخل الواجهة.</p>
+                <button class="simulate" id="simulateScan">محاكاة مسح الباركود</button>
+              </div>
+            </div>
+            <div class="content">
+              <div class="card">
+                <div id="qr" style="width:350px;height:350px;margin:0 auto;display:flex;align-items:center;justify-content:center;"></div>
+                <h3 style="margin-top:0">باركود دخول المتجر</h3>
+                <div id="qrcode" style="width:100%;max-width:400px;margin:0 auto;text-align:center;">
+                  <div style="margin-top: 15px; font-size: 14px; color: #666;">
+                    QR Code - دكان فيجين
+                  </div>
+                </div>
+                <div class="helper">هذا الرمز يعبّر عن رقم دخولك (ID).</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Barcode Scan Page -->
+        <div id="page-barcode-scan" class="page">
+          <div class="main">
+            <div class="sidebar">
+              <div class="card">
+                <h3>محاكاة مسح الباركود</h3>
+                <p class="helper">هذه الصفحة لمحاكاة عملية مسح الباركود في المتجر.</p>
+                <button class="back" id="backToDashboard">➡ رجوع</button>
+              </div>
+            </div>
+            <div class="content">
+              <div class="card">
+                <h3 style="margin-top:0">نظام مسح الباركود</h3>
+                <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 20px; height: 500px;">
+                  <!-- البانل الأيمن - كاميرا/ستريمر -->
+                  <div style="background: #f8f9fa; border-radius: 8px; padding: 20px; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+                    <div style="width: 100%; height: 300px; background: #e9ecef; border-radius: 8px; display: flex; align-items: center; justify-content: center; margin-bottom: 20px;">
+                      <div style="text-align: center; color: #6c757d;">
+                        <div style="font-size: 48px; margin-bottom: 10px;">📷</div>
+                        <div>كاميرا الكشف عن المنتجات</div>
+                        <div style="font-size: 12px; margin-top: 5px;">سيتم استبدالها بستريمر حقيقي</div>
+                      </div>
+                    </div>
+                    <button class="btn btn-primary" style="width: 100%;" onclick="simulateProductDetection()">محاكاة اكتشاف منتج</button>
+                  </div>
+                  
+                  <!-- البانل الأيسر - السلة -->
+                  <div style="background: #f8f9fa; border-radius: 8px; padding: 20px;">
+                    <h4 style="margin-top: 0; margin-bottom: 15px;">🛒 سلة المشتريات</h4>
+                    <div id="cartItems" style="min-height: 200px; max-height: 300px; overflow-y: auto; margin-bottom: 15px;">
+                      <div style="text-align: center; color: #6c757d; padding: 20px;">
+                        <div style="font-size: 24px; margin-bottom: 10px;">🛒</div>
+                        <div>السلة فارغة</div>
+                        <div style="font-size: 12px; margin-top: 5px;">سيتم إضافة المنتجات تلقائياً</div>
+                      </div>
+                    </div>
+                    <div style="border-top: 1px solid #dee2e6; padding-top: 15px;">
+                      <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                        <strong>المجموع:</strong>
+                        <span id="cartTotal">0.00 ر.س</span>
+                      </div>
+                      <button class="btn btn-accent" style="width: 100%;" onclick="completePurchase()">إتمام الشراء</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <div class="wrap">
+        <div class="footer-content">
+          <div class="footer-copyright">
+            2025 - جميع الحقوق محفوظة.
+          </div>
+          <div class="footer-brand">
+            <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDYiIGhlaWdodD0iNDYiIHZpZXdCb3g9IjAgMCA0NiA0NiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjQ2IiBoZWlnaHQ9IjQ2IiByeD0iOCIgZmlsbD0idXJsKCNncmFkaWVudDApIi8+CjxkZWZzPgo8bGluZWFyR3JhZGllbnQgaWQ9ImdyYWRpZW50MCIgeDE9IjAiIHkxPSIwIiB4Mj0iNDYiIHkyPSI0NiIgZ3JhZGllbnRVbml0cz0idXNlclNwYWNlT25Vc2UiPgo8c3RvcCBzdG9wLWNvbG9yPSIjZjk3MzE2Ii8+CjxzdG9wIG9mZnNldD0iMSIgc3RvcC1jb2xvcj0iIzhjNWNmNiIvPgo8L2xpbmVhckdyYWRpZW50Pgo8L2RlZnM+Cjwvc3ZnPgo=" alt="Dukkan Vision">
+            <span>دكان فيجين</span>
+          </div>
+        </div>
+      </div>
+    </footer>
+  </div>
+
+  <!-- Scripts -->
+  <script src="js/user.js"></script>
+</body>
+</html> 

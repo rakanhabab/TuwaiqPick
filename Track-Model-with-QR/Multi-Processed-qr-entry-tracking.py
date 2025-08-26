@@ -246,7 +246,13 @@ def main():
     current_tracks = []  # list of (track_id, cx, cy, (x1,y1,x2,y2))
     def get_current_tracks():
         return list(current_tracks)
-
+    
+    current_ids = {tid for (tid, cx, cy, box) in current_tracks}
+    left_ids = _active_ids_prev - current_ids
+    for tid in left_ids:
+        on_person_left(tid)
+    _active_ids_prev = current_ids
+    
     cv2.setMouseCallback(motion_win, mouse_motion_factory(get_current_tracks))
 
     #YOLO model & stream from motion cam (0)
