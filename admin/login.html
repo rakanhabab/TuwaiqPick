@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <title>تسجيل الدخول</title>
+  <link rel="stylesheet" href="./assets/css/base.css" />
+  <style>
+    .wrap{max-width:420px;margin:60px auto;padding:16px}
+    form{display:flex;flex-direction:column;gap:10px}
+    input{padding:10px;border:1px solid var(--line);border-radius:10px}
+  </style>
+</head>
+<body>
+  <div class="wrap panel">
+    <h2>تسجيل الدخول</h2>
+    <form id="loginForm">
+      <input id="email" type="email" placeholder="البريد" required />
+      <input id="password" type="password" placeholder="كلمة المرور" required />
+      <button class="btn">دخول</button>
+    </form>
+    <div id="msg" class="subtle" style="margin-top:8px"></div>
+  </div>
+
+  <script type="module">
+    import { supabase } from './assets/js/supabaseClient.js';
+
+    const form = document.getElementById('loginForm');
+    const msg  = document.getElementById('msg');
+
+    form.addEventListener('submit', async (e)=>{
+      e.preventDefault();
+      msg.textContent = '...';
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value.trim();
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) { msg.textContent = 'فشل التسجيل: ' + error.message; return; }
+      window.location.href = './pages/index.html';
+    });
+  </script>
+</body>
+</html>
