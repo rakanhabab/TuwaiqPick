@@ -3,6 +3,11 @@ import cv2
 import numpy as np
 from ultralytics import YOLO
 from collections import defaultdict
+from api import *
+import requests
+from typing import List 
+
+INVOICE_API_URL = "http://127.0.0.1:8000/invoices"  # FastAPI endpoint
 
 
 MOTION_CAM_INDEX = 0        #YOLO tracking camera
@@ -17,11 +22,55 @@ TABLES = {
     "Table B": (410, 225, 500, 250),
 }
 
-TableALatestID = ""
-TableBLatestID = ""
+# Optionally keep the "latest user" value even after they leave.
+CLEAR_LATEST_ON_EXIT = False
+
+def on_zone_enter(track_id: int, zone: str):
+    """
+    Fired when a person ENTERS a zone (including switching from another zone).
+    Good place to set 'latest user' per table, start dwell timers, etc.
+    """
+
+    print(f"[enter] track {track_id} -> {zone} | LatestA={TableALatestID} LatestB={TableBLatestID}")
+
+def on_zone_exit(track_id: int, zone: str):
+    """
+    Fired when a person LEAVES a zone (including switching to another zone).
+    Good place to stop dwell timers, finalize 'near shelf' logic, etc.
+    """
+    global TableALatestID, TableBLatestID
+
+    # Most apps keep 'latest user' as the last person who *entered*,
+    # so we usually do NOT clear these on exit. Toggle if you want to clear.
+    user_id = identity_map.get(track_id, (str(track_id), ""))[0]  # (user_id, user_name) or fallback
+    if zone == "Table A":
+        TableALatestID = user_id
+    elif zone == "Table B":
+        TableBLatestID = user_id
+
+    print(f"[leave] track {track_id} <- {zone} | LatestA={TableALatestID} LatestB={TableBLatestID}")
+
 
 def on_zone_change(track_id: int, new_zone: str | None, old_zone: str | None):
-    print(f"[event] track {track_id}: {old_zone} -> {new_zone}")
+    # No movement
+    if new_zone == old_zone:
+        return
+
+    # Left all zones
+    if old_zone is not None and new_zone is None:
+        on_zone_exit(track_id, old_zone)
+        return
+
+    # Entered from no zone
+    if old_zone is None and new_zone is not None:
+        on_zone_enter(track_id, new_zone)
+        return
+
+    # Switched zones (treat as exit then enter)
+    if old_zone is not None and new_zone is not None:
+        on_zone_exit(track_id, old_zone)
+        on_zone_enter(track_id, new_zone)
+        return
 
 def on_identity_linked(track_id: int, user_id: str, user_name: str):
     print(f"[identity] track {track_id} linked to {user_name} ({user_id})")
@@ -29,6 +78,67 @@ def on_identity_linked(track_id: int, user_id: str, user_name: str):
 # ----------------------------
 # UTILS
 # ----------------------------
+
+def queue_invoice_item(track_id: int, name: str, quantity: int):
+    """
+    Call this whenever your shelf logic decides the person took an item.
+    Example: queue_invoice_item(track_id, "Pepsi 330ml", 1)
+    """
+    try:
+        item = InvoiceItem(name=name, quantity=quantity)
+        cart_items[track_id].append(item)
+        print(f"[cart] track {track_id}: +{quantity} x {name} (total items now {len(cart_items[track_id])})")
+    except Exception as e:
+        print(f"[cart] Failed to queue item for track {track_id}: {e}")
+
+def _get_user_id_for_track(track_id: int) -> str | None:
+    """
+    Extract user_id previously linked via QR. Returns None if not linked.
+    """
+    if track_id in identity_map:
+        return identity_map[track_id][0]  # (user_id, user_name)
+    return None
+
+def _flush_invoice_for_track(track_id: int):
+    """
+    Build and POST InvoiceCreate for this track if possible.
+    Clears the cart on success (or leaves it intact on failure).
+    """
+    user_id = _get_user_id_for_track(track_id)
+    items = cart_items.get(track_id, [])
+
+    if not user_id:
+        print(f"[invoice] track {track_id}: no user_id bound; skipping invoice.")
+        return
+
+    if not items:
+        print(f"[invoice] track {track_id}: no items; nothing to invoice.")
+        return
+
+    # Build pydantic model then POST as JSON
+    try:
+        payload = InvoiceCreate(user_id=user_id, items=items)
+        resp = requests.post(INVOICE_API_URL, json=payload.dict())
+        if resp.status_code >= 200 and resp.status_code < 300:
+            print(f"[invoice] track {track_id}: SUCCESS {resp.status_code}")
+            cart_items.pop(track_id, None)  # clear on success
+        else:
+            print(f"[invoice] track {track_id}: FAILED {resp.status_code} - {resp.text}")
+    except Exception as e:
+        print(f"[invoice] track {track_id}: ERROR posting invoice: {e}")
+
+def on_person_left(track_id: int):
+    """
+    Called when a track disappears from the frame.
+    """
+    print(f"[leave] track {track_id} left the frame; attempting to flush invoice.")
+    _flush_invoice_for_track(track_id)
+
+    # Optional: clean up identity map and last_zone to avoid growth
+    identity_map.pop(track_id, None)
+    last_zone.pop(track_id, None)
+
+
 def point_in_rect_with_margin(pt, rect, margin=0):
     x, y = pt
     x1, y1, x2, y2 = rect
@@ -83,6 +193,11 @@ clicked_points_qr = []            #show clicks on QR window
 selected_track_id = [None]        
 last_zone = defaultdict(lambda: None)
 identity_map = {}                 # track_id -> (user_id, user_name)
+TableALatestID = ""
+TableBLatestID = ""
+cart_items = defaultdict(list) 
+_active_ids_prev = set()
+
 
 #mouse: QR window
 def mouse_qr(event, x, y, flags, param):
