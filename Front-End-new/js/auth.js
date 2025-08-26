@@ -26,23 +26,31 @@ const auth = {
       return;
     }
     
+    // Admin fast-path: allow admin login even if not pre-created in twq_users
+    if (email === 'admin@admin.com' && password === 'admin123') {
+      const adminUser = {
+        firstName: 'مدير',
+        lastName: 'النظام',
+        email: 'admin@admin.com'
+      };
+      localStorage.setItem('twq_is_admin', '1');
+      localStorage.setItem('twq_current', JSON.stringify(adminUser));
+      window.location.href = 'admin.html';
+      return;
+    }
+
     const users = JSON.parse(localStorage.getItem('twq_users') || '[]');
     const user = users.find(u => u.email === email && u.password === password);
     
-    if (user) {
-      if (user.email === '123' && password === '123') {
-        localStorage.setItem('twq_is_admin', '1');
-        localStorage.setItem('twq_current', JSON.stringify(user));
-        window.location.href = 'admin.html';
-        return;
-      }
-      localStorage.setItem('twq_current', JSON.stringify(user));
-      localStorage.setItem('twq_current_index', users.indexOf(user).toString());
-      localStorage.removeItem('twq_is_admin');
-      window.location.href = 'user.html';
-    } else {
+    if (!user) {
       alert('البريد الإلكتروني أو كلمة المرور غير صحيحة');
+      return;
     }
+
+    localStorage.setItem('twq_current', JSON.stringify(user));
+    localStorage.setItem('twq_current_index', users.indexOf(user).toString());
+    localStorage.removeItem('twq_is_admin');
+    window.location.href = 'user.html';
   },
 
   handleSignup() {
@@ -113,7 +121,7 @@ function adminLogin() {
   const adminUser = {
     firstName: 'مدير',
     lastName: 'النظام',
-    email: 'admin@dukkanvision.com',
+    email: 'admin@admin.com',
     password: 'admin123'
   };
   localStorage.setItem('twq_is_admin', '1');
@@ -122,6 +130,9 @@ function adminLogin() {
 }
 
 // Initialize auth when DOM is loaded
+// Expose to window for pages that reference window.auth
+// and initialize on DOM ready
 document.addEventListener('DOMContentLoaded', () => {
+  try { window.auth = auth; } catch (e) {}
   auth.init();
-}); 
+});

@@ -24,7 +24,7 @@ const admin = {
     const adminEmailEl = document.getElementById('adminEmail');
     
     if (adminNameEl) adminNameEl.textContent = 'مدير النظام';
-    if (adminEmailEl) adminEmailEl.textContent = 'admin@dukkanvision.com';
+    if (adminEmailEl) adminEmailEl.textContent = 'admin@admin.com';
   },
 
   // Load admin KPIs
