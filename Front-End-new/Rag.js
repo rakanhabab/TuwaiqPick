@@ -8,7 +8,7 @@ import { ConversationalRetrievalChain } from "langchain/chains";
 // ======== مفاتيح مباشرة (غير آمن للمتصفح) ========
 const SUPABASE_URL = "https://uidrnyzcqfvppglupbrm.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVpZHJueXpjcWZ2cHBnbHVwYnJtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU5Mzc2NjQsImV4cCI6MjA3MTUxMzY2NH0.AEOHzO3n4j3oEZ8WIw5_DA0NU9IOQCbsWHN8KXvaJ2s";
-const OPENAI_API_KEY = "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";
+const OPENAI_API_KEY = process.env.OPENAI_API_KEY || "YOUR_OPENAI_API_KEY_HERE";
 
 // ======== إنشاء عميل Supabase ========
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
