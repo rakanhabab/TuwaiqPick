@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>تسجيل الدخول | دكان فيجين</title>
+  <meta name="description" content="تسجيل الدخول أو إنشاء حساب جديد في دكان فيجين" />
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/auth.css">
+</head>
+<body>
+  <!-- Auth Container -->
+  <div class="auth-container">
+    <!-- Logo Section -->
+    <div class="logo-section">
+      <div class="logo">
+        <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDYiIGhlaWdodD0iNDYiIHZpZXdCb3g9IjAgMCA0NiA0NiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjQ2IiBoZWlnaHQ9IjQ2IiByeD0iOCIgZmlsbD0idXJsKCNncmFkaWVudDApIi8+CjxkZWZzPgo8bGluZWFyR3JhZGllbnQgaWQ9ImdyYWRpZW50MCIgeDE9IjAiIHkxPSIwIiB4Mj0iNDYiIHkyPSI0NiIgZ3JhZGllbnRVbml0cz0idXNlclNwYWNlT25Vc2UiPgo8c3RvcCBzdG9wLWNvbG9yPSIjZjk3MzE2Ii8+CjxzdG9wIG9mZnNldD0iMSIgc3RvcC1jb2xvcj0iIzhjNWNmNiIvPgo8L2xpbmVhckdyYWRpZW50Pgo8L2RlZnM+Cjwvc3ZnPgo=" alt="Dukkan Vision">
+        <h1>دكان فيجين</h1>
+      </div>
+      <p class="tagline">تجربة تسوّق بدون كاشير</p>
+    </div>
+
+    <!-- Auth Forms -->
+    <div class="auth-forms">
+      <!-- Login Form -->
+      <div class="auth-form" id="loginForm">
+        <div class="form-header">
+          <h2>تسجيل الدخول</h2>
+          <p>مرحباً بك مرة أخرى</p>
+        </div>
+        
+        <form id="loginFormElement">
+          <div class="form-group">
+            <label for="loginEmail">البريد الإلكتروني</label>
+            <input type="email" id="loginEmail" required>
+          </div>
+          
+          <div class="form-group">
+            <label for="loginPassword">كلمة المرور</label>
+            <input type="password" id="loginPassword" required>
+          </div>
+          
+          <button type="submit" class="btn btn-primary">تسجيل الدخول</button>
+        </form>
+        
+        <div class="form-footer">
+          <p>ليس لديك حساب؟ <a href="#" onclick="switchToSignup()">إنشاء حساب جديد</a></p>
+        </div>
+      </div>
+
+      <!-- Signup Form -->
+      <div class="auth-form" id="signupForm" style="display: none;">
+        <div class="form-header">
+          <h2>إنشاء حساب جديد</h2>
+          <p>انضم إلى دكان فيجين</p>
+        </div>
+        
+        <form id="signupFormElement">
+          <div class="form-row">
+            <div class="form-group">
+              <label for="signupFirst">الاسم الأول</label>
+              <input type="text" id="signupFirst" required>
+            </div>
+            <div class="form-group">
+              <label for="signupLast">الاسم الأخير</label>
+              <input type="text" id="signupLast" required>
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label for="signupEmail">البريد الإلكتروني</label>
+            <input type="email" id="signupEmail" required>
+          </div>
+          
+          <div class="form-row">
+            <div class="form-group">
+              <label for="signupPassword">كلمة المرور</label>
+              <input type="password" id="signupPassword" required>
+            </div>
+            <div class="form-group">
+              <label for="signupConfirm">تأكيد كلمة المرور</label>
+              <input type="password" id="signupConfirm" required>
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <div class="checkbox-group">
+              <input type="checkbox" id="agreeTerms" required>
+              <label for="agreeTerms">أوافق على <a href="#terms">الشروط والأحكام</a></label>
+            </div>
+          </div>
+          
+          <button type="submit" class="btn btn-primary">إنشاء حساب</button>
+        </form>
+        
+        <div class="form-footer">
+          <p>لديك حساب بالفعل؟ <a href="#" onclick="switchToLogin()">تسجيل الدخول</a></p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Back to Home -->
+    <div class="back-home">
+      <a href="index.html" class="back-link">
+        <span>←</span>
+        العودة للصفحة الرئيسية
+      </a>
+    </div>
+  </div>
+
+     <!-- Scripts -->
+   <script>
+     // Switch between login and signup forms
+     function switchToSignup() {
+       document.getElementById('loginForm').style.display = 'none';
+       document.getElementById('signupForm').style.display = 'block';
+     }
+     
+     function switchToLogin() {
+       document.getElementById('signupForm').style.display = 'none';
+       document.getElementById('loginForm').style.display = 'block';
+     }
+     
+     // Handle form submissions
+     document.addEventListener('DOMContentLoaded', function() {
+       // Login form
+       const loginForm = document.getElementById('loginFormElement');
+       if (loginForm) {
+         loginForm.addEventListener('submit', function(e) {
+           e.preventDefault();
+           handleLogin();
+         });
+       }
+       
+       // Signup form
+       const signupForm = document.getElementById('signupFormElement');
+       if (signupForm) {
+         signupForm.addEventListener('submit', function(e) {
+           e.preventDefault();
+           handleSignup();
+         });
+       }
+     });
+     
+     function handleLogin() {
+       const email = document.getElementById('loginEmail').value.trim();
+       const password = document.getElementById('loginPassword').value.trim();
+       
+       if (!email || !password) {
+         alert('يرجى ملء جميع الحقول');
+         return;
+       }
+       
+       const users = JSON.parse(localStorage.getItem('twq_users') || '[]');
+       const user = users.find(u => u.email === email && u.password === password);
+       
+       if (user) {
+         if (user.email === 'admin@dukkanvision.com' && password === 'admin123') {
+           localStorage.setItem('twq_is_admin', '1');
+           localStorage.setItem('twq_current', JSON.stringify(user));
+           window.location.href = 'admin.html';
+           return;
+         }
+         localStorage.setItem('twq_current', JSON.stringify(user));
+         localStorage.setItem('twq_current_index', users.indexOf(user).toString());
+         localStorage.removeItem('twq_is_admin');
+         window.location.href = 'user.html';
+       } else {
+         alert('البريد الإلكتروني أو كلمة المرور غير صحيحة');
+       }
+     }
+     
+     function handleSignup() {
+       const firstName = document.getElementById('signupFirst').value.trim();
+       const lastName = document.getElementById('signupLast').value.trim();
+       const email = document.getElementById('signupEmail').value.trim();
+       const password = document.getElementById('signupPassword').value.trim();
+       const confirmPassword = document.getElementById('signupConfirm').value.trim();
+       const agreeTerms = document.getElementById('agreeTerms').checked;
+       
+       if (!firstName || !lastName || !email || !password || !confirmPassword) {
+         alert('يرجى ملء جميع الحقول');
+         return;
+       }
+       
+       if (password !== confirmPassword) {
+         alert('كلمة المرور غير متطابقة');
+         return;
+       }
+       
+       if (!agreeTerms) {
+         alert('يجب الموافقة على الشروط والأحكام');
+         return;
+       }
+       
+       const users = JSON.parse(localStorage.getItem('twq_users') || '[]');
+       
+       if (users.find(u => u.email === email)) {
+         alert('البريد الإلكتروني مستخدم بالفعل');
+         return;
+       }
+       
+       const newUser = {
+         firstName,
+         lastName,
+         email,
+         password,
+         createdAt: new Date().toISOString()
+       };
+       
+       users.push(newUser);
+       localStorage.setItem('twq_users', JSON.stringify(users));
+       localStorage.setItem('twq_current', JSON.stringify(newUser));
+       localStorage.setItem('twq_current_index', (users.length - 1).toString());
+       localStorage.removeItem('twq_is_admin');
+       
+       alert('تم إنشاء الحساب بنجاح!');
+       window.location.href = 'user.html';
+     }
+   </script>
+</body>
+</html> 
