@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <title>وحدة الرؤية</title>
+  <link rel="stylesheet" href="../assets/css/base.css">
+  <link rel="stylesheet" href="../assets/css/layout.css">
+  <link rel="stylesheet" href="../assets/css/vision.css">
+</head>
+<body>
+  <div id="appHeader"></div>
+  <div class="app-layout">
+    <div id="appSidebar"></div>
+    <main class="app-main">
+      <!-- شريط العنوان المبسّط -->
+      <section class="toolbar">
+        <div class="toolbar-title">
+          <span class="live-dot" aria-hidden="true"></span>
+          <span class="label" data-i18n="vision.live">البث المباشر</span>
+        </div>
+      </section>
+
+      <!-- بانلان أفقيان (يتكوّمان عموديًا لو صغّرنا الشاشة) -->
+      <section class="vision-grid">
+        <div class="video-panel">
+          <div class="tabs">
+            <button class="tab active" data-tab="tracking">Tracking View</button>
+            <button class="tab" data-tab="detection">Detection View</button>
+            <button class="tab" data-tab="combined">Combined</button>
+          </div>
+          <div class="tab-views">
+            <div class="view active" id="view-tracking">
+              <div class="video-box"><video id="videoTrack" autoplay playsinline></video></div>
+            </div>
+            <div class="view" id="view-detection">
+              <div class="video-box"><video id="videoDet" autoplay playsinline></video></div>
+            </div>
+            <div class="view" id="view-combined">
+              <div class="video-box"><video id="videoBoth" autoplay playsinline></video></div>
+            </div>
+          </div>
+
+          <div class="logs" id="logs"></div>
+        </div>
+
+        <div class="carts-panel">
+          <div class="active-cart">
+            <h3>السلة النشطة</h3>
+            <ul id="activeCartList" class="list"></ul>
+            <div class="cart-actions">
+              <button class="btn">إغلاق السلة</button>
+            </div>
+          </div>
+          <div class="other-carts">
+            <h4>سلال أخرى</h4>
+            <ul id="otherCarts" class="list small"></ul>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script type="module" src="../assets/js/boot.js"></script>
+  <script type="module" src="../assets/js/vision.js"></script>
+</body>
+</html>

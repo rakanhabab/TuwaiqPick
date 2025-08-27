@@ -1,0 +1,21 @@
+<!-- /admin/partials/sidebar.html -->
+<aside class="app-sidebar" dir="rtl">
+  <nav class="nav">
+    <a href="../pages/index.html" class="nav-link" data-i18n="nav.dashboard">الواجهة الرئيسية</a>
+    <a href="../pages/vision.html" class="nav-link" data-i18n="nav.vision">وحدة الرؤية</a>
+    <a href="../pages/inventory.html" class="nav-link" data-i18n="nav.inventory">إدارة المخزون</a>
+    <a href="../pages/branches.html" class="nav-link" data-i18n="nav.branches">إدارة الفروع</a>
+    <a href="../pages/complaints.html" class="nav-link" data-i18n="nav.complaints">إدارة الشكاوى</a>
+  </nav>
+
+  <div class="sidebar-section">
+    <h4 class="subtle" data-i18n="chatbot.title">المساعد</h4>
+    <div id="chatFeed" class="chat-feed">
+      <div class="msg bot" data-i18n="chatbot.greet">مرحباً 👋، كيف أقدر أخدمك؟</div>
+    </div>
+    <form id="chatForm" class="chat-form">
+      <input id="chatInput" placeholder="اسأل عن منتج، فرع، شكوى..." data-i18n-placeholder="chatbot.placeholder"/>
+      <button type="submit" class="btn" data-i18n="chatbot.send">إرسال</button>
+    </form>
+  </div>
+</aside>

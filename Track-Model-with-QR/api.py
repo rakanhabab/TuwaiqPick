@@ -148,7 +148,18 @@ def create_invoice(payload: InvoiceCreate):
         # 3) Insert invoice
         # payment_id left NULL here; timestamp assumed default NOW() in DB
 
-        status = "paid"
+        cur.execute(
+            """
+            SELECT id
+            FROM payment_methods
+            WHERE user_id = %s AND is_default = TRUE
+            """,
+            (payload.user_id,),
+        )
+        payment_row = cur.fetchone()
+        
+        payment_id = payment_row[0] if payment_row and payment_row[0] is not None else None
+        status = "paid" if payment_id else "unpaid"
 
         cur.execute(
             """

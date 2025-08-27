@@ -1,0 +1,143 @@
+/* Dashboard Layout - Shared Styles */
+/* This file now contains only shared styles between user and admin dashboards */
+
+/* Common Card Styles */
+.card {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.card h3 {
+  margin: 0 0 16px 0;
+  font-size: 18px;
+  font-weight: 700;
+  color: #111827;
+}
+
+/* Common Button Styles */
+.btn {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-decoration: none;
+  display: inline-block;
+  text-align: center;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+  color: white;
+}
+
+.btn-accent {
+  background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+  color: white;
+}
+
+.btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+/* Common Header Styles */
+.header {
+  background: linear-gradient(135deg, #1f2937 0%, #374151 100%);
+  color: white;
+  padding: 16px 0;
+  margin-bottom: 24px;
+}
+
+.header .brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-weight: 700;
+  font-size: 18px;
+}
+
+.header .brand img {
+  width: 40px;
+  height: 40px;
+}
+
+.header .grow {
+  flex: 1;
+}
+
+.header .account {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.header .account .info {
+  text-align: right;
+}
+
+.header .account .info div:first-child {
+  font-weight: 700;
+  font-size: 16px;
+}
+
+.header .account .info div:last-child {
+  font-size: 14px;
+  opacity: 0.8;
+}
+
+/* Common Footer Styles */
+.footer {
+  background: #1f2937;
+  color: white;
+  padding: 24px 0;
+  margin-top: 48px;
+}
+
+.footer-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.footer-copyright {
+  font-size: 14px;
+  color: #9ca3af;
+}
+
+.footer-brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+}
+
+.footer-brand img {
+  width: 32px;
+  height: 32px;
+}
+
+/* Common Layout Styles */
+.wrap {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.main {
+  min-height: calc(100vh - 200px);
+}
+
+/* Common Responsive Styles */
+@media (max-width: 768px) {
+  .wrap {
+    padding: 0 16px;
+  }
+  
+  .card {
+    padding: 16px;
+  }
+} 
