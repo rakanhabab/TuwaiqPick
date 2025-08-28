@@ -1,0 +1,140 @@
+/* Admin Index Menu Styles */
+
+/* Admin Menu Container */
+.admin-menu {
+  padding: 24px;
+  height: calc(100vh - 140px);
+  overflow-y: auto;
+}
+
+/* Menu Grid */
+.menu-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* Menu Cards */
+.menu-card {
+  background: #dc2626;
+  border-radius: 16px;
+  padding: 32px;
+  text-decoration: none;
+  color: white;
+  border: 2px solid transparent;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.menu-card > * {
+  position: relative;
+  z-index: 2;
+}
+
+/* Menu Icons */
+.menu-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+  display: block;
+}
+
+/* Menu Card Titles */
+.menu-card h3 {
+  font-size: 24px;
+  font-weight: 700;
+  margin: 0 0 12px 0;
+  color: white;
+}
+
+/* Menu Card Descriptions */
+.menu-card p {
+  font-size: 16px;
+  color: rgba(255, 255, 255, 0.9);
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* All cards use the same unified color */
+.dashboard-card,
+.operations-card,
+.inventory-card,
+.branches-card,
+.tickets-card {
+  background: #dc2626;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .menu-grid {
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+  }
+  
+  .menu-card {
+    padding: 24px;
+  }
+  
+  .menu-icon {
+    font-size: 40px;
+  }
+  
+  .menu-card h3 {
+    font-size: 20px;
+  }
+}
+
+@media (max-width: 768px) {
+  .admin-menu {
+    padding: 16px;
+  }
+  
+  .menu-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  
+  .menu-card {
+    padding: 20px;
+  }
+  
+  .menu-icon {
+    font-size: 36px;
+  }
+  
+  .menu-card h3 {
+    font-size: 18px;
+  }
+  
+  .menu-card p {
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  .admin-menu {
+    padding: 12px;
+  }
+  
+  .menu-card {
+    padding: 16px;
+  }
+  
+  .menu-icon {
+    font-size: 32px;
+  }
+  
+  .menu-card h3 {
+    font-size: 16px;
+  }
+  
+  .menu-card p {
+    font-size: 13px;
+  }
+}

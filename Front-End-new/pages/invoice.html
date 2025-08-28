@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>تفاصيل الفاتورة - دكان فيجين</title>
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=Cairo:wght@400;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/base.css" />
+  <link rel="stylesheet" href="../css/landing.css" />
+  <link rel="stylesheet" href="../css/invoice.css" />
+</head>
+<body>
+  <nav class="nav">
+    <div class="wrap">
+      <div class="brand">
+        <img src="../img/Logo.png" alt="Dukkan Vision" />
+        <span>دكان فيجين</span>
+      </div>
+      <div class="cta">
+        <button type="button" class="btn btn-back" onclick="history.back()">رجوع</button>
+      </div>
+    </div>
+  </nav>
+
+  <main class="main">
+    <div class="wrap">
+      <div class="invoice-layout">
+        <div class="card main-card">
+          <h2 class="page-title">تفاصيل الفاتورة</h2>
+          
+          <div class="invoice-content">
+            <!-- Invoice Management Section -->
+            <div class="management-section">
+              <h3>إدارة الفاتورة</h3>
+              <div class="management-list">
+                <div class="management-item">
+                  <div class="management-number">1</div>
+                  <div class="management-text">اختر <span class="highlight">طباعة</span> لحفظ نسخة ورقية أو PDF.</div>
+                </div>
+
+                <div class="management-item">
+                  <div class="management-number">2</div>
+                  <div class="management-text">في حال وجود خطأ، استخدم <span class="highlight">شكوى</span> لإرسال اعتراض.</div>
+                </div>
+              </div>
+             
+              <div class="management-info">
+                <p>جميع فواتيرك الرقمية محفوظة وآمنة ويمكنك الرجوع لها في أي وقت.</p>
+              </div>
+              
+                              <div class="invoice-actions">
+                  <button class="btn btn-print">طباعة</button>
+                  <button class="btn btn-complaint" onclick="window.location.href='complaint.html?id=1028&date=2025-08-03'">شكوى</button>
+                </div>
+            </div>
+            
+            <!-- Invoice Details Section -->
+            <div class="invoice-details-section">
+              <h3>رقم الفاتورة #1028</h3>
+              <div class="invoice-info">
+                <p>التاريخ : 2025-08-03 - الفرع الرياض</p>
+              </div>
+              
+              <div class="invoice-items">
+                <div class="invoice-item">
+                  <div class="item-product">ماء 600 مل</div>
+                  <div class="item-quantity">2</div>
+                  <div class="item-price">2.00</div>
+                  <div class="item-total">4.00</div>
+                </div>
+                <div class="invoice-item">
+                  <div class="item-product">قهوة جاهزة</div>
+                  <div class="item-quantity">1</div>
+                  <div class="item-price">8.50</div>
+                  <div class="item-total">8.50</div>
+                </div>
+                <div class="invoice-item">
+                  <div class="item-product">مكسرات 200غ</div>
+                  <div class="item-quantity">1</div>
+                  <div class="item-price">18.90</div>
+                  <div class="item-total">18.90</div>
+                </div>
+              </div>
+              
+              <div class="invoice-total">
+                <div class="total-label">الإجمالي</div>
+                <div class="total-amount">31.40 ر.س</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="../js/invoice.js"></script>
+</body>
+</html>

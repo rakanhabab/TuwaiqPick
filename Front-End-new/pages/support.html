@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>الدعم - دكان فيجين</title>
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=Cairo:wght@400;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/base.css" />
+  <link rel="stylesheet" href="../css/landing.css" />
+  <link rel="stylesheet" href="../css/support.css" />
+</head>
+<body>
+  <nav class="nav">
+    <div class="wrap">
+      <div class="brand">
+        <img src="../img/Logo.png" alt="Dukkan Vision" />
+        <span>دكان فيجين</span>
+      </div>
+      <div class="cta">
+        <button type="button" class="btn btn-back" onclick="goBack()">رجوع</button>
+      </div>
+    </div>
+  </nav>
+
+  <main class="main">
+    <div class="wrap">
+      <div class="support-layout">
+        <div class="card main-card">
+          <h2 class="page-title">الدعم الفني</h2>
+          
+                    <div class="support-content">
+                        <!-- Contact Form Section -->
+            <div class="contact-form-section">
+              <h3>إرسال شكوى أو استفسار</h3>
+              <form id="supportForm" class="support-form">
+                <div class="form-group">
+                  <label for="name">الاسم الكامل *</label>
+                  <input type="text" id="name" name="name" required>
+                </div>
+                
+                <div class="form-group">
+                  <label for="email">البريد الإلكتروني *</label>
+                  <input type="email" id="email" name="email" required>
+                </div>
+                
+                <div class="form-group">
+                  <label for="phone">رقم الجوال *</label>
+                  <input type="tel" id="phone" name="phone" required>
+                </div>
+                
+                <div class="form-group">
+                  <label for="subject">نوع الاستفسار *</label>
+                  <select id="subject" name="subject" required>
+                    <option value="">اختر نوع الاستفسار</option>
+                    <option value="technical">مشكلة تقنية</option>
+                    <option value="billing">مشكلة في الفواتير</option>
+                    <option value="service">مشكلة في الخدمة</option>
+                    <option value="general">استفسار عام</option>
+                    <option value="complaint">شكوى</option>
+                  </select>
+                </div>
+                
+                <div class="form-group full-width">
+                  <label for="message">الرسالة *</label>
+                  <textarea id="message" name="message" rows="4" placeholder="اشرح مشكلتك أو استفسارك بالتفصيل..." required></textarea>
+                </div>
+                
+                <div class="form-actions full-width">
+                  <button type="submit" class="btn btn-submit">إرسال الرسالة</button>
+                  <button type="button" class="btn btn-clear" onclick="clearForm()">إلغاء</button>
+                </div>
+              </form>
+            </div>
+            
+            <!-- Support Information Section -->
+            <div class="support-info-section">
+              <h3>كيف يمكننا مساعدتك؟</h3>
+              <div class="support-info">
+                <div class="info-item">
+                  <div class="info-icon">📞</div>
+                  <div class="info-text">
+                    <h4>الدعم الهاتفي</h4>
+                    <p>اتصل بنا على: 0540231533</p>
+                    <p>من الأحد إلى الخميس: 8 ص - 6 م</p>
+                  </div>
+                </div>
+                <div class="info-item">
+                  <div class="info-icon">📧</div>
+                  <div class="info-text">
+                    <h4>البريد الإلكتروني</h4>
+                    <p>support@dukkanvision.com</p>
+                    <p>رد خلال 24 ساعة</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="../js/support.js"></script>
+</body>
+</html>

@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>إدارة التذاكر | دكان فيجين</title>
+    <meta name="description" content="إدارة التذاكر - لوحة تحكم دكان فيجين" />
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=Cairo:wght@400;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../base.css">
+    <link rel="stylesheet" href="./admin.css">
+    <link rel="stylesheet" href="./tickets.css">
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+</head>
+<body>
+    <div class="admin-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="brand">
+                    <img src="../../img/Logo.png" alt="دكان فيجين">
+                    <span>دكان فيجين</span>
+                </div>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <button class="logout-btn">تسجيل الخروج</button>
+                
+                <ul class="nav-menu">
+                    <li class="nav-item">
+                        <a href="./dashboard.html" class="nav-link">
+                            الواجهة الرئيسية
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="./operations.html" class="nav-link">
+                            إدارة العمليات
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="./inventory.html" class="nav-link">
+                            إدارة المخزون
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="./branches.html" class="nav-link">
+                            إدارة الفروع
+                        </a>
+                    </li>
+                    <li class="nav-item active">
+                        <a href="./tickets.html" class="nav-link">
+                            إدارة التذاكر
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+
+            <!-- Virtual Assistant -->
+            <div class="virtual-assistant">
+                <h3>المساعد الافتراضي</h3>
+                <div class="assistant-input">
+                    <input type="text" placeholder="اكتب سؤالك..." id="assistantInput">
+                    <button class="send-btn" id="sendBtn">إرسال</button>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="content-header">
+                <div class="header-top">
+                    <a href="./index.html" class="back-btn">
+                        <span>←</span>
+                        رجعة للقائمة الرئيسية
+                    </a>
+                </div>
+                <h1>إدارة التذاكر</h1>
+                <h2>دعم العملاء والاستفسارات</h2>
+            </header>
+
+            <!-- Tickets Dashboard -->
+            <div class="tickets-dashboard">
+                <!-- Statistics Cards -->
+                <div class="stats-grid">
+                    <div class="stat-card stat-total">
+                        <div class="stat-color-indicator"></div>
+                        <div class="stat-content">
+                            <h3>إجمالي التذاكر</h3>
+                            <div class="stat-value">342</div>
+                            <div class="stat-change positive">+15</div>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card stat-pending">
+                        <div class="stat-color-indicator"></div>
+                        <div class="stat-content">
+                            <h3>في الانتظار</h3>
+                            <div class="stat-value">28</div>
+                            <div class="stat-change negative">+5</div>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card stat-resolved">
+                        <div class="stat-color-indicator"></div>
+                        <div class="stat-content">
+                            <h3>تم الحل</h3>
+                            <div class="stat-value">298</div>
+                            <div class="stat-change positive">+12</div>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card stat-refund">
+                        <div class="stat-color-indicator"></div>
+                        <div class="stat-content">
+                            <h3>إجمالي المبالغ المستردة</h3>
+                            <div class="stat-value">12,450 ر.س</div>
+                            <div class="stat-change positive">+850 ر.س</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tickets Filters -->
+                <div class="tickets-filters">
+                    <div class="filter-group">
+                        <label>الحالة:</label>
+                        <select id="statusFilter" onchange="filterTickets()">
+                            <option value="all">جميع الحالات</option>
+                            <option value="pending">في الانتظار</option>
+                            <option value="approved">تم القبول</option>
+                            <option value="rejected">مرفوض</option>
+                            <option value="completed">مكتمل</option>
+                        </select>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label>نوع التذكرة:</label>
+                        <select id="typeFilter" onchange="filterTickets()">
+                            <option value="all">جميع الأنواع</option>
+                            <option value="refund">استرداد مبلغ</option>
+                            <option value="invoice">مشكلة فاتورة</option>
+                            <option value="technical">مشكلة تقنية</option>
+                            <option value="general">استفسار عام</option>
+                        </select>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label>المدة:</label>
+                        <select id="dateFilter" onchange="filterTickets()">
+                            <option value="all">جميع التواريخ</option>
+                            <option value="today">اليوم</option>
+                            <option value="week">هذا الأسبوع</option>
+                            <option value="month">هذا الشهر</option>
+                        </select>
+                    </div>
+                    
+                    <button class="btn btn-primary" onclick="createNewTicket()">إنشاء تذكرة جديدة</button>
+                </div>
+
+                <!-- Tickets Table -->
+                <div class="tickets-table-section">
+                    <div class="table-header">
+                        <h3>التذاكر</h3>
+                        <div class="table-actions">
+                            <input type="text" placeholder="البحث في التذاكر أو رقم الفاتورة..." class="search-input" id="ticketsSearch" oninput="searchTickets()">
+                            <button class="btn btn-secondary" onclick="exportTickets()">تصدير</button>
+                        </div>
+                    </div>
+                    
+                    <div class="table-container">
+                        <table class="tickets-table">
+                            <thead>
+                                <tr>
+                                    <th>رقم التذكرة</th>
+                                    <th>رقم الفاتورة</th>
+                                    <th>الحالة</th>
+                                    <th>المبلغ المسترد</th>
+                                    <th>تاريخ الإنشاء</th>
+                                    <th>الإجراءات</th>
+                                </tr>
+                            </thead>
+                            <tbody id="ticketsTableBody">
+                                <!-- Sample data will be populated by JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- View Invoice Modal -->
+    <div class="modal" id="invoiceModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>عرض الفاتورة</h3>
+                <button class="modal-close" onclick="closeInvoiceModal()">&times;</button>
+            </div>
+            <div class="modal-body" id="invoiceModalBody">
+                <!-- Invoice content will be populated here -->
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="./admin.js"></script>
+    <script type="module" src="./tickets.js"></script>
+</body>
+</html>

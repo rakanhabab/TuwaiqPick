@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>لوحة تحكم دكان فيجين | Dukkan Vision Admin</title>
+    <meta name="description" content="لوحة تحكم إدارة متجر دكان فيجين" />
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=Cairo:wght@400;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../base.css">
+    <link rel="stylesheet" href="./admin.css">
+    <link rel="stylesheet" href="./index.css">
+</head>
+
+<body>
+    <div class="admin-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="brand">
+                    <img src="../../img/Logo.png" alt="دكان فيجين">
+                    <span>دكان فيجين</span>
+                </div>
+            </div>
+
+            <nav class="sidebar-nav">
+                <button class="logout-btn">تسجيل الخروج</button>
+
+                <ul class="nav-menu">
+                    <li class="nav-item">
+                        <a href="./dashboard.html" class="nav-link">
+                            <span class="nav-icon"></span> الواجهة الرئيسية
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="./operations.html" class="nav-link">
+                            <span class="nav-icon"></span> إدارة العمليات
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="./inventory.html" class="nav-link">
+                            <span class="nav-icon"></span> إدارة المخزون
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="./branches.html" class="nav-link">
+                            <span class="nav-icon"></span> إدارة الفروع
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="./tickets.html" class="nav-link">
+                            <span class="nav-icon"></span> إدارة التذاكر
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+
+            <!-- Virtual Assistant -->
+            <div class="virtual-assistant">
+                <h3>المساعد الافتراضي</h3>
+                <div class="assistant-input">
+                    <input type="text" placeholder="اكتب سؤالك..." id="assistantInput">
+                    <button class="send-btn" id="sendBtn">إرسال</button>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="content-header">
+                <h1>لوحة تحكم دكان فيجين</h1>
+                <h2>اختر القسم المطلوب</h2>
+            </header>
+
+            <!-- Navigation Menu -->
+            <div class="admin-menu">
+                <div class="menu-grid">
+                    <a href="./dashboard.html" class="menu-card dashboard-card">
+                        <div class="menu-icon"></div>
+                        <h3>الواجهة الرئيسية</h3>
+                        <p>نظرة عامة على الأداء والإحصائيات</p>
+                    </a>
+
+                    <a href="./operations.html" class="menu-card operations-card">
+                        <div class="menu-icon"></div>
+                        <h3>إدارة العمليات</h3>
+                        <p>مراقبة وتتبع العمليات اليومية</p>
+                    </a>
+
+                    <a href="./inventory.html" class="menu-card inventory-card">
+                        <div class="menu-icon"></div>
+                        <h3>إدارة المخزون</h3>
+                        <p>تتبع وإدارة المنتجات والمخزون</p>
+                    </a>
+
+                    <a href="./branches.html" class="menu-card branches-card">
+                        <div class="menu-icon"></div>
+                        <h3>إدارة الفروع</h3>
+                        <p>إدارة فروع المتجر والموظفين</p>
+                    </a>
+
+                    <a href="./tickets.html" class="menu-card tickets-card">
+                        <div class="menu-icon"></div>
+                        <h3>إدارة التذاكر</h3>
+                        <p>دعم العملاء والاستفسارات</p>
+                    </a>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Check if user is admin
+        document.addEventListener('DOMContentLoaded', function() {
+            const currentUser = JSON.parse(localStorage.getItem('current_user') || '{}');
+            const isAdmin = localStorage.getItem('twq_is_admin') === 'true' || 
+                           currentUser.email?.includes('admin') || 
+                           currentUser.role === 'admin' || 
+                           currentUser.is_admin === true;
+            
+            if (!isAdmin) {
+                alert('غير مصرح لك بالوصول إلى لوحة التحكم');
+                window.location.href = '../login.html';
+            }
+        });
+    </script>
+    <script type="module" src="./admin.js"></script>
+    <script type="module" src="./index.js"></script>
+</body>
+
+</html>

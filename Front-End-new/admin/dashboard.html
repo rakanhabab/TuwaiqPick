@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>لوحة تحكم دكان فيجين | Dukkan Vision Admin</title>
+    <meta name="description" content="لوحة تحكم إدارة متجر دكان فيجين" />
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=Cairo:wght@400;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../base.css">
+    <link rel="stylesheet" href="./admin.css">
+    <link rel="stylesheet" href="./dashboard.css">
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+</head>
+<body>
+    <div class="admin-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="brand">
+                    <img src="../../img/Logo.png" alt="دكان فيجين">
+                    <span>دكان فيجين</span>
+                </div>
+            </div>
+            <nav class="sidebar-nav">
+                <button class="logout-btn">تسجيل الخروج</button>
+                <ul class="nav-menu">
+                    <li class="nav-item active">
+                        <a href="./dashboard.html" class="nav-link">
+                            الواجهة الرئيسية
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="./operations.html" class="nav-link">
+                            إدارة العمليات
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="./inventory.html" class="nav-link">
+                            إدارة المخزون
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="./branches.html" class="nav-link">
+                            إدارة الفروع
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="./tickets.html" class="nav-link">
+                            إدارة التذاكر
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+            <!-- Virtual Assistant -->
+            <div class="virtual-assistant">
+                <h3>المساعد الافتراضي</h3>
+                <div class="assistant-input">
+                    <input type="text" placeholder="اكتب سؤالك..." id="assistantInput">
+                    <button class="send-btn" id="sendBtn">إرسال</button>
+                </div>
+            </div>
+        </aside>
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="content-header">
+                <div class="header-top">
+                    <a href="./index.html" class="back-btn">
+                        <span>←</span>
+                        رجعة للقائمة الرئيسية
+                    </a>
+                </div>
+                <h1>متجر بدون كاشير</h1>
+                <h2>نظرة عامة</h2>
+            </header>
+            <!-- Dashboard Widgets -->
+            <div class="dashboard-grid">
+                <!-- Revenue Overview -->
+                <div class="widget-card revenue-card">
+                    <div class="card-header">
+                        <h3>الإيرادات</h3>
+                        <div class="period-selector">
+                            <button class="period-btn active" data-period="today">اليوم</button>
+                            <button class="period-btn" data-period="week">الأسبوع</button>
+                            <button class="period-btn" data-period="month">الشهر</button>
+                        </div>
+                    </div>
+                    <div class="card-content">
+                        <div class="revenue-stats">
+                            <div class="revenue-main">
+                                <div class="revenue-amount">1,247.50 ر.س</div>
+                                <div class="revenue-change positive">+12.5%</div>
+                            </div>
+                            <div class="revenue-metrics">
+                                <div class="metric">
+                                    <span class="metric-label">الطلبات</span>
+                                    <span class="metric-value">45</span>
+                                </div>
+                                <div class="metric">
+                                    <span class="metric-label">متوسط الطلب</span>
+                                    <span class="metric-value">27.72 ر.س</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="revenue-chart" id="revenueChart"></div>
+                    </div>
+                </div>
+
+                <!-- Orders Overview -->
+                <div class="widget-card orders-card">
+                    <div class="card-header">
+                        <h3>الطلبات</h3>
+                        <div class="orders-status">
+                            <span class="status-item completed">مكتمل: 42</span>
+                            <span class="status-item pending">في الانتظار: 3</span>
+                        </div>
+                    </div>
+                    <div class="card-content">
+                        <div class="orders-stats">
+                            <div class="orders-main">
+                                <div class="orders-amount">45</div>
+                                <div class="orders-change positive">+8</div>
+                            </div>
+                            <div class="orders-trend">
+                                <div class="trend-item">
+                                    <span class="trend-label">هذا اليوم</span>
+                                    <span class="trend-value">12 طلب</span>
+                                </div>
+                                <div class="trend-item">
+                                    <span class="trend-label">أمس</span>
+                                    <span class="trend-value">10 طلبات</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="orders-chart" id="ordersChart"></div>
+                    </div>
+                </div>
+
+                <!-- Products Overview -->
+                <div class="widget-card products-card">
+                    <div class="card-header">
+                        <h3>المنتجات</h3>
+                        <div class="products-actions">
+                            <button class="add-product-btn">+ إضافة</button>
+                        </div>
+                    </div>
+                    <div class="card-content">
+                        <div class="products-stats">
+                            <div class="products-main">
+                                <div class="products-amount">156</div>
+                                <div class="products-category">منتج متاح</div>
+                            </div>
+                            <div class="products-categories">
+                                <div class="category-item">
+                                    <span class="category-name">الألبان</span>
+                                    <span class="category-count">23</span>
+                                </div>
+                                <div class="category-item">
+                                    <span class="category-name">الفواكه</span>
+                                    <span class="category-count">18</span>
+                                </div>
+                                <div class="category-item">
+                                    <span class="category-name">الخضروات</span>
+                                    <span class="category-count">31</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="products-chart" id="productsChart"></div>
+                    </div>
+                </div>
+
+                <!-- Recent Activity -->
+                <div class="widget-card activity-card">
+                    <div class="card-header">
+                        <h3>النشاط الأخير</h3>
+                        <button class="view-all-btn">عرض الكل</button>
+                    </div>
+                    <div class="card-content">
+                        <div class="activity-list">
+                            <div class="activity-item">
+                                <div class="activity-icon order"></div>
+                                <div class="activity-content">
+                                    <div class="activity-title">طلب جديد #1247</div>
+                                    <div class="activity-time">منذ 2 دقيقة</div>
+                                    <div class="activity-amount">45.50 ر.س</div>
+                                </div>
+                            </div>
+                            <div class="activity-item">
+                                <div class="activity-icon invoice"></div>
+                                <div class="activity-content">
+                                    <div class="activity-title">فاتورة مرسلة #1246</div>
+                                    <div class="activity-time">منذ 5 دقائق</div>
+                                    <div class="activity-amount">32.75 ر.س</div>
+                                </div>
+                            </div>
+                            <div class="activity-item">
+                                <div class="activity-icon payment"></div>
+                                <div class="activity-content">
+                                    <div class="activity-title">دفع مكتمل #1245</div>
+                                    <div class="activity-time">منذ 8 دقائق</div>
+                                    <div class="activity-amount">67.20 ر.س</div>
+                                </div>
+                            </div>
+                            <div class="activity-item">
+                                <div class="activity-icon product"></div>
+                                <div class="activity-content">
+                                    <div class="activity-title">منتج جديد مضاف</div>
+                                    <div class="activity-time">منذ 15 دقيقة</div>
+                                    <div class="activity-details">عصير برتقال طازج</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    <script type="module" src="./admin.js"></script>
+    <script type="module" src="./dashboard.js"></script>
+</body>
+</html>

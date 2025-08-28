@@ -1,0 +1,411 @@
+/* Inventory Management Styles */
+
+/* Back Button Styles */
+.header-top {
+  display: flex;
+  justify-content: flex-start;
+  margin-bottom: 16px;
+}
+
+.back-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  background: #dc2626;
+  color: white;
+  text-decoration: none;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 12px;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(220, 38, 38, 0.2);
+  margin-bottom: 20px;
+}
+
+.back-btn:hover {
+  /* Static - no hover effects */
+}
+
+.back-btn span {
+  font-size: 16px;
+  font-weight: bold;
+}
+
+/* Search and Filter Section */
+.search-filter-section {
+  padding: 24px;
+  background: white;
+  border-bottom: 1px solid #e2e8f0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.filter-row {
+  display: flex;
+  gap: 30px;
+  align-items: end;
+  flex-wrap: wrap;
+}
+
+.filter-group {
+  flex: 1;
+  min-width: 200px;
+}
+
+.filter-group label {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: 600;
+  color: #2d3748;
+  font-size: 0.8rem;
+  font-family: 'Cairo', sans-serif;
+}
+
+.filter-input {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-family: 'Cairo', sans-serif;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.filter-input:focus {
+  outline: none;
+  border-color: #4299e1;
+  box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.1);
+}
+
+.apply-btn {
+  padding: 8px 16px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 0.8rem;
+  font-family: 'Cairo', sans-serif;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 80px;
+}
+
+.apply-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.apply-btn:active {
+  transform: translateY(0);
+}
+
+/* Inventory Table Section */
+.inventory-table-section {
+  padding: 24px;
+  height: calc(100vh - 280px);
+  overflow-y: auto;
+}
+
+/* Inventory Table */
+.inventory-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e1e5e9;
+}
+
+.inventory-table thead {
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+}
+
+.inventory-table th {
+  padding: 16px 20px;
+  text-align: right;
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: #2d3748;
+  border-bottom: 2px solid #e2e8f0;
+  font-family: 'Cairo', sans-serif;
+  white-space: nowrap;
+}
+
+.inventory-table td {
+  padding: 16px 20px;
+  text-align: right;
+  border-bottom: 1px solid #f1f5f9;
+  font-size: 0.9rem;
+  color: #4a5568;
+  font-family: 'Cairo', sans-serif;
+}
+
+.inventory-table tbody tr:hover {
+  background-color: #f8fafc;
+  transition: background-color 0.2s ease;
+}
+
+.inventory-table tr:last-child td {
+  border-bottom: none;
+}
+
+/* Column Specific Styling */
+.inventory-table td:nth-child(2) {
+  /* SKU Column */
+  font-family: 'Inter', monospace;
+  font-weight: 600;
+  color: #3182ce;
+  background: rgba(49, 130, 206, 0.05);
+}
+
+.inventory-table td:nth-child(3) {
+  /* Category Column */
+  color: #805ad5;
+  font-weight: 500;
+}
+
+.inventory-table td:nth-child(4) {
+  /* Shelf Column */
+  text-align: center;
+  font-weight: 600;
+  color: #38a169;
+  background: rgba(56, 161, 105, 0.05);
+}
+
+.inventory-table td:nth-child(5) {
+  /* Price Column */
+  font-weight: 600;
+  color: #d69e2e;
+  text-align: center;
+}
+
+.inventory-table td:nth-child(6) {
+  /* Quantity Column */
+  text-align: center;
+  font-weight: 600;
+  color: #38a169;
+}
+
+.inventory-table td:nth-child(7) {
+  /* Status Column */
+  text-align: center;
+  padding: 12px 20px;
+}
+
+/* Status Badge Styles */
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  font-family: 'Cairo', sans-serif;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* Status Types */
+.status-badge.status-high {
+  background: rgba(56, 161, 105, 0.1);
+  color: #38a169;
+  border: 1px solid rgba(56, 161, 105, 0.2);
+}
+
+.status-badge.status-high .status-dot {
+  background-color: #38a169;
+}
+
+.status-badge.status-normal {
+  background: rgba(66, 153, 225, 0.1);
+  color: #4299e1;
+  border: 1px solid rgba(66, 153, 225, 0.2);
+}
+
+.status-badge.status-normal .status-dot {
+  background-color: #4299e1;
+}
+
+.status-badge.status-low {
+  background: rgba(245, 158, 11, 0.1);
+  color: #f59e0b;
+  border: 1px solid rgba(245, 158, 11, 0.2);
+}
+
+.status-badge.status-low .status-dot {
+  background-color: #f59e0b;
+}
+
+.status-badge.status-out {
+  background: rgba(229, 62, 62, 0.1);
+  color: #e53e3e;
+  border: 1px solid rgba(229, 62, 62, 0.2);
+}
+
+.status-badge.status-out .status-dot {
+  background-color: #e53e3e;
+}
+
+/* Hover effects for status badges */
+.status-badge:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Quantity Status Colors (deprecated - now using status badges) */
+.inventory-table td:nth-child(6):has-text('0') {
+  color: #e53e3e;
+  background: rgba(229, 62, 62, 0.05);
+}
+
+.inventory-table td:nth-child(6):has-text('1-5') {
+  color: #dd6b20;
+  background: rgba(221, 107, 32, 0.05);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .search-filter-section {
+    padding: 16px;
+  }
+
+  .filter-row {
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .filter-group {
+    min-width: auto;
+  }
+
+  .apply-btn {
+    width: 100%;
+  }
+
+  .inventory-table-section {
+    padding: 16px;
+  }
+
+  .inventory-table {
+    font-size: 0.85rem;
+  }
+
+  .inventory-table th,
+  .inventory-table td {
+    padding: 12px 16px;
+  }
+
+  .status-badge {
+    font-size: 0.75rem;
+    padding: 4px 8px;
+  }
+}
+
+@media (max-width: 480px) {
+  .inventory-table {
+    font-size: 0.8rem;
+  }
+
+  .inventory-table th,
+  .inventory-table td {
+    padding: 10px 12px;
+  }
+
+  .filter-input {
+    padding: 10px 12px;
+  }
+
+  .apply-btn {
+    padding: 10px 20px;
+    font-size: 0.85rem;
+  }
+
+  .status-badge {
+    font-size: 0.7rem;
+    padding: 3px 6px;
+  }
+}
+
+/* Animation for table rows */
+.inventory-table tbody tr {
+  animation: fadeInUp 0.3s ease-out;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Loading state */
+.inventory-table.loading {
+  position: relative;
+}
+
+.inventory-table.loading::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Cairo', sans-serif;
+  color: #4a5568;
+}
+
+/* Empty state */
+.inventory-table tbody:empty::after {
+  content: 'لا توجد منتجات في هذا الفرع';
+  display: block;
+  text-align: center;
+  padding: 40px;
+  color: #718096;
+  font-family: 'Cairo', sans-serif;
+  font-style: italic;
+}
+
+/* Search highlight */
+.highlight {
+  background-color: #fef5e7;
+  font-weight: 600;
+}
+
+/* Status indicators */
+.status-indicator {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-left: 8px;
+}
+
+.status-in-stock {
+  background-color: #48bb78;
+}
+
+.status-low-stock {
+  background-color: #ed8936;
+}
+
+.status-out-of-stock {
+  background-color: #e53e3e;
+}

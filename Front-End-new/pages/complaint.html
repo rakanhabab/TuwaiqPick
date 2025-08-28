@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>رفع شكوى - دكان فيجين</title>
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=Cairo:wght@400;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/base.css" />
+  <link rel="stylesheet" href="../css/landing.css" />
+  <link rel="stylesheet" href="../css/complaint.css" />
+</head>
+<body>
+  <nav class="nav">
+    <div class="wrap">
+      <div class="brand">
+        <img src="../../img/Logo.png" alt="Dukkan Vision" />
+        <span>دكان فيجين</span>
+      </div>
+      <div class="cta">
+        <button type="button" class="btn btn-back" onclick="goBack()">رجوع</button>
+      </div>
+    </div>
+  </nav>
+
+  <main class="main">
+    <div class="wrap">
+      <div class="complaint-layout">
+        <div class="card main-card">
+          <h2 class="page-title">رفع شكوى على الفاتورة</h2>
+          
+          <div class="invoice-info">
+            <div class="invoice-number">
+              <span class="label">رقم الفاتورة:</span>
+              <span class="value" id="invoiceNumber">#1028</span>
+            </div>
+            <div class="invoice-date">
+              <span class="label">تاريخ الفاتورة:</span>
+              <span class="value" id="invoiceDate">2025-08-03</span>
+            </div>
+          </div>
+          
+          <form id="complaintForm" class="complaint-form">
+            <div class="form-group">
+              <label for="complaintType">نوع الشكوى *</label>
+              <select id="complaintType" name="complaintType" required>
+                <option value="">اختر نوع الشكوى</option>
+                <option value="billing_error">خطأ في الفاتورة</option>
+                <option value="wrong_items">منتجات خاطئة</option>
+                <option value="missing_items">منتجات مفقودة</option>
+                <option value="damaged_items">منتجات تالفة</option>
+                <option value="service_issue">مشكلة في الخدمة</option>
+                <option value="other">أخرى</option>
+              </select>
+            </div>
+            
+            <div class="form-group">
+              <label for="description">شرح الشكوى *</label>
+              <textarea id="description" name="description" rows="6" placeholder="اكتب ملاحظتك بالتفصيل..." required></textarea>
+            </div>
+            
+            <div class="form-actions">
+              <button type="submit" class="btn btn-submit">إرسال الشكوى</button>
+              <button type="button" class="btn btn-clear" onclick="clearForm()">إلغاء</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="../js/complaint.js"></script>
+</body>
+</html>

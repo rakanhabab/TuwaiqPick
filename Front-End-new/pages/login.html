@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>تسجيل الدخول | دكان فيجين</title>
+  <meta name="description" content="تسجيل الدخول إلى دكان فيجين" />
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/base.css">
+  <link rel="stylesheet" href="../css/auth.css">
+</head>
+<body>
+  <div class="auth-container">
+    <div class="logo-section">
+      <div class="logo">
+        <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDYiIGhlaWdodD0iNDYiIHZpZXdCb3g9IjAgMCA0NiA0NiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjQ2IiBoZWlnaHQ9IjQ2IiByeD0iOCIgZmlsbD0idXJsKCNncmFkaWVudDApIi8+CjxkZWZzPgo8bGluZWFyR3JhZGllbnQgaWQ9ImdyYWRpZW50MCIgeDE9IjAiIHkxPSIwIiB4Mj0iNDYiIHkyPSI0NiIgZ3JhZGllbnRVbml0cz0idXNlclNwYWNlT25Vc2UiPgo8c3RvcCBzdG9wLWNvbG9yPSIjZjk3MzE2Ii8+CjxzdG9wIG9mZnNldD0iMSIgc3RvcC1jb2xvcj0iIzhjNWNmNiIvPgo8L2xpbmVhckdyYWRpZW50Pgo8L2RlZnM+Cjwvc3ZnPgo=" alt="Dukkan Vision">
+        <h1>دكان فيجين</h1>
+      </div>
+      <p class="tagline">مرحباً بك مرة أخرى</p>
+    </div>
+
+    <div class="auth-forms">
+      <div class="auth-form">
+        <div class="form-header">
+          <h2>تسجيل الدخول</h2>
+        </div>
+        <form id="loginFormElement">
+          <div class="form-group">
+            <label for="loginEmail">البريد الإلكتروني</label>
+            <input type="email" id="loginEmail" placeholder="أدخل بريدك الإلكتروني" required>
+          </div>
+          <div class="form-group">
+            <label for="loginPassword">كلمة المرور</label>
+            <input type="password" id="loginPassword" placeholder="أدخل كلمة المرور" required>
+          </div>
+          <button type="submit" id="loginSubmit" class="btn btn-primary">تسجيل الدخول</button>
+        </form>
+        <div class="form-footer">
+          <p>ليس لديك حساب؟ <a href="../pages/signup.html">إنشاء حساب جديد</a></p>
+        </div>
+      </div>
+    </div>
+
+    <div class="back-home">
+      <a href="../pages/index.html" class="back-link"><span>←</span>العودة للصفحة الرئيسية</a>
+    </div>
+  </div>
+
+  <!-- Database Integration -->
+  <script type="module" src="../js/auth.js"></script>
+  <script>
+    // Remove the old script since we're using modules now
+    // The auth.js file will handle everything automatically
+  </script>
+</body>
+</html>
+
+

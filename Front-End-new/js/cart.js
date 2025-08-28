@@ -1,8 +1,10 @@
-// Cart Module
+// ===== CART WITH DATABASE INTEGRATION =====
+import { db } from './database.js'
+
 const cart = {
   // Initialize cart
-  init() {
-    this.loadCart();
+  async init() {
+    await this.loadCart();
     this.bindEvents();
   },
 
@@ -13,7 +15,7 @@ const cart = {
       if (e.target.matches('[data-cart-action]')) {
         const action = e.target.dataset.cartAction;
         const productId = e.target.dataset.productId;
-        
+
         switch (action) {
           case 'add':
             this.addToCart(productId);
@@ -36,33 +38,53 @@ const cart = {
   },
 
   // Add product to cart
-  addToCart(product) {
-    let cartData = JSON.parse(localStorage.getItem('twq_cart') || '[]');
-    
-    // Check if product already exists in cart
-    const existingItem = cartData.find(item => item.id === product.id);
-    
-    if (existingItem) {
-      existingItem.quantity += 1;
-      existingItem.total = existingItem.quantity * existingItem.price;
-    } else {
-      cartData.push({
-        ...product,
-        quantity: 1,
-        total: product.price
-      });
+  async addToCart(product) {
+    try {
+      // Get product details from database if only ID is provided
+      if (typeof product === 'string') {
+        const { data: productData, error } = await db.supabase
+          .from('products')
+          .select('*')
+          .eq('id', product)
+          .single();
+
+        if (error || !productData) {
+          this.showToast('خطأ في تحميل المنتج', 'error');
+          return;
+        }
+        product = productData;
+      }
+
+      let cartData = JSON.parse(localStorage.getItem('twq_cart') || '[]');
+
+      // Check if product already exists in cart
+      const existingItem = cartData.find(item => item.id === product.id);
+
+      if (existingItem) {
+        existingItem.quantity += 1;
+        existingItem.total = existingItem.quantity * product.price;
+      } else {
+        cartData.push({
+          ...product,
+          quantity: 1,
+          total: product.price
+        });
+      }
+
+      localStorage.setItem('twq_cart', JSON.stringify(cartData));
+      this.updateCartDisplay(cartData);
+      this.showToast(`تم إضافة ${product.name} إلى السلة!`, 'success');
+    } catch (error) {
+      console.error('Error adding to cart:', error);
+      this.showToast('خطأ في إضافة المنتج', 'error');
     }
-    
-    localStorage.setItem('twq_cart', JSON.stringify(cartData));
-    this.updateCartDisplay(cartData);
-    this.showToast(`تم إضافة ${product.name} إلى السلة!`, 'success');
   },
 
   // Remove product from cart
   removeFromCart(productId) {
     let cartData = JSON.parse(localStorage.getItem('twq_cart') || '[]');
     cartData = cartData.filter(item => item.id !== productId);
-    
+
     localStorage.setItem('twq_cart', JSON.stringify(cartData));
     this.updateCartDisplay(cartData);
     this.showToast('تم حذف المنتج من السلة!', 'info');
@@ -72,11 +94,11 @@ const cart = {
   updateQuantity(productId, quantity) {
     let cartData = JSON.parse(localStorage.getItem('twq_cart') || '[]');
     const item = cartData.find(item => item.id === productId);
-    
+
     if (item) {
       item.quantity = parseInt(quantity) || 1;
       item.total = item.quantity * item.price;
-      
+
       localStorage.setItem('twq_cart', JSON.stringify(cartData));
       this.updateCartDisplay(cartData);
     }
@@ -86,7 +108,7 @@ const cart = {
   updateCartDisplay(cartData) {
     const cartItems = document.getElementById('cartItems');
     const cartTotal = document.getElementById('cartTotal');
-    
+
     if (!cartItems) return;
 
     if (cartData.length === 0) {
@@ -118,7 +140,7 @@ const cart = {
     `).join('');
 
     cartItems.innerHTML = itemsHtml;
-    
+
     const total = cartData.reduce((sum, item) => sum + item.total, 0);
     if (cartTotal) cartTotal.textContent = `${total.toFixed(2)} ر.س`;
   },
@@ -130,43 +152,67 @@ const cart = {
     this.showToast('تم مسح السلة!', 'info');
   },
 
-  // Checkout
-  checkout() {
+  // Checkout with database integration
+  async checkout() {
     const cartData = JSON.parse(localStorage.getItem('twq_cart') || '[]');
-    
+
     if (cartData.length === 0) {
       this.showToast('السلة فارغة!', 'warning');
       return;
     }
 
-    const currentUser = JSON.parse(localStorage.getItem('twq_current') || '{}');
-    const total = cartData.reduce((sum, item) => sum + item.total, 0);
+    try {
+      // Get current user
+      const currentUserStr = localStorage.getItem('current_user');
+      if (!currentUserStr) {
+        this.showToast('يرجى تسجيل الدخول أولاً', 'error');
+        window.location.href = 'login.html';
+        return;
+      }
 
-    // Create invoice
-    const invoice = {
-      id: `INV-${Date.now()}`,
-      date: new Date().toLocaleDateString('ar-SA'),
-      userId: currentUser.email || 'guest',
-      items: cartData,
-      total: total,
-      status: 'مكتمل'
-    };
+      const currentUser = JSON.parse(currentUserStr);
+      const total = cartData.reduce((sum, item) => sum + item.total, 0);
 
-    // Save invoice
-    const invoices = JSON.parse(localStorage.getItem('twq_invoices') || '[]');
-    invoices.unshift(invoice);
-    localStorage.setItem('twq_invoices', JSON.stringify(invoices));
+      // Create invoice in database
+      const { data: invoice, error } = await db.supabase
+        .from('invoices')
+        .insert({
+          user_id: currentUser.id,
+          branch_id: '1', // Default branch ID
+          items: cartData.map(item => ({
+            name: item.name,
+            price: item.price,
+            quantity: item.quantity,
+            total: item.total
+          })),
+          total_amount: total,
+          status: 'مكتمل',
+          payment_method: 'نقدي'
+        })
+        .select()
+        .single();
 
-    // Clear cart
-    this.clearCart();
+      if (error) {
+        console.error('Error creating invoice:', error);
+        this.showToast('خطأ في إنشاء الفاتورة', 'error');
+        return;
+      }
 
-    // Show success message
-    this.showToast(`تم إتمام الشراء بنجاح! المجموع: ${total.toFixed(2)} ر.س`, 'success');
-    
-    // Redirect to invoices page
-    setTimeout(() => {
-      showSubpage('invoices');
-    }, 2000);
+      // Clear cart
+      this.clearCart();
+
+      // Show success message
+      this.showToast(`تم إتمام الشراء بنجاح! المجموع: ${db.formatCurrency(total)}`, 'success');
+
+      // Redirect to invoice view page
+      setTimeout(() => {
+        window.location.href = `invoice-view.html?id=${invoice.id}`;
+      }, 2000);
+
+    } catch (error) {
+      console.error('Error during checkout:', error);
+      this.showToast('خطأ في إتمام عملية الشراء', 'error');
+    }
   },
 
   // Get cart count
@@ -237,8 +283,8 @@ function clearCart() {
   cart.clearCart();
 }
 
-function checkout() {
-  cart.checkout();
+async function checkout() {
+  await cart.checkout();
 }
 
 // Initialize cart when DOM is loaded

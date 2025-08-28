@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>إدارة الفروع | دكان فيجين</title>
+    <meta name="description" content="إدارة الفروع - لوحة تحكم دكان فيجين" />
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=Cairo:wght@400;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+ 
+    <link rel="stylesheet" href="./admin.css">
+    <link rel="stylesheet" href="./branches.css">
+</head>
+<body>
+    <div class="admin-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="brand">
+                    <img src="../../img/Logo.png" alt="دكان فيجين">
+                    <span>دكان فيجين</span>
+                </div>
+            </div>
+            <nav class="sidebar-nav">
+                <button class="logout-btn">تسجيل الخروج</button>
+                <ul class="nav-menu">
+                    <li class="nav-item">
+                        <a href="./dashboard.html" class="nav-link">
+                            الواجهة الرئيسية
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="./operations.html" class="nav-link">
+                            إدارة العمليات
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="./inventory.html" class="nav-link">
+                            إدارة المخزون
+                        </a>
+                    </li>
+                    <li class="nav-item active">
+                        <a href="./branches.html" class="nav-link">
+                            إدارة الفروع
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="./tickets.html" class="nav-link">
+                            إدارة التذاكر
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+            <!-- Virtual Assistant -->
+            <div class="virtual-assistant">
+                <h3>المساعد الافتراضي</h3>
+                <div class="assistant-input">
+                    <input type="text" placeholder="اكتب سؤالك..." id="assistantInput">
+                    <button class="send-btn" id="sendBtn">إرسال</button>
+                </div>
+            </div>
+        </aside>
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="content-header">
+                <div class="header-top">
+                    <a href="./index.html" class="back-btn">
+                        <span>←</span>
+                        رجعة للقائمة الرئيسية
+                    </a>
+                </div>
+                <h1>متجر بدون كاشير</h1>
+                <h2>الفروع</h2>
+            </header>
+            
+            <!-- Branches Cards Section -->
+            <div class="branches-cards-section">
+                <div class="branch-cards-grid">
+                    <!-- Branch 1 -->
+                    <div class="branch-card">
+                        <div class="branch-header">
+                            <h3>العليا</h3>
+                            <button class="edit-btn" onclick="editBranch('olaya')">تعديل</button>
+                        </div>
+                        <div class="branch-content">
+                            <div class="branch-location">
+                                <span class="location-icon"></span>
+                                <span>طريق الملك فهد، حي العليا، الرياض</span>
+                            </div>
+                            <div class="branch-hours">
+                                <div class="hours-row">
+                                    <span class="days">السبت-الخميس:</span>
+                                    <span class="time">08:00-23:00</span>
+                                </div>
+                                <div class="hours-row">
+                                    <span class="days">الجمعة:</span>
+                                    <span class="time">16:00-23:00</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Branch 2 -->
+                    <div class="branch-card">
+                        <div class="branch-header">
+                            <h3>النرجس</h3>
+                            <button class="edit-btn" onclick="editBranch('narjis')">تعديل</button>
+                        </div>
+                        <div class="branch-content">
+                            <div class="branch-location">
+                                <span class="location-icon">📍</span>
+                                <span>الرياض — حي النرجس</span>
+                            </div>
+                            <div class="branch-hours">
+                                <div class="hours-row">
+                                    <span class="days">السبت-الخميس:</span>
+                                    <span class="time">08:00-23:00</span>
+                                </div>
+                                <div class="hours-row">
+                                    <span class="days">الجمعة:</span>
+                                    <span class="time">16:00-23:00</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Branch 3 -->
+                    <div class="branch-card">
+                        <div class="branch-header">
+                            <h3>الياسمين</h3>
+                            <button class="edit-btn" onclick="editBranch('yasmeen')">تعديل</button>
+                        </div>
+                        <div class="branch-content">
+                            <div class="branch-location">
+                                <span class="location-icon">📍</span>
+                                <span>طريق أنس بن مالك، حي الياسمين، الرياض</span>
+                            </div>
+                            <div class="branch-hours">
+                                <div class="hours-row">
+                                    <span class="days">السبت-الخميس:</span>
+                                    <span class="time">08:00-23:00</span>
+                                </div>
+                                <div class="hours-row">
+                                    <span class="days">الجمعة:</span>
+                                    <span class="time">16:00-23:00</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Map Section -->
+            <div class="map-section">
+                <h3>خريطة الرياض</h3>
+                <div class="map-container">
+                    <iframe 
+                        src="https://maps.google.com/maps?q=Riyadh,Saudi%20Arabia&t=&z=11&ie=UTF8&iwloc=&output=embed"
+                        width="100%" 
+                        height="450" 
+                        style="border:0;" 
+                        allowfullscreen="" 
+                        loading="lazy" 
+                        referrerpolicy="no-referrer-when-downgrade">
+                    </iframe>
+                    <!-- Map Pins Overlay -->
+                    <div class="map-pins">
+                        <div class="map-pin pin-olaya" data-branch="العليا">
+                            <div class="pin-icon">📍</div>
+                            <div class="pin-label">العليا</div>
+                        </div>
+                        <div class="map-pin pin-narjis" data-branch="النرجس">
+                            <div class="pin-icon">📍</div>
+                            <div class="pin-label">النرجس</div>
+                        </div>
+                        <div class="map-pin pin-yasmeen" data-branch="الياسمين">
+                            <div class="pin-icon">📍</div>
+                            <div class="pin-label">الياسمين</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Edit Branch Modal -->
+    <div class="modal" id="editBranchModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>تعديل الفرع</h3>
+                <button class="modal-close" onclick="closeModal()">&times;</button>
+            </div>
+            <form class="modal-form" id="editBranchForm">
+                <div class="form-group">
+                    <label for="branchName">اسم الفرع</label>
+                    <input type="text" id="branchName" name="branchName" required>
+                </div>
+                <div class="form-group">
+                    <label for="branchLocation">الموقع</label>
+                    <input type="text" id="branchLocation" name="branchLocation" required>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="weekDaysStart">أيام الأسبوع بداية</label>
+                        <input type="time" id="weekDaysStart" name="weekDaysStart" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="weekDaysEnd">أيام الأسبوع نهاية</label>
+                        <input type="time" id="weekDaysEnd" name="weekDaysEnd" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="fridayStart">الجمعة بداية</label>
+                        <input type="time" id="fridayStart" name="fridayStart" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="fridayEnd">الجمعة نهاية</label>
+                        <input type="time" id="fridayEnd" name="fridayEnd" required>
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-outline" onclick="closeModal()">إلغاء</button>
+                    <button type="submit" class="btn btn-primary">حفظ التغييرات</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script type="module" src="./admin.js"></script>
+    <script type="module" src="./branches.js"></script>
+</body>
+</html>

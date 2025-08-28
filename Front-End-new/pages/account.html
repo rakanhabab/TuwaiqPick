@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>معلومات الحساب</title>
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=Cairo:wght@400;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/base.css" />
+  <link rel="stylesheet" href="../css/landing.css" />
+  <link rel="stylesheet" href="../css/account.css" />
+</head>
+<body>
+  <nav class="nav">
+    <div class="wrap">
+      <div class="brand">
+        <img src="../img/Logo.png" alt="Dukkan Vision" />
+        <span>دكان فيجين</span>
+      </div>
+      <div class="cta">
+        <button type="button" class="btn btn-back" onclick="window.location.href='../pages/user.html'">رجوع</button>
+      </div>
+    </div>
+  </nav>
+
+  <main class="main">
+    <div class="wrap">
+      <div class="account-layout">
+        <div class="card main-card">
+          <h2 class="page-title">معلومات الحساب</h2>
+          <form id="accountForm" class="account-form">
+            <div class="grid-2">
+              <div>
+                <label>الاسم الأول</label>
+                <input type="text" id="firstName" required />
+              </div>
+              <div>
+                <label>الاسم الثاني</label>
+                <input type="text" id="lastName" required />
+              </div>
+              <div>
+                <label>البريد الإلكتروني</label>
+                <input type="email" id="email" required />
+              </div>
+              <div>
+                <label>رقم الجوال</label>
+                <input type="tel" id="phone" required />
+              </div>
+              <div>
+                <label>المدينة</label>
+                <input type="text" id="city" />
+              </div>
+              <div>
+                <label>تاريخ الميلاد</label>
+                <input type="date" id="birthdate" />
+              </div>
+              <div>
+                <label>كلمة المرور</label>
+                <input type="password" id="password" placeholder="أدخل كلمة المرور الجديدة" />
+              </div>
+              <div>
+                <label>تأكيد كلمة المرور</label>
+                <input type="password" id="confirmPassword" placeholder="أعد إدخال كلمة المرور" />
+              </div>
+            </div>
+
+            <div class="actions actions-duo">
+              <button type="button" id="applyBtn" class="btn btn-accent">إجراء تغييرات</button>
+              <button type="submit" id="saveBtn" class="btn btn-purple">حفظ التغييرات</button>
+              <button type="button" id="cancelBtn" class="btn btn-outline">إلغاء</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script type="module" src="../js/account.js"></script>
+</body>
+</html>
+
+

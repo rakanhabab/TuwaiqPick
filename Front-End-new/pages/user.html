@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>دكان فيجين - لوحة المستخدم</title>
+    <meta name="description" content="لوحة تحكم المستخدم - دكان فيجين" />
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin defer></script>
+    <link rel="stylesheet" href="../css/base.css">
+    <link rel="stylesheet" href="../css/user.css">
+    
+    <!-- Database Integration -->
+    <script type="module" src="js/user.js"></script>
+</head>
+
+<body>
+    <!-- User Dashboard -->
+    <div class="view active">
+        <!-- Navigation -->
+        <nav class="nav">
+            <div class="wrap">
+                <div class="brand">
+                    <img src="../img/Logo.png" alt="Dukkan Vision">
+                    <span class="brand-sub">مرحبًا بك مجددًا في <span class="brand-name">دكان فيجين</span></span>
+                </div>
+                <div class="nav-links">
+                    <a href="#dashboard" onclick="scrollToSection('dashboard')">ملخّص</a>
+                    <a href="#sadeeq" onclick="scrollToSection('sadeeq')">مساعدك صديق</a>
+                    <a href="#invoices" onclick="scrollToSection('invoices')">فواتيرك</a>
+                    <a href="#support" onclick="scrollToSection('support')">الدعم</a>
+                </div>
+                <div class="cta">
+                    <div class="user-actions">
+                        <div class="user-buttons">
+                            <a class="btn btn-account" href="account.html">معلومات الحساب</a>
+                            <button class="btn btn-outline" onclick="logoutUser()">تسجيل الخروج</button>
+                        </div>
+                    </div>
+
+                    <!-- Small QR Code -->
+                    <div class="qr-small">
+                        <button class="btn btn-qr" onclick="window.location.href='qr.html'" title="اضغط لعرض QR Code">
+                        <img src="../img/QR.png" alt="QR Code" style="width: 70px; height: 70px;">
+                    </button>
+                    </div>
+
+                    <!-- Account Dropdown Menu -->
+                    <div class="account-dropdown" id="accountDropdown">
+                        <div class="dropdown-header">
+                            <div class="user-avatar">
+                                <div class="avatar-gradient"></div>
+                            </div>
+                            <div class="user-info">
+                                <div class="brand-name">دكان فيجين</div>
+                                <div class="user-name" id="dropdownName">تحميل...</div>
+                                <div class="user-email" id="dropdownEmail">تحميل...</div>
+                            </div>
+                        </div>
+
+                        <div class="dropdown-content">
+                            <button class="dropdown-btn logout-btn" onclick="logoutUser()">
+                            تسجيل الخروج
+                        </button>
+
+                            <div class="qr-section">
+                                <div class="qr-code" id="dropdownQR">
+                                    <!-- QR Code will be generated here -->
+                                </div>
+                                <div class="qr-label">QR Code</div>
+                            </div>
+
+                            <button class="dropdown-btn account-info-btn" onclick="showAccountInfo()">
+                            معلومات الحساب
+                        </button>
+                        </div>
+                    </div>
+
+
+                </div>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main">
+            <div class="wrap">
+                <!-- Dashboard Content -->
+                <div id="page-dashboard" class="page active">
+                    <div class="dashboard-grid">
+                        <!-- Single Column Layout -->
+                        <div class="left-column">
+                            <!-- Data Summary Cards -->
+                            <div class="data-summary" id="dashboard">
+                                <h3 class="dashboard-title">ملخّص زياراتك وإنفاقك</h3>
+                                <div class="summary-cards">
+                                    <div class="summary-card yellow">
+                                        <div class="card-content">
+                                            <div class="card-title">إجمالي المصروف</div>
+                                            <div class="card-value" id="kSpend">0.00 ر.س</div>
+                                            <canvas id="sparkSpend" width="100" height="30"></canvas>
+                                        </div>
+                                    </div>
+                                    <div class="summary-card green">
+                                        <div class="card-content">
+                                            <div class="card-title">عدد الزيارات</div>
+                                            <div class="card-value" id="kVisits">0</div>
+                                            <canvas id="sparkVisits" width="100" height="30"></canvas>
+                                        </div>
+                                    </div>
+                                    <div class="summary-card yellow">
+                                        <div class="card-content">
+                                            <div class="card-title">أكثر فرع زيارة</div>
+                                            <div class="card-value" id="kTop">غير محدد</div>
+                                            <canvas id="sparkTop" width="100" height="30"></canvas>
+                                        </div>
+                                    </div>
+                                    <div class="summary-card green">
+                                        <div class="card-content">
+                                            <div class="card-title">متوسط الفاتورة</div>
+                                            <div class="card-value" id="kAvg">0.00 ر.س</div>
+                                            <canvas id="sparkAvg" width="100" height="30"></canvas>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+
+                            <!-- Assistant (Sadeeq) -->
+                            <div class="assistant-section" id="sadeeq">
+                                <div class="card">
+                                    <h3>المساعد الافتراضي</h3>
+                                    <div class="chat-messages" id="chatMessages">
+                                        <div class="msg msg-bot">مرحباً، أنا صديق 👋، مساعدك الذكي في دكان فجن، كيف أقدر أساعدك اليوم؟</div>
+                                    </div>
+                                    <div class="chat-input">
+                                        <div class="chat-input-container">
+                                            <textarea placeholder="اسأل عن منتج، فاتورة، ..." id="chatInput" rows="1"></textarea>
+                                            <button class="send-btn" id="sendMessageBtn">إرسال</button>
+                                        </div>
+                                        <div class="chat-controls">
+                                            <button class="btn btn-sm btn-clear" id="clearChatBtn">مسح المحادثة</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Invoices Section -->
+                            <div class="invoices-section" id="invoices">
+                                <div class="card">
+                                    <h3>الفواتير</h3>
+                                    <div class="invoices-list" id="invoicesList">
+                                        <!-- Invoices will be loaded from database -->
+                                    </div>
+                                    <div class="invoices-link">
+                                        <a href="invoices-management.html">- إدارة فواتيري -</a>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Support Section -->
+                            <div class="contact-section" id="support">
+                                <div class="card">
+                                    <h3>الدعم</h3>
+                                    <div class="support-info">
+                                        <p>هل تحتاج مساعدة؟ يمكنك التواصل معنا عبر:</p>
+                                        <div class="support-links">
+                                            <a href="support.html" class="btn btn-gradient">صفحة الدعم</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <div class="wrap">
+                <div class="footer-content">
+                    <div class="footer-copyright">
+                        2025 - جميع الحقوق محفوظة.
+                    </div>
+                    <div class="footer-brand">
+                        <img src="img/Logo.png" alt="Dukkan Vision">
+                        <span>دكان فيجين</span>
+                    </div>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Scripts -->
+    <script>
+        // Simple logout function
+        function logoutUser() {
+            console.log('Logout function called');
+            
+            // Clear user data from localStorage
+            localStorage.removeItem('current_user');
+            localStorage.removeItem('twq_cart');
+            
+            console.log('User data cleared, redirecting to login page...');
+            
+            // Redirect to login page
+            window.location.href = 'login.html';
+        }
+
+        // Chat functionality - Direct implementation
+        document.addEventListener('DOMContentLoaded', function() {
+            const chatInput = document.getElementById('chatInput');
+            const chatMessages = document.getElementById('chatMessages');
+            const sendMessageBtn = document.getElementById('sendMessageBtn');
+            const clearChatBtn = document.getElementById('clearChatBtn');
+
+            function addMessage(text, type) {
+                if (!chatMessages) return;
+                const messageDiv = document.createElement('div');
+                const messageId = Date.now();
+                messageDiv.id = `msg-${messageId}`;
+                messageDiv.className = `msg msg-${type}`;
+                messageDiv.textContent = text;
+                chatMessages.appendChild(messageDiv);
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+                return messageId;
+            }
+
+            function removeMessage(messageId) {
+                const messageDiv = document.getElementById(`msg-${messageId}`);
+                if (messageDiv) {
+                    messageDiv.remove();
+                }
+            }
+
+            async function handleSend() {
+                const query = (chatInput?.value || '').trim();
+                if (!query) return;
+                
+                // Add user message
+                addMessage(query, 'user');
+                if (chatInput) chatInput.value = '';
+
+                try {
+                    // Show loading message
+                    const loadingId = addMessage('جاري البحث عن إجابة...', 'bot');
+                    
+                    // Get current user data
+                    const currentUserStr = localStorage.getItem('current_user');
+                    const currentUser = currentUserStr ? JSON.parse(currentUserStr) : null;
+                    
+                    // Get user name from multiple possible sources
+                    let userName = 'مستخدم';
+                    if (currentUser) {
+                        if (currentUser.name && currentUser.name.trim()) {
+                            userName = currentUser.name.trim();
+                        } else if (currentUser.full_name && currentUser.full_name.trim()) {
+                            userName = currentUser.full_name.trim();
+                        } else if (currentUser.first_name && currentUser.first_name.trim()) {
+                            userName = currentUser.first_name.trim();
+                        } else if (currentUser.email && currentUser.email.includes('@')) {
+                            // Extract name from email if available
+                            const emailName = currentUser.email.split('@')[0];
+                            if (emailName && emailName.trim()) {
+                                userName = emailName.trim();
+                            }
+                        }
+                    }
+                    
+                    console.log('Sending request to RAG API:', {
+                        question: query,
+                        user_id: currentUser?.id || null,
+                        user_name: userName,
+                        currentUser: currentUser
+                    });
+                    
+                    // Call RAG API
+                    const response = await fetch('http://localhost:8001/ask', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json',
+                        },
+                        mode: 'cors',
+                        body: JSON.stringify({
+                            question: query,
+                            user_id: currentUser?.id || null,
+                            user_name: userName
+                        })
+                    });
+                    
+                    // Remove loading message
+                    removeMessage(loadingId);
+
+                    if (response.ok) {
+                        const result = await response.json();
+                        console.log('RAG API response:', result);
+                        addMessage(result.answer, 'bot');
+                    } else {
+                        const errorText = await response.text();
+                        console.error('RAG API error:', response.status, response.statusText);
+                        console.error('Error details:', errorText);
+                        addMessage(`عذراً، حدث خطأ في الاتصال (${response.status}). تأكد من أن الخادم يعمل على المنفذ 8001.`, 'bot');
+                    }
+                } catch (error) {
+                    console.error('Error calling RAG API:', error);
+                    addMessage('عذراً، حدث خطأ في الاتصال. تأكد من أن الخادم يعمل على المنفذ 8001.', 'bot');
+                }
+            }
+
+            function handleClear() {
+                if (chatMessages) {
+                    chatMessages.innerHTML = '<div class="msg msg-bot">مرحباً، أنا صديق 👋، مساعدك الذكي في دكان فجن، كيف أقدر أساعدك اليوم؟</div>';
+                }
+            }
+
+            // Add event listeners
+            if (sendMessageBtn) sendMessageBtn.addEventListener('click', handleSend);
+            if (clearChatBtn) clearChatBtn.addEventListener('click', handleClear);
+            
+            if (chatInput) {
+                // Auto-resize height to fit content
+                const autoResize = () => {
+                    if (chatInput) {
+                        chatInput.style.height = 'auto';
+                        chatInput.style.height = Math.min(chatInput.scrollHeight, 120) + 'px';
+                    }
+                };
+                ['input','change'].forEach(evt => chatInput.addEventListener(evt, autoResize));
+                autoResize();
+
+                // Allow Enter key to send message
+                chatInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        handleSend();
+                        autoResize();
+                    }
+                });
+            }
+
+            // Test connection and user data on page load
+            async function testConnection() {
+                try {
+                    console.log('Testing RAG API connection...');
+                    const response = await fetch('http://localhost:8001/', {
+                        method: 'GET',
+                        headers: {
+                            'Accept': 'application/json',
+                        },
+                        mode: 'cors'
+                    });
+                    
+                    if (response.ok) {
+                        const data = await response.json();
+                        console.log('✅ RAG API is running:', data);
+                        
+                        // Test user data
+                        const currentUserStr = localStorage.getItem('current_user');
+                        if (currentUserStr) {
+                            const currentUser = JSON.parse(currentUserStr);
+                            console.log('👤 Current user data:', currentUser);
+                            
+                            // Get user name from multiple possible sources
+                            let userName = 'مستخدم';
+                            if (currentUser) {
+                                if (currentUser.name && currentUser.name.trim()) {
+                                    userName = currentUser.name.trim();
+                                } else if (currentUser.full_name && currentUser.full_name.trim()) {
+                                    userName = currentUser.full_name.trim();
+                                } else if (currentUser.first_name && currentUser.first_name.trim()) {
+                                    userName = currentUser.first_name.trim();
+                                } else if (currentUser.email && currentUser.email.includes('@')) {
+                                    const emailName = currentUser.email.split('@')[0];
+                                    if (emailName && emailName.trim()) {
+                                        userName = emailName.trim();
+                                    }
+                                }
+                            }
+                            console.log('👤 User name to be used:', userName);
+                        } else {
+                            console.log('⚠️ No user data found in localStorage');
+                        }
+                    } else {
+                        console.error('❌ RAG API is not responding properly');
+                        addMessage('⚠️ تحذير: خادم المساعد غير متصل. يرجى تشغيل الخادم أولاً.', 'bot');
+                    }
+                } catch (error) {
+                    console.error('❌ Cannot connect to RAG API:', error);
+                    addMessage('⚠️ تحذير: خادم المساعد غير متصل. يرجى تشغيل الخادم أولاً.', 'bot');
+                }
+            }
+
+            // Test connection when page loads
+            testConnection();
+        });
+    </script>
+    <script src="../js/logout.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>إدارة العمليات | دكان فيجين</title>
+    <meta name="description" content="إدارة العمليات - لوحة تحكم دكان فيجين" />
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=Cairo:wght@400;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../base.css">
+    <link rel="stylesheet" href="./admin.css">
+    <link rel="stylesheet" href="./operations.css">
+</head>
+<body>
+    <div class="admin-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="brand">
+                    <img src="../../img/Logo.png" alt="دكان فيجين">
+                    <span>دكان فيجين</span>
+                </div>
+            </div>
+            <nav class="sidebar-nav">
+                <button class="logout-btn">تسجيل الخروج</button>
+                <ul class="nav-menu">
+                    <li class="nav-item">
+                        <a href="./dashboard.html" class="nav-link">
+                            الواجهة الرئيسية
+                        </a>
+                    </li>
+                    <li class="nav-item active">
+                        <a href="./operations.html" class="nav-link">
+                            إدارة العمليات
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="./inventory.html" class="nav-link">
+                            إدارة المخزون
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="./branches.html" class="nav-link">
+                            إدارة الفروع
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="./tickets.html" class="nav-link">
+                            إدارة التذاكر
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+            <!-- Virtual Assistant -->
+            <div class="virtual-assistant">
+                <h3>المساعد الافتراضي</h3>
+                <div class="assistant-input">
+                    <input type="text" placeholder="اكتب سؤالك..." id="assistantInput">
+                    <button class="send-btn" id="sendBtn">إرسال</button>
+                </div>
+            </div>
+        </aside>
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="content-header">
+                <div class="header-top">
+                    <a href="./index.html" class="back-btn">
+                        <span>←</span>
+                        رجعة للقائمة الرئيسية
+                    </a>
+                </div>
+                <h1>متجر بدون كاشير</h1>
+                <h2>العربات الافتراضية (LiveStream)</h2>
+            </header>
+            <div class="virtual-carts-section">
+                <!-- Cart 1 -->
+                <div class="cart-card">
+                    <div class="cart-header">
+                        <h3>العميل: CUS-001</h3>
+                        <span class="cart-timestamp">Started at PM 11:47:52, 8/27/2025</span>
+                    </div>
+                    <div class="cart-content">
+                        <table class="cart-table">
+                            <thead>
+                                <tr>
+                                    <th>المنتج</th>
+                                    <th>SKU</th>
+                                    <th>الكمية</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>تفاح</td>
+                                    <td>SKU-APPLE</td>
+                                    <td>3</td>
+                                </tr>
+                                <tr>
+                                    <td>حليب</td>
+                                    <td>SKU-MILK</td>
+                                    <td>2</td>
+                                </tr>
+                                <tr>
+                                    <td>خبز</td>
+                                    <td>SKU-BREAD</td>
+                                    <td>1</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Cart 2 -->
+                <div class="cart-card">
+                    <div class="cart-header">
+                        <h3>العميل: CUS-002</h3>
+                        <span class="cart-timestamp">Started at PM 11:34:52, 8/27/2025</span>
+                    </div>
+                    <div class="cart-content">
+                        <table class="cart-table">
+                            <thead>
+                                <tr>
+                                    <th>المنتج</th>
+                                    <th>SKU</th>
+                                    <th>الكمية</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>قهوة</td>
+                                    <td>SKU-COFFEE</td>
+                                    <td>1</td>
+                                </tr>
+                                <tr>
+                                    <td>سكر</td>
+                                    <td>SKU-SUGAR</td>
+                                    <td>1</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Cart 3 -->
+                <div class="cart-card">
+                    <div class="cart-header">
+                        <h3>العميل: CUS-003</h3>
+                        <span class="cart-timestamp">Started at PM 11:28:15, 8/27/2025</span>
+                    </div>
+                    <div class="cart-content">
+                        <table class="cart-table">
+                            <thead>
+                                <tr>
+                                    <th>المنتج</th>
+                                    <th>SKU</th>
+                                    <th>الكمية</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>موز</td>
+                                    <td>SKU-BANANA</td>
+                                    <td>2</td>
+                                </tr>
+                                <tr>
+                                    <td>عصير برتقال</td>
+                                    <td>SKU-ORANGE-JUICE</td>
+                                    <td>1</td>
+                                </tr>
+                                <tr>
+                                    <td>زبدة</td>
+                                    <td>SKU-BUTTER</td>
+                                    <td>1</td>
+                                </tr>
+                                <tr>
+                                    <td>جبن</td>
+                                    <td>SKU-CHEESE</td>
+                                    <td>2</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    <script type="module" src="./admin.js"></script>
+    <script type="module" src="./operations.js"></script>
+</body>
+</html>

@@ -1,0 +1,468 @@
+/* Branches Management Styles */
+
+/* Back Button Styles */
+.header-top {
+  display: flex;
+  justify-content: flex-start;
+  margin-bottom: 16px;
+}
+
+.back-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 20px;
+  background: #dc2626;
+  color: white;
+  text-decoration: none;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 14px;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(220, 38, 38, 0.2);
+}
+
+.back-btn:hover {
+  /* Static - no hover effects */
+}
+
+.back-btn span {
+  font-size: 18px;
+  font-weight: bold;
+}
+
+/* Branches Cards Section */
+.branches-cards-section {
+  padding: 24px;
+  background: white;
+}
+
+.branch-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+/* Branch Card */
+.branch-card {
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e1e5e9;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.branch-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+}
+
+.branch-header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 20px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.branch-header h3 {
+  margin: 0;
+  font-size: 1.3rem;
+  font-weight: 700;
+  font-family: 'Cairo', sans-serif;
+}
+
+.edit-btn {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  font-family: 'Cairo', sans-serif;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.edit-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: translateY(-1px);
+}
+
+.branch-content {
+  padding: 24px;
+}
+
+.branch-location {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 20px;
+  color: #4a5568;
+  font-family: 'Cairo', sans-serif;
+  font-size: 1rem;
+}
+
+.location-icon {
+  font-size: 1.2rem;
+  color: #e53e3e;
+}
+
+.branch-hours {
+  background: #f8fafc;
+  border-radius: 12px;
+  padding: 16px;
+}
+
+.hours-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+  font-family: 'Cairo', sans-serif;
+}
+
+.hours-row:last-child {
+  margin-bottom: 0;
+}
+
+.days {
+  color: #2d3748;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.time {
+  color: #38a169;
+  font-weight: 700;
+  font-size: 0.9rem;
+  background: rgba(56, 161, 105, 0.1);
+  padding: 4px 8px;
+  border-radius: 6px;
+}
+
+/* Map Section */
+.map-section {
+  padding: 0 24px 24px 24px;
+}
+
+.map-section h3 {
+  margin: 0 0 16px 0;
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #2d3748;
+  font-family: 'Cairo', sans-serif;
+}
+
+.map-container {
+  position: relative;
+  background: white;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e1e5e9;
+}
+
+.map-container iframe {
+  border-radius: 16px;
+}
+
+/* Map Pins */
+.map-pins {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+}
+
+.map-pin {
+  position: absolute;
+  cursor: pointer;
+  pointer-events: auto;
+  transition: all 0.3s ease;
+}
+
+.map-pin:hover {
+  transform: scale(1.1);
+}
+
+.pin-icon {
+  font-size: 2rem;
+  color: #e53e3e;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+  filter: drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.2));
+}
+
+.pin-label {
+  background: rgba(229, 62, 62, 0.9);
+  color: white;
+  padding: 4px 8px;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  font-family: 'Cairo', sans-serif;
+  white-space: nowrap;
+  margin-top: 4px;
+  text-align: center;
+}
+
+/* Pin Positions (accurate for Riyadh branches) */
+.pin-olaya {
+  top: 30%;
+  left: 35%;
+}
+
+.pin-narjis {
+  top: 45%;
+  right: 25%;
+}
+
+.pin-yasmeen {
+  bottom: 30%;
+  left: 40%;
+}
+
+/* Modal Styles */
+.modal {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal.show {
+  display: flex;
+}
+
+.modal-content {
+  background: white;
+  border-radius: 16px;
+  width: 90%;
+  max-width: 500px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.modal-header h3 {
+  margin: 0;
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: #2d3748;
+  font-family: 'Cairo', sans-serif;
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  font-size: 24px;
+  color: #718096;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.modal-close:hover {
+  background: rgba(239, 68, 68, 0.1);
+  color: #e53e3e;
+}
+
+.modal-form {
+  padding: 24px;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+  color: #2d3748;
+  font-size: 0.9rem;
+  font-family: 'Cairo', sans-serif;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-family: 'Cairo', sans-serif;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.form-group input:focus {
+  outline: none;
+  border-color: #4299e1;
+  box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.1);
+}
+
+.modal-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  margin-top: 24px;
+  padding-top: 24px;
+  border-top: 1px solid #e2e8f0;
+}
+
+.btn {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  font-family: 'Cairo', sans-serif;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.btn-outline {
+  background: transparent;
+  color: #4a5568;
+  border: 1px solid #e2e8f0;
+}
+
+.btn-outline:hover {
+  background: #f8fafc;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .branches-cards-section {
+    padding: 16px;
+  }
+
+  .branch-cards-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .branch-header {
+    padding: 16px 20px;
+  }
+
+  .branch-header h3 {
+    font-size: 1.2rem;
+  }
+
+  .branch-content {
+    padding: 20px;
+  }
+
+  .map-section {
+    padding: 0 16px 16px 16px;
+  }
+
+  .map-container iframe {
+    height: 350px;
+  }
+
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+
+  .modal-content {
+    width: 95%;
+    margin: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .branch-header h3 {
+    font-size: 1.1rem;
+  }
+
+  .edit-btn {
+    padding: 6px 12px;
+    font-size: 0.8rem;
+  }
+
+  .hours-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+
+  .map-container iframe {
+    height: 300px;
+  }
+
+  .pin-label {
+    font-size: 0.7rem;
+    padding: 2px 6px;
+  }
+}
+
+/* Animation for cards */
+.branch-card {
+  animation: slideInUp 0.5s ease-out;
+}
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Pin hover effects */
+.map-pin:hover .pin-icon {
+  animation: bounce 0.6s ease;
+}
+
+@keyframes bounce {
+  0%, 20%, 50%, 80%, 100% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-10px);
+  }
+  60% {
+    transform: translateY(-5px);
+  }
+}

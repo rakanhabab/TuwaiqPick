@@ -1,49 +1,99 @@
-// Dashboard Module - Simplified
+// ===== DASHBOARD WITH DATABASE INTEGRATION =====
+import { db } from './database.js'
+
 window.dashboard = {
   // Initialize dashboard
-  init() {
-    this.loadUserInfo();
-    this.loadKPIs();
+  async init() {
+    await this.loadUserInfo();
+    await this.loadKPIs();
     this.initBarcodePages();
   },
 
-  // Load user info
-  loadUserInfo() {
-    const currentUser = JSON.parse(localStorage.getItem('twq_current') || '{}');
-    const accNameEl = document.getElementById('accName');
-    const accEmailEl = document.getElementById('accEmail');
-    
-    if (currentUser && currentUser.email) {
-      const fullName = currentUser.firstName && currentUser.lastName 
-        ? `${currentUser.firstName} ${currentUser.lastName}`
-        : currentUser.email.split('@')[0];
+  // Load user info from database
+  async loadUserInfo() {
+    try {
+      // Get current user from localStorage
+      const currentUserStr = localStorage.getItem('current_user');
+      if (!currentUserStr) {
+        window.location.href = 'login.html';
+        return;
+      }
+
+      const currentUser = JSON.parse(currentUserStr);
       
-      if (accNameEl) accNameEl.textContent = fullName;
-      if (accEmailEl) accEmailEl.textContent = currentUser.email;
-    } else {
-      if (accNameEl) accNameEl.textContent = 'مرحباً';
-      if (accEmailEl) accEmailEl.textContent = '—';
+      // Get fresh user data from database
+      const { data: user, error } = await db.supabase
+        .from('users')
+        .select('first_name, last_name, email')
+        .eq('id', currentUser.id)
+        .single();
+
+      if (error || !user) {
+        console.error('Error loading user info:', error);
+        return;
+      }
+
+      const accNameEl = document.getElementById('accName');
+      const accEmailEl = document.getElementById('accEmail');
+
+      if (user) {
+        const fullName = user.first_name && user.last_name 
+          ? `${user.first_name} ${user.last_name}`
+          : user.email.split('@')[0];
+
+        if (accNameEl) accNameEl.textContent = fullName;
+        if (accEmailEl) accEmailEl.textContent = user.email;
+      } else {
+        if (accNameEl) accNameEl.textContent = 'مرحباً';
+        if (accEmailEl) accEmailEl.textContent = '—';
+      }
+    } catch (error) {
+      console.error('Error loading user info:', error);
     }
   },
 
-  // Load KPIs
-  loadKPIs() {
-    const kpis = {
-      visits: Math.floor(Math.random() * 200) + 50,
-      spend: (Math.random() * 2000 + 500).toFixed(2),
-      avg: (Math.random() * 100 + 30).toFixed(2),
-      topBranch: 'الرياض - Two Pick'
-    };
+  // Load KPIs from database
+  async loadKPIs() {
+    try {
+      // Get current user from localStorage
+      const currentUserStr = localStorage.getItem('current_user');
+      if (!currentUserStr) return;
 
-    const visitsEl = document.getElementById('kVisits');
-    const spendEl = document.getElementById('kSpend');
-    const avgEl = document.getElementById('kAvg');
-    const topEl = document.getElementById('kTop');
+      const currentUser = JSON.parse(currentUserStr);
+      
+      // Get user data and invoices from database
+      const [userData, invoices] = await Promise.all([
+        db.supabase.from('users').select('num_visits, owed_balance').eq('id', currentUser.id).single(),
+        db.supabase.from('invoices').select('total_amount').eq('user_id', currentUser.id)
+      ]);
 
-    if (visitsEl) visitsEl.textContent = kpis.visits;
-    if (spendEl) spendEl.textContent = `${kpis.spend} ر.س`;
-    if (avgEl) avgEl.textContent = `${kpis.avg} ر.س`;
-    if (topEl) topEl.textContent = kpis.topBranch;
+      const visitsEl = document.getElementById('kVisits');
+      const spendEl = document.getElementById('kSpend');
+      const avgEl = document.getElementById('kAvg');
+      const topEl = document.getElementById('kTop');
+
+      // Calculate KPIs from real data
+      const visits = userData.data?.num_visits || 0;
+      const totalSpend = invoices.data?.reduce((sum, invoice) => sum + (invoice.total_amount || 0), 0) || 0;
+      const avgSpend = invoices.data?.length > 0 ? totalSpend / invoices.data.length : 0;
+
+      if (visitsEl) visitsEl.textContent = visits;
+      if (spendEl) spendEl.textContent = db.formatCurrency(totalSpend);
+      if (avgEl) avgEl.textContent = db.formatCurrency(avgSpend);
+      if (topEl) topEl.textContent = 'الرياض - دكان فيجين';
+    } catch (error) {
+      console.error('Error loading KPIs:', error);
+      // Fallback to static data
+      const visitsEl = document.getElementById('kVisits');
+      const spendEl = document.getElementById('kSpend');
+      const avgEl = document.getElementById('kAvg');
+      const topEl = document.getElementById('kTop');
+
+      if (visitsEl) visitsEl.textContent = '0';
+      if (spendEl) spendEl.textContent = '0 ر.س';
+      if (avgEl) avgEl.textContent = '0 ر.س';
+      if (topEl) topEl.textContent = '—';
+    }
   },
 
   // Initialize barcode pages
@@ -70,11 +120,11 @@ window.dashboard = {
   showBarcodePage() {
     const dashboardPage = document.getElementById('page-dashboard');
     const barcodePage = document.getElementById('page-barcode');
-    
+
     if (dashboardPage && barcodePage) {
       dashboardPage.classList.remove('active');
       barcodePage.classList.add('active');
-      
+
       // Generate QR code when page is shown
       setTimeout(() => {
         this.showUserQR('12345');
@@ -86,7 +136,7 @@ window.dashboard = {
   hideBarcodePage() {
     const dashboardPage = document.getElementById('page-dashboard');
     const barcodePage = document.getElementById('page-barcode');
-    
+
     if (dashboardPage && barcodePage) {
       barcodePage.classList.remove('active');
       dashboardPage.classList.add('active');
@@ -97,7 +147,7 @@ window.dashboard = {
   showBarcodeScanPage() {
     const barcodePage = document.getElementById('page-barcode');
     const barcodeScanPage = document.getElementById('page-barcode-scan');
-    
+
     if (barcodePage && barcodeScanPage) {
       barcodePage.classList.remove('active');
       barcodeScanPage.classList.add('active');
@@ -108,7 +158,7 @@ window.dashboard = {
   hideBarcodeScanPage() {
     const barcodePage = document.getElementById('page-barcode');
     const barcodeScanPage = document.getElementById('page-barcode-scan');
-    
+
     if (barcodePage && barcodeScanPage) {
       barcodeScanPage.classList.remove('active');
       barcodePage.classList.add('active');
@@ -119,7 +169,7 @@ window.dashboard = {
   showUserQR(userId) {
     const container = document.getElementById('qr');
     if (!container) return;
-    
+
     container.innerHTML = ''; // clear old
 
     // Create QR code directly
@@ -157,7 +207,7 @@ function showBarcodeScanPage() {
 function showUserQR(userId) {
   const container = document.getElementById('qr');
   if (!container) return;
-  
+
   container.innerHTML = ''; // clear old
 
   // Create QR code directly
@@ -171,42 +221,8 @@ function showUserQR(userId) {
   });
 }
 
-// Barcode simulation functions
-function simulateProductDetection() {
-  const products = [
-    { name: 'حليب طازج', price: 12.50, image: '🥛' },
-    { name: 'خبز أبيض', price: 3.75, image: '🍞' },
-    { name: 'تفاح أحمر', price: 8.90, image: '🍎' },
-    { name: 'جبنة شيدر', price: 15.25, image: '🧀' }
-  ];
-  
-  const randomProduct = products[Math.floor(Math.random() * products.length)];
-  addToCart(randomProduct);
-  
-  const cameraArea = document.querySelector('#page-barcode-scan .content .card > div > div:first-child');
-  cameraArea.innerHTML = `
-    <div style="width: 100%; height: 300px; background: #d4edda; border-radius: 8px; display: flex; align-items: center; justify-content: center; margin-bottom: 20px;">
-      <div style="text-align: center; color: #155724;">
-        <div style="font-size: 48px; margin-bottom: 10px;">✅</div>
-        <div>تم اكتشاف المنتج!</div>
-        <div style="font-size: 16px; margin-top: 5px;">${randomProduct.name}</div>
-        <div style="font-size: 14px; margin-top: 5px;">${randomProduct.price} ر.س</div>
-      </div>
-    </div>
-  `;
-  
-  setTimeout(() => {
-    cameraArea.innerHTML = `
-      <div style="width: 100%; height: 300px; background: #f8f9fa; border: 2px dashed #dee2e6; border-radius: 8px; display: flex; align-items: center; justify-content: center; margin-bottom: 20px;">
-        <div style="text-align: center; color: #6c757d;">
-          <div style="font-size: 48px; margin-bottom: 10px;">📷</div>
-          <div>امسح الباركود للمنتج</div>
-          <div style="font-size: 14px; margin-top: 5px;">اضغط على زر المحاكاة</div>
-        </div>
-      </div>
-    `;
-  }, 2000);
-}
+
+
 
 function addToCart(product) {
   let cart = JSON.parse(localStorage.getItem('twq_cart') || '[]');
@@ -218,7 +234,7 @@ function addToCart(product) {
 function updateCartDisplay() {
   const cartItems = document.getElementById('cartItems');
   const cart = JSON.parse(localStorage.getItem('twq_cart') || '[]');
-  
+
   if (cartItems) {
     cartItems.innerHTML = cart.map((item, index) => `
       <div class="cart-item">
@@ -243,7 +259,7 @@ function completePurchase() {
     alert('السلة فارغة!');
     return;
   }
-  
+
   const total = cart.reduce((sum, item) => sum + item.price, 0);
   const invoice = {
     id: Date.now(),
@@ -251,12 +267,12 @@ function completePurchase() {
     total: total,
     date: new Date().toLocaleDateString('ar-SA')
   };
-  
+
   let invoices = JSON.parse(localStorage.getItem('twq_invoices') || '[]');
   invoices.push(invoice);
   localStorage.setItem('twq_invoices', JSON.stringify(invoices));
   localStorage.setItem('twq_cart', '[]');
-  
+
   updateCartDisplay();
   alert(`تم إتمام الشراء! المجموع: ${total.toFixed(2)} ر.س`);
 }

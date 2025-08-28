@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Dukkan Vision | دكان فيجين</title>
+    <meta name="description" content="Dukkan Vision — تجربة تسوّق بدون كاشير، اختَر وامشِ!" />
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=Cairo:wght@400;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/base.css">
+    <link rel="stylesheet" href="../css/landing.css">
+</head>
+
+<body>
+    <!-- Navigation -->
+    <nav class="nav">
+        <div class="wrap">
+            <div class="brand">
+                <img src="../img/Logo.png" alt="Dukkan Vision">
+                <span>دكان فيجين</span>
+            </div>
+            <div class="nav-links">
+                <a href="#about">من نحن</a>
+                <a href="#features">ما يميزنا</a>
+                <a href="#how-it-works">طريقة الاستخدام</a>
+                <a href="#gallery">شاهد التجربة</a>
+                <a href="#branches">وين تلقانا؟</a>
+            </div>
+            <div class="cta">
+                <div class="language-toggle" onclick="toggleLanguage()">
+                    <span class="lang-text">عربي</span>
+                    <div class="toggle-switch">
+                        <div class="toggle-slider"></div>
+                    </div>
+                    <span class="lang-text">En</span>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="wrap">
+            <div class="hero-content">
+                <h1>تسوّق وامش - <span class="accent-orange">بلا كاشير</span></h1>
+                <p>دكان فيجين يقدم تجربة تسوّق ذكية وسلسة. ادخل بباركودك، اختر منتجاتك بحرية، واخرج فوراً. ستصل لك الفاتورة الرقمية مباشرة.</p>
+                <div class="hero-badges">
+                    <span class="badge">ذكاء اصطناعي لرصد المنتجات</span>
+                    <span class="badge">دفع تلقائي وآمن</span>
+                    <span class="badge">إيصال رقمي فوري</span>
+                    <span class="badge">تجربة سلسة</span>
+                </div>
+            </div>
+            <div class="hero-card">
+                <div class="hero-card-header">
+                    <h3>ابدأ حسابك الآن لتجربة أسهل وأسرع في <strong>دكان فيجين</strong></h3>
+                </div>
+                <div class="hero-features">
+                    <div class="feature-item">
+                        <span>تجربة بلا احتكاك — وداعًا للطوابير</span>
+                    </div>
+                    <div class="feature-item">
+                        <span>دفع تلقائي وإيصال رقمي</span>
+                    </div>
+                    <div class="feature-item">
+                        <span>سجل مشتريات وتتبّع للمصاريف</span>
+                    </div>
+                </div>
+                <div class="hero-actions">
+                    <a href="./login.html" class="btn btn-outline">تسجيل الدخول</a>
+                    <a href="./signup.html" class="btn btn-accent">إنشاء حساب</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features">
+        <div class="container">
+            <h2 class="section-title">ما يميزنا</h2>
+            <p class="section-sub">عميل يختار منتجات من متجر حديث</p>
+            <div class="features">
+                <div class="feature-card">
+                    <h3 class="feature-title">سرعة فائقة</h3>
+                    <p class="feature-description">دفع لا تلامسي عبر الجوال، خروج تلقائي، وفاتورة رقمية فورية.</p>
+                    <div class="card">
+                        <img src="../img/27.png" alt="سرعة فائقة">
+                    </div>
+                </div>
+                <div class="feature-card">
+                    <h3 class="feature-title">أمان مُحكَم</h3>
+                    <p class="feature-description">حماية كاملة لبيانات الدفع وهويتك.</p>
+                    <div class="card">
+                        <img src="../img/28.png" alt="أمان مُحكَم">
+                    </div>
+                </div>
+                <div class="feature-card">
+                    <h3 class="feature-title">اختر وامشِ</h3>
+                    <p class="feature-description">بدون طوابير — التقط وواصل طريقك.</p>
+                    <div class="card">
+                        <img src="../img/29.png" alt="اختر وامشِ">
+                    </div>
+                </div>
+                <div class="feature-card">
+                    <h3 class="feature-title">ذكاء وتحليلات</h3>
+                    <p class="feature-description">رؤية حاسوبية تتتبّع المشتريات وتقدّم توصيات ذكية، مع لوحة مشتريات وسجل رقمي واضح.</p>
+                    <div class="card">
+                        <img src="../img/30.png" alt="ذكاء وتحليلات">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works Section -->
+    <section id="how-it-works">
+        <div class="container">
+            <h2 class="section-title">طريقة الاستخدام</h2>
+            <p class="section-sub">كيف يعمل نظام دكان فيجين</p>
+            <div class="how-it-works">
+                <div class="step-card">
+                    <h3 class="step-title">1. ابدأ بالباركود</h3>
+                    <p class="step-description">اعرض باركود الدخول من حسابك عند بوابة المتجر.</p>
+                    <div class="card">
+                        <img src="../img/24.png" alt="Step 1">
+                    </div>
+                </div>
+                <div class="step-card">
+                    <h3 class="step-title">2. اختر منتجاتك</h3>
+                    <p class="step-description">تسوّق بحرّية، وسيتم رصد كل شيء تلقائيًا.</p>
+                    <div class="card">
+                        <img src="../img/25.png" alt="Step 2">
+                    </div>
+                </div>
+                <div class="step-card">
+                    <h3 class="step-title">3. اخرج واستلم الفاتورة</h3>
+                    <p class="step-description">بمجرد خروجك تصلك فاتورة رقمية فورًا.</p>
+                    <div class="card">
+                        <img src="../img/26.png" alt="Step 3">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Gallery Section -->
+    <section id="gallery">
+        <div class="container">
+            <h2 class="section-title">شاهد التجربة</h2>
+            <p class="section-sub">شاهد تجربة دكان فيجين</p>
+            <div class="gallery">
+                <div class="ph">
+                    <img src="../img/32.jpg" alt="Gallery 1">
+                </div>
+                <div class="ph">
+                    <img src="../img/33.png" alt="Gallery 2">
+                </div> 
+                <div class="ph">
+                    <img src="../img/34.png" alt="Gallery 3">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Branches Section -->
+    <section id="branches">
+        <div class="container">
+            <h2 class="section-title">وين تلقانا؟</h2>
+            <p class="section-sub">اكتشف أقرب فرع لك</p>
+            <div class="branches">
+                <div class="branch-card">
+                    <div class="branch-map">
+                        <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3624.5!2d46.6753!3d24.7136!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMjTCsNDInNDkuMCJOIDQ2sDAwJzMxLjEiRQ!5e0!3m2!1sen!2ssa!4v1234567890" width="100%" height="100%"
+                            style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+                    </div>
+                    <div class="branch-info">
+                        <h3>دكان فيجين — فرع العليا</h3>
+                        <p class="branch-address">طريق الملك فهد، حي العليا، الرياض</p>
+                        <div class="branch-actions">
+                            <a href="https://maps.app.goo.gl/vmbrsYAHRGHsq8ih9" target="_blank" class="map-link">
+                                <span>فتح على الخريطة</span>
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M7 17L17 7M17 7H7M17 7V17"/>
+                                </svg>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="branch-card">
+                    <div class="branch-map">
+                        <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3624.5!2d46.7384!3d24.7743!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMjTCsNDYnMjcuNCJOIDQ2sDAwJzE4LjIiRQ!5e0!3m2!1sen!2ssa!4v1234567890" width="100%" height="100%"
+                            style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+                    </div>
+                    <div class="branch-info">
+                        <h3>دكان فيجين — فرع النرجس</h3>
+                        <p class="branch-address">الرياض — حي النرجس</p>
+                        <div class="branch-actions">
+                            <a href="https://maps.app.goo.gl/nGC34myqDDgVXfHg7" target="_blank" class="map-link">
+                                <span>فتح على الخريطة</span>
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M7 17L17 7M17 7H7M17 7V17"/>
+                                </svg>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="branch-card">
+                    <div class="branch-map">
+                        <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3624.5!2d46.6753!3d24.7914!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMjTCsNDcnMjkuMCJOIDQ2sDAwJzMxLjEiRQ!5e0!3m2!1sen!2ssa!4v1234567890" width="100%" height="100%"
+                            style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+                    </div>
+                    <div class="branch-info">
+                        <h3>دكان فيجين — فرع الياسمين</h3>
+                        <p class="branch-address">طريق أنس بن مالك، حي الياسمين، الرياض</p>
+                        <div class="branch-actions">
+                            <a href="https://maps.app.goo.gl/example" target="_blank" class="map-link">
+                                <span>فتح على الخريطة</span>
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M7 17L17 7M17 7H7M17 7V17"/>
+                                </svg>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about">
+        <div class="container">
+            <div class="about-cards">
+                <div class="about-card">
+                    <h2 class="about-title">من نحن</h2>
+                    <p>دكان فيجين منصة سعودية مبتكرة توفّر تجربة تسوّق ذاتي ذكية وسلسة، بالاعتماد على تقنيات الرؤية الحاسوبية والتعرّف الذكي لمتابعة المشتريات داخل المتجر بأمان وموثوقية.</p>
+                    <p>نسعى لتقديم تجربة تسوق حديثة وسريعة في مختلف مدن المملكة.</p>
+                </div>
+                <div class="about-card">
+                    <h2 class="about-title">لماذا دكان فيجين؟</h2>
+                    <ul class="about-list">
+                        <li>تسوّق بلا طوابير وانتظار.</li>
+                        <li>دخول سلس عبر باركودك الخاص.</li>
+                        <li>دفع تلقائي وآمن.</li>
+                        <li>فاتورة رقمية وسجل مشتريات دائما معك.</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="about-logo">
+                <img src="../img/Logo.png" alt="دكان فيجين" class="main-logo">
+                <div class="logo-text">
+                    <p>مستقبل التسوق الذكي</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="wrap">
+            <div>© 2024 دكان فيجين. جميع الحقوق محفوظة.</div>
+            <div>
+                <a href="#privacy">الخصوصية</a> |
+                <a href="#terms">الشروط</a> |
+                <a href="#contact">اتصل بنا</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Smooth Scrolling -->
+    <script>
+        // Language content
+        const content = {
+            ar: {
+                // Navigation
+                'nav-about': 'من نحن',
+                'nav-features': 'ما يميزنا',
+                'nav-how-it-works': 'طريقة الاستخدام',
+                'nav-gallery': 'شاهد التجربة',
+                'nav-branches': 'وين تلقانا؟',
+
+                // Hero
+                'hero-title': 'تسوّق وامش - <span class="accent-orange">بلا كاشير</span>',
+                'hero-subtitle': 'دكان فيجين يقدم تجربة تسوّق ذكية وسلسة. ادخل بباركودك، اختر منتجاتك بحرية، واخرج فوراً. ستصل لك الفاتورة الرقمية مباشرة.',
+                'hero-badge-1': 'ذكاء اصطناعي لرصد المنتجات',
+                'hero-badge-2': 'دفع تلقائي وآمن',
+                'hero-badge-3': 'إيصال رقمي فوري',
+                'hero-badge-4': 'تجربة سلسة',
+                'hero-card-title': 'ابدأ حسابك الآن لتجربة أسهل وأسرع في <strong>دكان فيجين</strong>',
+                'hero-feature-1': 'تجربة بلا احتكاك — وداعًا للطوابير',
+                'hero-feature-2': 'دفع تلقائي وإيصال رقمي',
+                'hero-feature-3': 'سجل مشتريات وتتبّع للمصاريف',
+                'login-btn': 'تسجيل الدخول',
+                'signup-btn': 'إنشاء حساب',
+
+                // Features
+                'features-title': 'ما يميزنا',
+                'features-subtitle': 'عميل يختار منتجات من متجر حديث',
+                'feature-1-title': 'سرعة فائقة',
+                'feature-1-desc': 'دفع لا تلامسي عبر الجوال، خروج تلقائي، وفاتورة رقمية فورية.',
+                'feature-2-title': 'أمان مُحكَم',
+                'feature-2-desc': 'حماية كاملة لبيانات الدفع وهويتك.',
+                'feature-3-title': 'اختر وامشِ',
+                'feature-3-desc': 'بدون طوابير — التقط وواصل طريقك.',
+                'feature-4-title': 'ذكاء وتحليلات',
+                'feature-4-desc': 'رؤية حاسوبية تتتبّع المشتريات وتقدّم توصيات ذكية، مع لوحة مشتريات وسجل رقمي واضح.',
+
+                // How it works
+                'how-title': 'كيف يعمل؟',
+                'how-subtitle': 'Dukkan Vision اختر وامشِ لا طوابير، لا مسح باركود — التقط وواصل طريقك.',
+                'step-1-title': 'ابدأ بالباركود',
+                'step-1-desc': 'اعرض باركود الدخول من حسابك عند بوابة المتجر.',
+                'step-2-title': 'اختر منتجاتك',
+                'step-2-desc': 'تسوّق بحرّية، وسيتم رصد كل شيء تلقائيًا.',
+                'step-3-title': 'اخرج واستلم الفاتورة',
+                'step-3-desc': 'بمجرد خروجك تصلك فاتورة رقمية فورًا.',
+
+                // Gallery
+                'gallery-title': 'شاهد التجربة',
+                'gallery-subtitle': 'شاهد تجربة دكان فيجين',
+
+                // Branches
+                'branches-title': 'وين تلقانا؟',
+                'branches-subtitle': 'اكتشف أقرب فرع لك',
+                'branch-1-name': 'دكان فيجين — فرع العليا',
+                'branch-1-address': 'طريق الملك فهد، حي العليا، الرياض',
+                'branch-2-name': 'دكان فيجين — فرع النرجس',
+                'branch-2-address': 'الرياض — حي النرجس',
+                'branch-3-name': 'دكان فيجين — فرع الياسمين',
+                'branch-3-address': 'طريق أنس بن مالك، حي الياسمين، الرياض',
+                'open-map': 'فتح على الخريطة',
+
+                // About
+                'about-title-1': 'من نحن',
+                'about-text-1': 'دكان فيجين منصة سعودية مبتكرة توفّر تجربة تسوّق ذاتي ذكية وسلسة، بالاعتماد على تقنيات الرؤية الحاسوبية والتعرّف الذكي لمتابعة المشتريات داخل المتجر بأمان وموثوقية.',
+                'about-text-1-2': 'نسعى لتقديم تجربة تسوق حديثة وسريعة في مختلف مدن المملكة.',
+                'about-title-2': 'لماذا دكان فيجين؟',
+                'about-list-1': 'تسوّق بلا طوابير وانتظار.',
+                'about-list-2': 'دخول سلس عبر باركودك الخاص.',
+                'about-list-3': 'دفع تلقائي وآمن.',
+                'about-list-4': 'فاتورة رقمية وسجل مشتريات دائما معك.',
+                'logo-text': 'مستقبل التسوق الذكي',
+
+                // Footer
+                'footer-copyright': '© 2024 دكان فيجين. جميع الحقوق محفوظة.',
+                'footer-privacy': 'الخصوصية',
+                'footer-terms': 'الشروط',
+                'footer-contact': 'اتصل بنا'
+            },
+            en: {
+                // Navigation
+                'nav-about': 'About Us',
+                'nav-features': 'Features',
+                'nav-how-it-works': 'How It Works',
+                'nav-gallery': 'Gallery',
+                'nav-branches': 'Our Branches',
+
+                // Hero
+                'hero-title': 'Shop & Go - <span class="accent-orange">No Cashier</span>',
+                'hero-subtitle': 'Dukkan Vision offers a smart and seamless shopping experience. Enter with your barcode, choose your products freely, and exit immediately. Your digital receipt will arrive instantly.',
+                'hero-badge-1': 'AI-powered product detection',
+                'hero-badge-2': 'Automatic & secure payment',
+                'hero-badge-3': 'Instant digital receipt',
+                'hero-badge-4': 'Seamless experience',
+                'hero-card-title': 'Start your account now for an easier and faster experience at <strong>Dukkan Vision</strong>',
+                'hero-feature-1': 'Frictionless experience — goodbye queues',
+                'hero-feature-2': 'Automatic payment & digital receipt',
+                'hero-feature-3': 'Purchase history & expense tracking',
+                'login-btn': 'Login',
+                'signup-btn': 'Sign Up',
+
+                // Features
+                'features-title': 'What Makes Us Special',
+                'features-subtitle': 'Customer chooses products from a modern store',
+                'feature-1-title': 'Super Fast',
+                'feature-1-desc': 'Contactless mobile payment, automatic checkout, and instant digital receipt.',
+                'feature-2-title': 'Secure',
+                'feature-2-desc': 'Complete protection for your payment data and identity.',
+                'feature-3-title': 'Grab & Go',
+                'feature-3-desc': 'No queues — grab and continue your way.',
+                'feature-4-title': 'Smart Analytics',
+                'feature-4-desc': 'Computer vision tracks purchases and provides smart recommendations, with a clear purchase dashboard and digital record.',
+
+                // How it works
+                'how-title': 'How It Works?',
+                'how-subtitle': 'Dukkan Vision grab and go, no queues, no barcode scanning — grab and continue your way.',
+                'step-1-title': 'Start with Barcode',
+                'step-1-desc': 'Display your entry barcode from your account at the store entrance.',
+                'step-2-title': 'Choose Your Products',
+                'step-2-desc': 'Shop freely, and everything will be tracked automatically.',
+                'step-3-title': 'Exit & Get Receipt',
+                'step-3-desc': 'As soon as you exit, you\'ll receive a digital receipt instantly.',
+
+                // Gallery
+                'gallery-title': 'See the Experience',
+                'gallery-subtitle': 'See Dukkan Vision experience',
+
+                // Branches
+                'branches-title': 'Where to Find Us?',
+                'branches-subtitle': 'Discover the nearest branch to you',
+                'branch-1-name': 'Dukkan Vision — Al Olaya Branch',
+                'branch-1-address': 'King Fahd Road, Al Olaya District, Riyadh',
+                'branch-2-name': 'Dukkan Vision — Al Narjis Branch',
+                'branch-2-address': 'Riyadh — Al Narjis District',
+                'branch-3-name': 'Dukkan Vision — Al Yasmeen Branch',
+                'branch-3-address': 'Anas Bin Malik Road, Al Yasmeen District, Riyadh',
+                'open-map': 'Open on Map',
+
+                // About
+                'about-title-1': 'About Us',
+                'about-text-1': 'Dukkan Vision is an innovative Saudi platform that provides a smart and seamless self-shopping experience, relying on computer vision and intelligent recognition technologies to track purchases inside the store safely and reliably.',
+                'about-text-1-2': 'We strive to provide a modern and fast shopping experience in various cities across the Kingdom.',
+                'about-title-2': 'Why Dukkan Vision?',
+                'about-list-1': 'Shop without queues and waiting.',
+                'about-list-2': 'Smooth entry through your personal barcode.',
+                'about-list-3': 'Automatic and secure payment.',
+                'about-list-4': 'Digital receipt and purchase history always with you.',
+                'logo-text': 'The Future of Smart Shopping',
+
+                // Footer
+                'footer-copyright': '© 2024 Dukkan Vision. All rights reserved.',
+                'footer-privacy': 'Privacy',
+                'footer-terms': 'Terms',
+                'footer-contact': 'Contact Us'
+            }
+        };
+
+        let currentLang = 'ar';
+
+        // Smooth scrolling for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Language toggle functionality
+        function toggleLanguage() {
+            const toggle = document.querySelector('.language-toggle');
+            toggle.classList.toggle('active');
+
+            // Toggle language
+            currentLang = currentLang === 'ar' ? 'en' : 'ar';
+
+            // Update page direction
+            document.documentElement.dir = currentLang === 'ar' ? 'rtl' : 'ltr';
+            document.documentElement.lang = currentLang;
+
+            // Update content
+            updateContent();
+
+            // Add click animation
+            toggle.style.transform = 'scale(0.95)';
+            setTimeout(() => {
+                toggle.style.transform = 'translateY(-1px)';
+            }, 150);
+        }
+
+        function updateContent() {
+            const lang = content[currentLang];
+
+            // Navigation
+            document.querySelectorAll('.nav-links a')[0].textContent = lang['nav-about'];
+            document.querySelectorAll('.nav-links a')[1].textContent = lang['nav-features'];
+            document.querySelectorAll('.nav-links a')[2].textContent = lang['nav-how-it-works'];
+            document.querySelectorAll('.nav-links a')[3].textContent = lang['nav-gallery'];
+            document.querySelectorAll('.nav-links a')[4].textContent = lang['nav-branches'];
+
+            // Hero
+            document.querySelector('.hero h1').innerHTML = lang['hero-title'];
+            document.querySelector('.hero p').textContent = lang['hero-subtitle'];
+            document.querySelectorAll('.hero-badges .badge')[0].textContent = lang['hero-badge-1'];
+            document.querySelectorAll('.hero-badges .badge')[1].textContent = lang['hero-badge-2'];
+            document.querySelectorAll('.hero-badges .badge')[2].textContent = lang['hero-badge-3'];
+            document.querySelectorAll('.hero-badges .badge')[3].textContent = lang['hero-badge-4'];
+            document.querySelector('.hero-card h3').innerHTML = lang['hero-card-title'];
+            document.querySelectorAll('.feature-item span')[0].textContent = lang['hero-feature-1'];
+            document.querySelectorAll('.feature-item span')[1].textContent = lang['hero-feature-2'];
+            document.querySelectorAll('.feature-item span')[2].textContent = lang['hero-feature-3'];
+            document.querySelectorAll('.hero-actions .btn')[0].textContent = lang['login-btn'];
+            document.querySelectorAll('.hero-actions .btn')[1].textContent = lang['signup-btn'];
+
+            // Features
+            document.querySelector('#features .section-title').textContent = lang['features-title'];
+            document.querySelector('#features .section-sub').textContent = lang['features-subtitle'];
+            document.querySelectorAll('.feature-title')[0].textContent = lang['feature-1-title'];
+            document.querySelectorAll('.feature-description')[0].textContent = lang['feature-1-desc'];
+            document.querySelectorAll('.feature-title')[1].textContent = lang['feature-2-title'];
+            document.querySelectorAll('.feature-description')[1].textContent = lang['feature-2-desc'];
+            document.querySelectorAll('.feature-title')[2].textContent = lang['feature-3-title'];
+            document.querySelectorAll('.feature-description')[2].textContent = lang['feature-3-desc'];
+            document.querySelectorAll('.feature-title')[3].textContent = lang['feature-4-title'];
+            document.querySelectorAll('.feature-description')[3].textContent = lang['feature-4-desc'];
+
+            // How it works
+            document.querySelector('#how-it-works .section-title').textContent = lang['how-title'];
+            document.querySelector('#how-it-works .section-sub').textContent = lang['how-subtitle'];
+            document.querySelectorAll('.step-title')[0].textContent = lang['step-1-title'];
+            document.querySelectorAll('.step-description')[0].textContent = lang['step-1-desc'];
+            document.querySelectorAll('.step-title')[1].textContent = lang['step-2-title'];
+            document.querySelectorAll('.step-description')[1].textContent = lang['step-2-desc'];
+            document.querySelectorAll('.step-title')[2].textContent = lang['step-3-title'];
+            document.querySelectorAll('.step-description')[2].textContent = lang['step-3-desc'];
+
+            // Gallery
+            document.querySelector('#gallery .section-title').textContent = lang['gallery-title'];
+            document.querySelector('#gallery .section-sub').textContent = lang['gallery-subtitle'];
+
+            // Branches
+            document.querySelector('#branches .section-title').textContent = lang['branches-title'];
+            document.querySelector('#branches .section-sub').textContent = lang['branches-subtitle'];
+            document.querySelectorAll('.branch-info h3')[0].textContent = lang['branch-1-name'];
+            document.querySelectorAll('.branch-address')[0].textContent = lang['branch-1-address'];
+            document.querySelectorAll('.branch-info h3')[1].textContent = lang['branch-2-name'];
+            document.querySelectorAll('.branch-address')[1].textContent = lang['branch-2-address'];
+            document.querySelectorAll('.branch-info h3')[2].textContent = lang['branch-3-name'];
+            document.querySelectorAll('.branch-address')[2].textContent = lang['branch-3-address'];
+            document.querySelectorAll('.map-link span').forEach(span => {
+                span.textContent = lang['open-map'];
+            });
+
+            // About
+            document.querySelectorAll('.about-title')[0].textContent = lang['about-title-1'];
+            document.querySelectorAll('.about-card p')[0].textContent = lang['about-text-1'];
+            document.querySelectorAll('.about-card p')[1].textContent = lang['about-text-1-2'];
+            document.querySelectorAll('.about-title')[1].textContent = lang['about-title-2'];
+            document.querySelectorAll('.about-list li')[0].textContent = lang['about-list-1'];
+            document.querySelectorAll('.about-list li')[1].textContent = lang['about-list-2'];
+            document.querySelectorAll('.about-list li')[2].textContent = lang['about-list-3'];
+            document.querySelectorAll('.about-list li')[3].textContent = lang['about-list-4'];
+            document.querySelector('.logo-text p').textContent = lang['logo-text'];
+
+            // Footer
+            document.querySelector('footer .wrap div:first-child').textContent = lang['footer-copyright'];
+            document.querySelectorAll('footer a')[0].textContent = lang['footer-privacy'];
+            document.querySelectorAll('footer a')[1].textContent = lang['footer-terms'];
+            document.querySelectorAll('footer a')[2].textContent = lang['footer-contact'];
+        }
+    </script>
+    
+    <!-- Database Integration -->
+    <script type="module" src="../js/landing.js"></script>
+    <script type="module" src="../js/test-database.js"></script>
+</body>
+
+</html>

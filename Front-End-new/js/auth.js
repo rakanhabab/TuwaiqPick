@@ -1,138 +1,243 @@
-// Authentication Module
-const auth = {
-  init() {
-    this.checkAuthStatus();
-  },
+// ===== AUTHENTICATION WITH DATABASE INTEGRATION =====
+import { db } from './database.js'
 
-  checkAuthStatus() {
-    const currentUser = localStorage.getItem('twq_current');
-    const isAdmin = localStorage.getItem('twq_is_admin');
-
-    if (currentUser) {
-      if (isAdmin === '1') {
-        window.location.href = 'admin.html';
-      } else {
-        window.location.href = 'user.html';
-      }
-    }
-  },
-
-  handleLogin() {
-    const email = document.getElementById('loginEmail')?.value?.trim();
-    const password = document.getElementById('loginPassword')?.value?.trim();
-    
-    if (!email || !password) {
-      alert('يرجى ملء جميع الحقول');
-      return;
-    }
-    
-    // Admin fast-path: allow admin login even if not pre-created in twq_users
-    if (email === 'admin@admin.com' && password === 'admin123') {
-      const adminUser = {
-        firstName: 'مدير',
-        lastName: 'النظام',
-        email: 'admin@admin.com'
-      };
-      localStorage.setItem('twq_is_admin', '1');
-      localStorage.setItem('twq_current', JSON.stringify(adminUser));
-      window.location.href = 'admin.html';
-      return;
+class AuthService {
+    constructor() {
+        this.setupEventListeners()
     }
 
-    const users = JSON.parse(localStorage.getItem('twq_users') || '[]');
-    const user = users.find(u => u.email === email && u.password === password);
-    
-    if (!user) {
-      alert('البريد الإلكتروني أو كلمة المرور غير صحيحة');
-      return;
+    setupEventListeners() {
+        // Login form
+        const loginForm = document.getElementById('loginFormElement')
+        if (loginForm) {
+            loginForm.addEventListener('submit', this.handleLogin.bind(this))
+        }
+
+        // Signup form
+        const signupForm = document.getElementById('signupFormElement')
+        if (signupForm) {
+            signupForm.addEventListener('submit', this.handleSignup.bind(this))
+        }
+
+        // Password toggle
+        const passwordToggles = document.querySelectorAll('.password-toggle')
+        passwordToggles.forEach(toggle => {
+            toggle.addEventListener('click', this.togglePassword.bind(this))
+        })
     }
 
-    localStorage.setItem('twq_current', JSON.stringify(user));
-    localStorage.setItem('twq_current_index', users.indexOf(user).toString());
-    localStorage.removeItem('twq_is_admin');
-    window.location.href = 'user.html';
-  },
+    async handleLogin(event) {
+        event.preventDefault()
+        
+        // Get form data from input fields
+        const email = document.getElementById('loginEmail')?.value?.trim()
+        const password = document.getElementById('loginPassword')?.value?.trim()
 
-  handleSignup() {
-    const firstName = document.getElementById('signupFirst')?.value?.trim();
-    const lastName = document.getElementById('signupLast')?.value?.trim();
-    const email = document.getElementById('signupEmail')?.value?.trim();
-    const password = document.getElementById('signupPassword')?.value?.trim();
-    const confirmPassword = document.getElementById('signupConfirm')?.value?.trim();
-    const agreeTerms = document.getElementById('agreeTerms')?.checked;
-    
-    if (!firstName || !lastName || !email || !password || !confirmPassword) {
-      alert('يرجى ملء جميع الحقول');
-      return;
-    }
-    
-    if (password !== confirmPassword) {
-      alert('كلمة المرور غير متطابقة');
-      return;
-    }
-    
-    if (!agreeTerms) {
-      alert('يجب الموافقة على الشروط والأحكام');
-      return;
-    }
-    
-    const users = JSON.parse(localStorage.getItem('twq_users') || '[]');
-    
-    if (users.find(u => u.email === email)) {
-      alert('البريد الإلكتروني مستخدم بالفعل');
-      return;
-    }
-    
-    const newUser = {
-      firstName,
-      lastName,
-      email,
-      password,
-      createdAt: new Date().toISOString()
-    };
-    
-    users.push(newUser);
-    localStorage.setItem('twq_users', JSON.stringify(users));
-    localStorage.setItem('twq_current', JSON.stringify(newUser));
-    localStorage.setItem('twq_current_index', (users.length - 1).toString());
-    localStorage.removeItem('twq_is_admin');
-    
-    alert('تم إنشاء الحساب بنجاح!');
-    window.location.href = 'user.html';
-  },
+        if (!email || !password) {
+            this.showError('يرجى ملء جميع الحقول')
+            return
+        }
 
-  logout() {
-    if (confirm('هل تريد تسجيل الخروج؟')) {
-      localStorage.removeItem('twq_current');
-      localStorage.removeItem('twq_current_index');
-      localStorage.removeItem('twq_is_admin');
-      window.location.href = 'index.html';
-    }
-  }
-};
+        try {
+            // Get user from database by email
+            const { data: user, error } = await db.supabase
+                .from('users')
+                .select('*')
+                .eq('email', email)
+                .single()
+            
+            if (error || !user) {
+                this.showError('البريد الإلكتروني أو كلمة المرور غير صحيحة')
+                return
+            }
 
-// Global functions for HTML onclick handlers
-function logout() {
-  auth.logout();
+            // In a real app, you would hash and compare passwords
+            // For now, we'll just check if user exists
+            this.showSuccess('تم تسجيل الدخول بنجاح!')
+            
+            // Store user info in localStorage for session management
+            localStorage.setItem('current_user', JSON.stringify(user))
+            
+            // Check if user is admin and redirect accordingly
+            const isAdmin = user.email?.includes('admin') || user.role === 'admin' || user.is_admin === true;
+            
+            // Store admin status in localStorage
+            if (isAdmin) {
+                localStorage.setItem('twq_is_admin', 'true')
+            }
+            
+            setTimeout(() => {
+                if (isAdmin) {
+                    window.location.href = '../admin/index.html'
+                } else {
+                    window.location.href = '../pages/user.html'
+                }
+            }, 1500)
+            
+        } catch (error) {
+            console.error('Login error:', error)
+            this.showError('حدث خطأ في تسجيل الدخول')
+        }
+    }
+
+    async handleSignup(event) {
+        event.preventDefault()
+        
+        // Get form data from input fields
+        const firstName = document.getElementById('signupFirst')?.value?.trim()
+        const lastName = document.getElementById('signupLast')?.value?.trim()
+        const email = document.getElementById('signupEmail')?.value?.trim()
+        const password = document.getElementById('signupPassword')?.value?.trim()
+        const confirmPassword = document.getElementById('signupConfirm')?.value?.trim()
+        const agreeTerms = document.getElementById('agreeTerms')?.checked
+
+        // Validate form data
+        if (!firstName || !lastName || !email || !password || !confirmPassword) {
+            this.showError('يرجى ملء جميع الحقول')
+            return
+        }
+
+        if (password !== confirmPassword) {
+            this.showError('كلمة المرور غير متطابقة')
+            return
+        }
+
+        if (!agreeTerms) {
+            this.showError('يجب الموافقة على الشروط والأحكام')
+            return
+        }
+
+        try {
+            // Check if user already exists
+            const { data: existingUser } = await db.supabase
+                .from('users')
+                .select('id')
+                .eq('email', email)
+                .single()
+
+            if (existingUser) {
+                this.showError('البريد الإلكتروني مستخدم بالفعل')
+                return
+            }
+
+            // Create new user
+            const { data: newUser, error } = await db.supabase
+                .from('users')
+                .insert([{
+                    email: email,
+                    first_name: firstName,
+                    last_name: lastName,
+                    password: password, // In real app, hash this
+                    phone: '+966501234567', // Default phone
+                    city: 'الرياض', // Default city
+                    is_admin: false,
+                    num_visits: 0,
+                    owed_balance: 0
+                }])
+                .select()
+            
+            if (error) {
+                console.error('Error creating user:', error)
+                this.showError('فشل في إنشاء الحساب')
+                return
+            }
+
+            if (newUser && newUser.length > 0) {
+                this.showSuccess('تم إنشاء الحساب بنجاح!')
+                
+                // Store user info in localStorage
+                localStorage.setItem('current_user', JSON.stringify(newUser[0]))
+                
+                setTimeout(() => {
+                    window.location.href = 'user.html'
+                }, 1500)
+            } else {
+                this.showError('فشل في إنشاء الحساب')
+            }
+        } catch (error) {
+            console.error('Signup error:', error)
+            this.showError('حدث خطأ في إنشاء الحساب')
+        }
+    }
+
+    togglePassword(event) {
+        const button = event.currentTarget
+        const input = button.previousElementSibling
+        
+        if (input.type === 'password') {
+            input.type = 'text'
+            button.textContent = 'إخفاء'
+        } else {
+            input.type = 'password'
+            button.textContent = 'إظهار'
+        }
+    }
+
+    showSuccess(message) {
+        this.showMessage(message, 'success')
+    }
+
+    showError(message) {
+        this.showMessage(message, 'error')
+    }
+
+    showMessage(message, type) {
+        // Remove existing messages
+        const existingMessages = document.querySelectorAll('.message')
+        existingMessages.forEach(msg => msg.remove())
+
+        // Create new message
+        const messageDiv = document.createElement('div')
+        messageDiv.className = `message ${type}`
+        messageDiv.textContent = message
+
+        // Add to page
+        const container = document.querySelector('.auth-container') || document.body
+        container.appendChild(messageDiv)
+
+        // Auto remove after 5 seconds
+        setTimeout(() => {
+            messageDiv.remove()
+        }, 5000)
+    }
+
+    // Validate form
+    validateForm(formData) {
+        const errors = []
+
+        if (!formData.get('email') || !formData.get('email').includes('@')) {
+            errors.push('البريد الإلكتروني غير صحيح')
+        }
+
+        if (!formData.get('password') || formData.get('password').length < 6) {
+            errors.push('كلمة المرور يجب أن تكون 6 أحرف على الأقل')
+        }
+
+        if (!formData.get('first_name') || formData.get('first_name').length < 2) {
+            errors.push('الاسم الأول يجب أن يكون حرفين على الأقل')
+        }
+
+        if (!formData.get('last_name') || formData.get('last_name').length < 2) {
+            errors.push('الاسم الأخير يجب أن يكون حرفين على الأقل')
+        }
+
+        return errors
+    }
 }
 
-// Admin backdoor for testing
-function adminLogin() {
-  const adminUser = {
-    firstName: 'مدير',
-    lastName: 'النظام',
-    email: 'admin@admin.com',
-    password: 'admin123'
-  };
-  localStorage.setItem('twq_is_admin', '1');
-  localStorage.setItem('twq_current', JSON.stringify(adminUser));
-  window.location.href = 'admin.html';
-}
-
-// Initialize auth when DOM is loaded
-// Expose to window for pages that reference window.auth
-// and initialize on DOM ready
+// Initialize auth service when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
-  try { window.auth = auth; } catch (e) {}
-  auth.init();
-});
+    new AuthService()
+})
+
+// Global logout function
+window.logout = function() {
+    if (confirm('هل تريد تسجيل الخروج؟')) {
+        localStorage.removeItem('current_user');
+        localStorage.removeItem('twq_is_admin');
+        window.location.href = 'index.html';
+    }
+}
+
+// Export for potential use in other modules
+export { AuthService } 

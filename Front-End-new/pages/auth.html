@@ -6,8 +6,8 @@
   <title>تسجيل الدخول | دكان فيجين</title>
   <meta name="description" content="تسجيل الدخول أو إنشاء حساب جديد في دكان فيجين" />
   <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/base.css">
-  <link rel="stylesheet" href="css/auth.css">
+  <link rel="stylesheet" href="../css/base.css">
+  <link rel="stylesheet" href="../css/auth.css">
 </head>
 <body>
   <!-- Auth Container -->
@@ -29,21 +29,21 @@
           <h2>تسجيل الدخول</h2>
           <p>مرحباً بك مرة أخرى</p>
         </div>
-        
+
         <form id="loginFormElement">
           <div class="form-group">
             <label for="loginEmail">البريد الإلكتروني</label>
             <input type="email" id="loginEmail" required>
           </div>
-          
+
           <div class="form-group">
             <label for="loginPassword">كلمة المرور</label>
             <input type="password" id="loginPassword" required>
           </div>
-          
+
           <button type="submit" class="btn btn-primary">تسجيل الدخول</button>
         </form>
-        
+
         <div class="form-footer">
           <p>ليس لديك حساب؟ <a href="#" onclick="switchToSignup()">إنشاء حساب جديد</a></p>
         </div>
@@ -55,7 +55,7 @@
           <h2>إنشاء حساب جديد</h2>
           <p>انضم إلى دكان فيجين</p>
         </div>
-        
+
         <form id="signupFormElement">
           <div class="form-row">
             <div class="form-group">
@@ -67,12 +67,12 @@
               <input type="text" id="signupLast" required>
             </div>
           </div>
-          
+
           <div class="form-group">
             <label for="signupEmail">البريد الإلكتروني</label>
             <input type="email" id="signupEmail" required>
           </div>
-          
+
           <div class="form-row">
             <div class="form-group">
               <label for="signupPassword">كلمة المرور</label>
@@ -83,17 +83,17 @@
               <input type="password" id="signupConfirm" required>
             </div>
           </div>
-          
+
           <div class="form-group">
             <div class="checkbox-group">
               <input type="checkbox" id="agreeTerms" required>
               <label for="agreeTerms">أوافق على <a href="#terms">الشروط والأحكام</a></label>
             </div>
           </div>
-          
+
           <button type="submit" class="btn btn-primary">إنشاء حساب</button>
         </form>
-        
+
         <div class="form-footer">
           <p>لديك حساب بالفعل؟ <a href="#" onclick="switchToLogin()">تسجيل الدخول</a></p>
         </div>
@@ -116,12 +116,12 @@
        document.getElementById('loginForm').style.display = 'none';
        document.getElementById('signupForm').style.display = 'block';
      }
-     
+
      function switchToLogin() {
        document.getElementById('signupForm').style.display = 'none';
        document.getElementById('loginForm').style.display = 'block';
      }
-     
+
      // Handle form submissions
      document.addEventListener('DOMContentLoaded', function() {
        // Login form
@@ -132,7 +132,7 @@
            handleLogin();
          });
        }
-       
+
        // Signup form
        const signupForm = document.getElementById('signupFormElement');
        if (signupForm) {
@@ -142,19 +142,19 @@
          });
        }
      });
-     
+
      function handleLogin() {
        const email = document.getElementById('loginEmail').value.trim();
        const password = document.getElementById('loginPassword').value.trim();
-       
+
        if (!email || !password) {
          alert('يرجى ملء جميع الحقول');
          return;
        }
-       
+
        const users = JSON.parse(localStorage.getItem('twq_users') || '[]');
        const user = users.find(u => u.email === email && u.password === password);
-       
+
        if (user) {
          if (user.email === 'admin@dukkanvision.com' && password === 'admin123') {
            localStorage.setItem('twq_is_admin', '1');
@@ -170,7 +170,7 @@
          alert('البريد الإلكتروني أو كلمة المرور غير صحيحة');
        }
      }
-     
+
      function handleSignup() {
        const firstName = document.getElementById('signupFirst').value.trim();
        const lastName = document.getElementById('signupLast').value.trim();
@@ -178,29 +178,29 @@
        const password = document.getElementById('signupPassword').value.trim();
        const confirmPassword = document.getElementById('signupConfirm').value.trim();
        const agreeTerms = document.getElementById('agreeTerms').checked;
-       
+
        if (!firstName || !lastName || !email || !password || !confirmPassword) {
          alert('يرجى ملء جميع الحقول');
          return;
        }
-       
+
        if (password !== confirmPassword) {
          alert('كلمة المرور غير متطابقة');
          return;
        }
-       
+
        if (!agreeTerms) {
          alert('يجب الموافقة على الشروط والأحكام');
          return;
        }
-       
+
        const users = JSON.parse(localStorage.getItem('twq_users') || '[]');
-       
+
        if (users.find(u => u.email === email)) {
          alert('البريد الإلكتروني مستخدم بالفعل');
          return;
        }
-       
+
        const newUser = {
          firstName,
          lastName,
@@ -208,13 +208,13 @@
          password,
          createdAt: new Date().toISOString()
        };
-       
+
        users.push(newUser);
        localStorage.setItem('twq_users', JSON.stringify(users));
        localStorage.setItem('twq_current', JSON.stringify(newUser));
        localStorage.setItem('twq_current_index', (users.length - 1).toString());
        localStorage.removeItem('twq_is_admin');
-       
+
        alert('تم إنشاء الحساب بنجاح!');
        window.location.href = 'user.html';
      }

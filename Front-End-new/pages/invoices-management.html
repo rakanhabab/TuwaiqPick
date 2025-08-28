@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>إدارة الفواتير - دكان فيجين</title>
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=Cairo:wght@400;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/base.css" />
+  <link rel="stylesheet" href="../css/landing.css" />
+  <link rel="stylesheet" href="../css/invoices-management.css" />
+</head>
+<body>
+  <nav class="nav">
+    <div class="wrap">
+      <div class="brand">
+        <img src="../img/Logo.png" alt="Dukkan Vision" />
+        <span>دكان فيجين</span>
+      </div>
+      <div class="cta">
+        <button type="button" class="btn btn-back" onclick="history.back()">رجوع</button>
+      </div>
+    </div>
+  </nav>
+
+  <main class="main">
+    <div class="wrap">
+      <div class="invoices-management-layout">
+        <div class="card main-card">
+          <h2 class="page-title">إدارة الفواتير</h2>
+          
+          <div class="invoices-management-content">
+                        <!-- Invoice Management Section -->
+            <div class="management-section">
+              <h3>إدارة الفواتير</h3>
+              <div class="management-list">
+                                    <div class="management-item">
+                     <div class="management-number">1</div>
+                     <div class="management-text">اضغط <span class="highlight">عرض</span> لفتح تفاصيل الفاتورة.</div>
+                   </div>
+                  <div class="management-item">
+                    <div class="management-number">2</div>
+                    <div class="management-text">اختر <span class="highlight">طباعة</span> لحفظ نسخة ورقية أو PDF.</div>
+                  </div>
+                  <div class="management-item">
+                    <div class="management-number">3</div>
+                    <div class="management-text">في حال وجود خطأ، استخدم <span class="highlight">شكوى</span> لإرسال اعتراض.</div>
+                  </div>
+                </div>
+                
+                <div class="management-info">
+                  <p>جميع فواتيرك الرقمية محفوظة وآمنة ويمكنك الرجوع لها في أي وقت.</p>
+                </div>
+              </div>
+              
+                             <!-- All Invoices Section -->
+               <div class="all-invoices-section">
+                 <h3>كل الفواتير</h3>
+                 <div class="invoices-table">
+                   <div class="invoice-row header">
+                     <div class="invoice-id">رقم الفاتورة</div>
+                     <div class="invoice-date">التاريخ</div>
+                     <div class="invoice-branch">الفرع</div>
+                     <div class="invoice-actions">الإجراءات</div>
+                   </div>
+                   <!-- Invoices will be loaded from database -->
+                  </div>
+                </div>
+              </div>
+            </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script type="module" src="../js/invoices-management.js"></script>
+</body>
+</html>

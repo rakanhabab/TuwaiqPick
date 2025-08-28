@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>عرض الفاتورة - دكان فيجين</title>
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=Cairo:wght@400;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/base.css" />
+  <link rel="stylesheet" href="../css/landing.css" />
+  <link rel="stylesheet" href="../css/invoice-view.css" />
+</head>
+<body>
+  <nav class="nav">
+    <div class="wrap">
+      <div class="brand">
+        <img src="../img/Logo.png" alt="Dukkan Vision" />
+        <span>دكان فيجين</span>
+      </div>
+      <div class="cta">
+        <button type="button" class="btn btn-back" onclick="goBack()">رجوع</button>
+      </div>
+    </div>
+  </nav>
+
+  <main class="main">
+    <div class="wrap">
+      <div class="invoice-view-layout">
+        <div class="card main-card">
+          <h2 class="page-title">عرض الفاتورة</h2>
+          
+          <div class="invoice-details">
+            <!-- Invoice Header -->
+            <div class="invoice-header">
+              <div class="invoice-info">
+                <h3 class="invoice-number">رقم الفاتورة: <span id="invoice-id">#1028</span></h3>
+                <p class="invoice-date">التاريخ: <span id="invoice-date">2025-08-03</span></p>
+                <p class="invoice-branch">الفرع: <span id="invoice-branch">الرياض</span></p>
+              </div>
+              <div class="invoice-logo">
+                <img src="../img/Logo.png" alt="دكان فيجين" />
+                <p>دكان فيجين</p>
+              </div>
+            </div>
+
+            <!-- Invoice Items -->
+            <div class="invoice-items-section">
+              <h4>تفاصيل المشتريات</h4>
+              <div class="invoice-items">
+                <div class="invoice-item header">
+                  <div class="item-product">المنتج</div>
+                  <div class="item-quantity">الكمية</div>
+                  <div class="item-price">السعر</div>
+                  <div class="item-total">المجموع</div>
+                </div>
+                <div id="invoice-items-list">
+                  <!-- Items will be populated by JavaScript -->
+                </div>
+              </div>
+            </div>
+
+            <!-- Invoice Summary -->
+            <div class="invoice-summary">
+              <div class="summary-row">
+                <span>المجموع الفرعي:</span>
+                <span id="subtotal">0.00 ر.س</span>
+              </div>
+              <div class="summary-row">
+                <span>الضريبة (15%):</span>
+                <span id="tax">0.00 ر.س</span>
+              </div>
+              <div class="summary-row total">
+                <span>المجموع الكلي:</span>
+                <span id="total">0.00 ر.س</span>
+              </div>
+            </div>
+
+            <!-- Invoice Actions -->
+            <div class="invoice-actions">
+              <button class="btn btn-print" onclick="printInvoice()">طباعة</button>
+              <button class="btn btn-complaint" onclick="fileComplaint()">شكوى</button>
+            </div>
+            
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script type="module" src="../js/invoice-view.js"></script>
+</body>
+</html>

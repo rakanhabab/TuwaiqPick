@@ -1,4 +1,4 @@
-/* Reset and Base Styles */
+* Reset and Base Styles */
 * {
   margin: 0;
   padding: 0;
@@ -311,24 +311,24 @@ html, body {
     padding: 16px;
     min-height: 100vh;
   }
-  
+
   .auth-forms {
     padding: 24px;
     margin-bottom: 20px;
   }
-  
+
   .logo h1 {
     font-size: 24px;
   }
-  
+
   .tagline {
     font-size: 16px;
   }
-  
+
   .form-header h2 {
     font-size: 24px;
   }
-  
+
   .form-row {
     grid-template-columns: 1fr;
     gap: 0;
@@ -339,25 +339,25 @@ html, body {
   .auth-container {
     padding: 12px;
   }
-  
+
   .auth-forms {
     padding: 20px;
   }
-  
+
   .logo {
     flex-direction: column;
     gap: 12px;
   }
-  
+
   .logo img {
     width: 50px;
     height: 50px;
   }
-  
+
   .logo h1 {
     font-size: 20px;
   }
-  
+
   .tagline {
     font-size: 14px;
   }
