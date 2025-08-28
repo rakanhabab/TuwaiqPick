@@ -102,6 +102,18 @@ class DatabaseService {
         return data
     }
 
+    // ===== INVENTORY (quantities per product) =====
+    async getInventoryQuantities() {
+        const { data, error } = await this.supabase
+            .from('inventory')
+            .select('product_id, quantity')
+        if (error) {
+            console.error('Error fetching inventory quantities:', error)
+            return []
+        }
+        return data
+    }
+
     // ===== INVOICES =====
     async getInvoices() {
         const { data, error } = await this.supabase
@@ -115,6 +127,22 @@ class DatabaseService {
         
         if (error) {
             console.error('Error fetching invoices:', error)
+            return []
+        }
+        return data
+    }
+
+    // New: get all invoices (no user filter) for admin dashboards
+    async getAllInvoices() {
+        const { data, error } = await this.supabase
+            .from('invoices')
+            .select(`
+                *,
+                branches(name, address, lat, long)
+            `)
+            .order('timestamp', { ascending: false })
+        if (error) {
+            console.error('Error fetching all invoices:', error)
             return []
         }
         return data

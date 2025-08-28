@@ -1,5 +1,5 @@
 // Tickets Management JavaScript with Database Integration
-import { db } from '../../js/database.js';
+import { db } from '../js/database.js';
 
 class TicketsService {
     constructor() {
@@ -23,14 +23,37 @@ class TicketsService {
         try {
             // Get tickets from database
             const tickets = await db.getTickets();
-            
-            this.ticketsData = tickets;
+            this.ticketsData = tickets || [];
+
+            // Update stats
+            this.updateStats();
             
             // Update UI with real data
-            this.populateTicketsTable(tickets);
+            this.populateTicketsTable(this.ticketsData);
         } catch (error) {
             console.error('Error loading tickets data:', error);
         }
+    }
+
+    updateStats() {
+        const total = this.ticketsData.length;
+        // DB uses 'pending' and 'approved'
+        const pending = this.ticketsData.filter(t => (t.status || '').toLowerCase() === 'pending').length;
+        const resolved = this.ticketsData.filter(t => (t.status || '').toLowerCase() === 'approved').length;
+        // Sum refund_price (numeric)
+        const refundTotal = this.ticketsData.reduce((sum, t) => sum + (Number(t.refund_price) || 0), 0);
+
+        const setText = (id, text) => { const el = document.getElementById(id); if (el) el.textContent = text; };
+        setText('totalTicketsValue', total.toLocaleString('ar-SA'));
+        setText('pendingTicketsValue', pending.toLocaleString('ar-SA'));
+        setText('resolvedTicketsValue', resolved.toLocaleString('ar-SA'));
+        setText('refundTotalValue', db.formatCurrency(refundTotal));
+
+        // Optional: simple change indicators (can be enhanced later)
+        setText('totalTicketsChange', '');
+        setText('pendingTicketsChange', '');
+        setText('resolvedTicketsChange', '');
+        setText('refundTotalChange', '');
     }
 
     populateTicketsTable(tickets) {
@@ -43,6 +66,7 @@ class TicketsService {
             const row = document.createElement('tr');
             row.style.animationDelay = `${index * 0.1}s`;
             
+            const refund = Number(ticket.refund_price) || 0;
             row.innerHTML = `
                 <td>
                     <strong class="ticket-number">${ticket.id || 'غير محدد'}</strong>
@@ -54,8 +78,8 @@ class TicketsService {
                     ${this.getStatusBadge(ticket.status)}
                 </td>
                 <td>
-                    <span class="refund-amount ${ticket.refund_amount === 0 ? 'zero' : ''}">
-                        ${db.formatCurrency(ticket.refund_amount || 0)}
+                    <span class="refund-amount ${refund === 0 ? 'zero' : ''}">
+                        ${db.formatCurrency(refund)}
                     </span>
                 </td>
                 <td>
@@ -66,7 +90,7 @@ class TicketsService {
                         <button class="action-btn view" onclick="ticketsService.viewInvoice('${ticket.invoice_id}')" title="عرض الفاتورة">
                             عرض الفاتورة
                         </button>
-                        ${ticket.status === 'open' ? `
+                        ${(ticket.status || '').toLowerCase() === 'pending' ? `
                             <button class="action-btn approve" onclick="ticketsService.approveTicket('${ticket.id}')" title="قبول الطلب">
                                 قبول الطلب
                             </button>
@@ -86,14 +110,16 @@ class TicketsService {
     }
 
     getStatusBadge(status) {
+        const s = (status || '').toLowerCase();
         const statusMap = {
-            'open': { text: 'مفتوح', class: 'pending' },
+            'pending': { text: 'في الانتظار', class: 'pending' },
+            'approved': { text: 'تم الحل', class: 'completed' },
+            'rejected': { text: 'مرفوض', class: 'rejected' },
             'in_progress': { text: 'قيد المعالجة', class: 'approved' },
-            'closed': { text: 'مغلق', class: 'completed' },
-            'rejected': { text: 'مرفوض', class: 'rejected' }
+            'open': { text: 'مفتوح', class: 'pending' }
         };
         
-        const statusInfo = statusMap[status] || statusMap['open'];
+        const statusInfo = statusMap[s] || statusMap['open'];
         
         return `
             <span class="status-badge ${statusInfo.class}">

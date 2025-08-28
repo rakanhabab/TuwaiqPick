@@ -1,5 +1,5 @@
 // Inventory Management JavaScript with Database Integration
-import { db } from '../../js/database.js';
+import { db } from '../js/database.js';
 
 class InventoryService {
     constructor() {
@@ -21,15 +21,29 @@ class InventoryService {
 
     async loadInventoryData() {
         try {
-            // Get products from database
-            const products = await db.getProducts();
+            // Get products and quantities
+            const [products, quantities] = await Promise.all([
+                db.getProducts(),
+                db.getInventoryQuantities()
+            ]);
             
-            this.inventoryData = products || [];
+            // Build map product_id -> quantity
+            const idToQty = new Map();
+            (quantities || []).forEach(row => {
+                if (row && row.product_id) {
+                    idToQty.set(row.product_id, Number(row.quantity) || 0);
+                }
+            });
+
+            // Merge
+            this.inventoryData = (products || []).map(p => ({
+                ...p,
+                quantity: idToQty.get(p.id) ?? 0
+            }));
             
             // Update UI with real data
             this.updateInventoryDisplay();
             
-            // Show notification if no products found
             if (!products || products.length === 0) {
                 this.showNotification('لا توجد منتجات في قاعدة البيانات', 'info');
             }
@@ -43,21 +57,19 @@ class InventoryService {
         const tableBody = document.querySelector('.inventory-table tbody');
         if (!tableBody) return;
 
-        // Clear existing content
         tableBody.innerHTML = '';
 
-        // Add real products from database
         this.inventoryData.forEach((product, index) => {
             const row = this.createProductRow(product, index);
             tableBody.appendChild(row);
         });
 
-        // Reinitialize table functionality
         this.initializeTableInteractions();
     }
 
     createProductRow(product, index) {
-        const statusInfo = this.calculateInventoryStatus(product.quantity || 0);
+        const qty = Number(product.quantity) || 0;
+        const statusInfo = this.calculateInventoryStatus(qty);
         const row = document.createElement('tr');
         
         row.innerHTML = `
@@ -66,11 +78,10 @@ class InventoryService {
             <td>${product.category || 'أخرى'}</td>
             <td>${product.shelf || 'غير محدد'}</td>
             <td>${db.formatCurrency(product.price || 0)}</td>
-            <td>${product.quantity || 0}</td>
+            <td>${qty}</td>
             <td>${this.createStatusBadge(statusInfo)}</td>
         `;
         
-        // Add staggered animation
         row.style.animationDelay = `${index * 0.1}s`;
         
         return row;
@@ -78,31 +89,14 @@ class InventoryService {
 
     calculateInventoryStatus(quantity) {
         const qty = parseInt(quantity);
-        
         if (qty === 0) {
-            return {
-                status: 'out',
-                text: 'نفد المخزون',
-                class: 'status-out'
-            };
+            return { status: 'out', text: 'نفد المخزون', class: 'status-out' };
         } else if (qty <= 5) {
-            return {
-                status: 'low',
-                text: 'مخزون منخفض',
-                class: 'status-low'
-            };
+            return { status: 'low', text: 'مخزون منخفض', class: 'status-low' };
         } else if (qty <= 20) {
-            return {
-                status: 'normal',
-                text: 'مخزون عادي',
-                class: 'status-normal'
-            };
+            return { status: 'normal', text: 'مخزون عادي', class: 'status-normal' };
         } else {
-            return {
-                status: 'high',
-                text: 'مخزون مرتفع',
-                class: 'status-high'
-            };
+            return { status: 'high', text: 'مخزون مرتفع', class: 'status-high' };
         }
     }
 
