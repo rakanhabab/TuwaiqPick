@@ -6,7 +6,7 @@
     <title>إدارة الفروع | دكان فيجين</title>
     <meta name="description" content="إدارة الفروع - لوحة تحكم دكان فيجين" />
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=Cairo:wght@400;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
- 
+    <link rel="stylesheet" href="../css/base.css">
     <link rel="stylesheet" href="./admin.css">
     <link rel="stylesheet" href="./branches.css">
 </head>
@@ -16,12 +16,10 @@
         <aside class="sidebar">
             <div class="sidebar-header">
                 <div class="brand">
-                    <img src="../img/Logo.png" alt="دكان فيجين">
-                    <span>دكان فيجين</span>
+                    <img src="../../Front-End-new/img/Logo.png" alt="دكان فيجين" style="width: 120px; height: 120px; object-fit: contain;">
                 </div>
             </div>
             <nav class="sidebar-nav">
-                <button class="logout-btn">تسجيل الخروج</button>
                 <ul class="nav-menu">
                     <li class="nav-item">
                         <a href="./dashboard.html" class="nav-link">
@@ -31,6 +29,11 @@
                     <li class="nav-item">
                         <a href="./operations.html" class="nav-link">
                             إدارة العمليات
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="./operations2.html" class="nav-link">
+                            إدارة العمليات - model
                         </a>
                     </li>
                     <li class="nav-item">
@@ -50,19 +53,13 @@
                     </li>
                 </ul>
             </nav>
-            
+            <button class="logout-btn">تسجيل الخروج</button>
         </aside>
         <!-- Main Content -->
         <main class="main-content">
             <header class="content-header">
-                <div class="header-top">
-                    <a href="./index.html" class="back-btn">
-                        <span>←</span>
-                        رجعة للقائمة الرئيسية
-                    </a>
-                </div>
-                <h1>متجر بدون كاشير</h1>
-                <h2>الفروع</h2>
+                <h1>إدارة الفروع</h1>
+                <h2>فروع مدينة الرياض</h2>
             </header>
             
             <!-- Branches Cards Section -->
@@ -76,7 +73,7 @@
                         <div class="branch-content">
                             <div class="branch-location">
                                 <span class="location-icon"></span>
-                                <span>طريق الملك فهد، حي العليا، الرياض</span>
+                                <span>طريق الملك فهد — حي العليا</span>
                             </div>
                             <div class="branch-hours">
                                 <div class="hours-row">
@@ -98,8 +95,7 @@
                         </div>
                         <div class="branch-content">
                             <div class="branch-location">
-                                <span class="location-icon">📍</span>
-                                <span>الرياض — حي النرجس</span>
+                                <span>طريق عثمان بن عفان — حي النرجس</span>
                             </div>
                             <div class="branch-hours">
                                 <div class="hours-row">
@@ -121,8 +117,7 @@
                         </div>
                         <div class="branch-content">
                             <div class="branch-location">
-                                <span class="location-icon">📍</span>
-                                <span>طريق أنس بن مالك، حي الياسمين، الرياض</span>
+                                <span>طريق أنس بن مالك — حي الياسمين</span>
                             </div>
                             <div class="branch-hours">
                                 <div class="hours-row">

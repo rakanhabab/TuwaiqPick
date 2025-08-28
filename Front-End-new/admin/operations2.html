@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>إدارة العمليات | دكان فيجين</title>
+    <meta name="description" content="إدارة العمليات - لوحة تحكم دكان فيجين" />
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=Cairo:wght@400;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/base.css">
+    <link rel="stylesheet" href="./admin.css">
+    <link rel="stylesheet" href="./operations2.css">
+</head>
+<body>
+    <div class="admin-container">
+        <!-- Burger Menu Button -->
+        <div class="burger-menu-btn" id="burgerMenuBtn">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="brand">
+                    <img src="../../Front-End-new/img/Logo.png" alt="دكان فيجين" style="width: 120px; height: 120px; object-fit: contain;">
+                </div>
+                <button class="close-sidebar-btn" id="closeSidebarBtn">&times;</button>
+            </div>
+            <nav class="sidebar-nav">
+                <ul class="nav-menu">
+                    <li class="nav-item">
+                        <a href="./dashboard.html" class="nav-link">
+                            الواجهة الرئيسية
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="./operations.html" class="nav-link">
+                            إدارة العمليات
+                        </a>
+                    </li>
+                    <li class="nav-item active">
+                        <a href="./operations2.html" class="nav-link">
+                            إدارة العمليات - model
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="./inventory.html" class="nav-link">
+                            إدارة المخزون
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="./branches.html" class="nav-link">
+                            إدارة الفروع
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="./tickets.html" class="nav-link">
+                            إدارة التذاكر
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+            <button class="logout-btn">تسجيل الخروج</button>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="content-header">
+                <div class="header-content">
+                    <div class="header-logo">
+                        <img src="../../Front-End-new/img/Logo.png" alt="دكان فيجين" style="width: 120px; height: 120px; object-fit: contain;">
+                    </div>
+                    <div class="header-text">
+                        <h1>إدارة العمليات</h1>
+                        <h2>العربات الافتراضية (LiveStream)</h2>
+                    </div>
+                </div>
+            </header>
+            
+            <!-- Two Panel Layout -->
+            <div class="two-panel-layout">
+                <!-- Left Panel - Live Streaming -->
+                <div class="left-panel">
+                    <div class="panel-header">
+                        <h3>Live Streaming</h3>
+                    </div>
+                    
+                    <div class="live-stream-container">
+                        <div class="video-placeholder">
+                            <div class="placeholder-icon">
+                                <svg width="64" height="64" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M15 10L11 7V17L15 14V10Z" fill="#9CA3AF"/>
+                                    <path d="M21 5C21 3.89543 20.1046 3 19 3H5C3.89543 3 3 3.89543 3 5V19C3 20.1046 3.89543 21 5 21H19C20.1046 21 21 20.1046 21 19V5Z" stroke="#9CA3AF" stroke-width="2"/>
+                                </svg>
+                            </div>
+                            <p class="placeholder-text">Live Stream Area</p>
+                            <p class="placeholder-subtext">Video feed will be connected here</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Panel - Customer Carts -->
+                <div class="right-panel">
+                    <div class="panel-header">
+                        <h3>عربات العملاء</h3>
+                        <div class="session-filters">
+                            <button class="filter-btn active" data-filter="all">all</button>
+                            <button class="filter-btn" data-filter="processing">processing</button>
+                            <button class="filter-btn" data-filter="paid">paid</button>
+                            <button class="filter-btn" data-filter="unpaid">unpaid</button>
+                        </div>
+                    </div>
+                    
+                    <div class="sessions-list ltr-content" id="sessionsGrid">
+                        <!-- Customer Session Cards will be populated dynamically -->
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    <script type="module" src="./admin.js"></script>
+    <script type="module" src="./operations2.js"></script>
+</body>
+</html>

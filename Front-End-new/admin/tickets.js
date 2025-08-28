@@ -370,10 +370,7 @@ class TicketsService {
         }
     }
 
-    createNewTicket() {
-        this.showNotification('تم فتح نموذج إنشاء تذكرة جديدة', 'info');
-        // Here you would typically open a modal or navigate to a form
-    }
+
 
     exportTickets() {
         this.showNotification('تم تصدير البيانات بنجاح', 'success');
@@ -521,15 +518,6 @@ document.head.appendChild(style);
 
 // Keyboard shortcuts
 document.addEventListener('keydown', function(event) {
-    // Ctrl/Cmd + N to create new ticket
-    if ((event.ctrlKey || event.metaKey) && event.key === 'n') {
-        event.preventDefault();
-        const ticketsService = window.ticketsService;
-        if (ticketsService) {
-            ticketsService.createNewTicket();
-        }
-    }
-    
     // Ctrl/Cmd + E to export tickets
     if ((event.ctrlKey || event.metaKey) && event.key === 'e') {
         event.preventDefault();

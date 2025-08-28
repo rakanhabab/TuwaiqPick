@@ -16,12 +16,10 @@
         <aside class="sidebar">
             <div class="sidebar-header">
                 <div class="brand">
-                    <img src="../img/Logo.png" alt="دكان فيجين">
-                    <span>دكان فيجين</span>
+                    <img src="../../Front-End-new/img/Logo.png" alt="دكان فيجين" style="width: 120px; height: 120px; object-fit: contain;">
                 </div>
             </div>
             <nav class="sidebar-nav">
-                <button class="logout-btn">تسجيل الخروج</button>
                 <ul class="nav-menu">
                     <li class="nav-item">
                         <a href="./dashboard.html" class="nav-link">
@@ -31,6 +29,11 @@
                     <li class="nav-item">
                         <a href="./operations.html" class="nav-link">
                             إدارة العمليات
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="./operations2.html" class="nav-link">
+                            إدارة العمليات - model
                         </a>
                     </li>
                     <li class="nav-item active">
@@ -50,19 +53,13 @@
                     </li>
                 </ul>
             </nav>
-            
+            <button class="logout-btn">تسجيل الخروج</button>
         </aside>
         <!-- Main Content -->
         <main class="main-content">
             <header class="content-header">
-                <div class="header-top">
-                    <a href="./index.html" class="back-btn">
-                        <span>←</span>
-                        رجعة للقائمة الرئيسية
-                    </a>
-                </div>
-                <h1>متجر بدون كاشير</h1>
-                <h2>إدارة المخزون</h2>
+                <h1>إدارة المخزون</h1>
+                <h2>إدارة المخزون للفروع</h2>
             </header>
             <div class="search-filter-section">
                 <div class="filter-row">
@@ -72,7 +69,7 @@
                     </div>
                     <div class="filter-group">
                         <label for="searchInput">بحث (اسم/SKU)</label>
-                        <input type="text" id="searchInput" placeholder="مثال: حليب أو SKU-MILK" class="filter-input">
+                        <input type="text" id="searchInput" placeholder="مثال: barni أو SKU003" class="filter-input">
                     </div>
                     <button class="apply-btn" id="applyBtn">تطبيق</button>
                 </div>
@@ -91,7 +88,141 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <!-- البيانات ستُملأ من قاعدة البيانات -->
+                        <tr>
+                            <td>حليب طازج</td>
+                            <td>SKU-MILK-001</td>
+                            <td>منتجات الألبان</td>
+                            <td>A-1</td>
+                            <td>15.50 ر.س</td>
+                            <td>45</td>
+                            <td><span class="status-badge status-high"><span class="status-dot"></span>متوفر</span></td>
+                        </tr>
+                        <tr>
+                            <td>خبز أبيض</td>
+                            <td>SKU-BREAD-002</td>
+                            <td>المخبوزات</td>
+                            <td>B-2</td>
+                            <td>8.00 ر.س</td>
+                            <td>12</td>
+                            <td><span class="status-badge status-normal"><span class="status-dot"></span>متوفر</span></td>
+                        </tr>
+                        <tr>
+                            <td>زيت زيتون</td>
+                            <td>SKU-OIL-003</td>
+                            <td>الزيوت</td>
+                            <td>C-3</td>
+                            <td>45.00 ر.س</td>
+                            <td>3</td>
+                            <td><span class="status-badge status-low"><span class="status-dot"></span>كمية قليلة</span></td>
+                        </tr>
+                        <tr>
+                            <td>أرز بسمتي</td>
+                            <td>SKU-RICE-004</td>
+                            <td>الحبوب</td>
+                            <td>D-4</td>
+                            <td>25.00 ر.س</td>
+                            <td>0</td>
+                            <td><span class="status-badge status-out"><span class="status-dot"></span>نفذ المخزون</span></td>
+                        </tr>
+                        <tr>
+                            <td>سكر أبيض</td>
+                            <td>SKU-SUGAR-005</td>
+                            <td>المحليات</td>
+                            <td>E-5</td>
+                            <td>12.00 ر.س</td>
+                            <td>28</td>
+                            <td><span class="status-badge status-high"><span class="status-dot"></span>متوفر</span></td>
+                        </tr>
+                        <tr>
+                            <td>قهوة عربية</td>
+                            <td>SKU-COFFEE-006</td>
+                            <td>المشروبات</td>
+                            <td>F-6</td>
+                            <td>35.00 ر.س</td>
+                            <td>15</td>
+                            <td><span class="status-badge status-normal"><span class="status-dot"></span>متوفر</span></td>
+                        </tr>
+                        <tr>
+                            <td>شاي أخضر</td>
+                            <td>SKU-TEA-007</td>
+                            <td>المشروبات</td>
+                            <td>F-7</td>
+                            <td>18.00 ر.س</td>
+                            <td>22</td>
+                            <td><span class="status-badge status-high"><span class="status-dot"></span>متوفر</span></td>
+                        </tr>
+                        <tr>
+                            <td>عسل طبيعي</td>
+                            <td>SKU-HONEY-008</td>
+                            <td>المحليات</td>
+                            <td>E-8</td>
+                            <td>55.00 ر.س</td>
+                            <td>8</td>
+                            <td><span class="status-badge status-normal"><span class="status-dot"></span>متوفر</span></td>
+                        </tr>
+                        <tr>
+                            <td>تمر سكري</td>
+                            <td>SKU-DATES-009</td>
+                            <td>الفواكه المجففة</td>
+                            <td>G-9</td>
+                            <td>42.00 ر.س</td>
+                            <td>0</td>
+                            <td><span class="status-badge status-out"><span class="status-dot"></span>نفذ المخزون</span></td>
+                        </tr>
+                        <tr>
+                            <td>لوز محمص</td>
+                            <td>SKU-ALMONDS-010</td>
+                            <td>المكسرات</td>
+                            <td>H-10</td>
+                            <td>65.00 ر.س</td>
+                            <td>5</td>
+                            <td><span class="status-badge status-low"><span class="status-dot"></span>كمية قليلة</span></td>
+                        </tr>
+                        <tr>
+                            <td>جوز هند</td>
+                            <td>SKU-COCONUT-011</td>
+                            <td>المكسرات</td>
+                            <td>H-11</td>
+                            <td>28.00 ر.س</td>
+                            <td>18</td>
+                            <td><span class="status-badge status-normal"><span class="status-dot"></span>متوفر</span></td>
+                        </tr>
+                        <tr>
+                            <td>فستق حلبي</td>
+                            <td>SKU-PISTACHIO-012</td>
+                            <td>المكسرات</td>
+                            <td>H-12</td>
+                            <td>75.00 ر.س</td>
+                            <td>12</td>
+                            <td><span class="status-badge status-normal"><span class="status-dot"></span>متوفر</span></td>
+                        </tr>
+                        <tr>
+                            <td>زعتر بري</td>
+                            <td>SKU-THYME-013</td>
+                            <td>التوابل</td>
+                            <td>I-13</td>
+                            <td>32.00 ر.س</td>
+                            <td>25</td>
+                            <td><span class="status-badge status-high"><span class="status-dot"></span>متوفر</span></td>
+                        </tr>
+                        <tr>
+                            <td>كمون</td>
+                            <td>SKU-CUMIN-014</td>
+                            <td>التوابل</td>
+                            <td>I-14</td>
+                            <td>15.00 ر.س</td>
+                            <td>30</td>
+                            <td><span class="status-badge status-high"><span class="status-dot"></span>متوفر</span></td>
+                        </tr>
+                        <tr>
+                            <td>كركم</td>
+                            <td>SKU-TURMERIC-015</td>
+                            <td>التوابل</td>
+                            <td>I-15</td>
+                            <td>20.00 ر.س</td>
+                            <td>2</td>
+                            <td><span class="status-badge status-low"><span class="status-dot"></span>كمية قليلة</span></td>
+                        </tr>
                     </tbody>
                 </table>
             </div>

@@ -4,50 +4,27 @@
 .header-top {
   display: flex;
   justify-content: flex-start;
-  margin-bottom: 16px;
+  margin-bottom: 12px; /* تصغير المسافة */
 }
 
-.back-btn {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 12px 20px;
-  background: #dc2626;
-  color: white;
-  text-decoration: none;
-  border-radius: 10px;
-  font-weight: 600;
-  font-size: 14px;
-  transition: all 0.3s ease;
-  box-shadow: 0 2px 8px rgba(220, 38, 38, 0.2);
-}
 
-.back-btn:hover {
-  /* Static - no hover effects */
-}
-
-.back-btn span {
-  font-size: 18px;
-  font-weight: bold;
-}
 
 /* Branches Cards Section */
 .branches-cards-section {
-  padding: 24px;
-  background: white;
+  padding: 16px; /* تصغير التباعد */
 }
 
 .branch-cards-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 24px;
-  margin-bottom: 24px;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); /* تصغير الحد الأدنى للعرض */
+  gap: 16px; /* تصغير المسافة */
+  margin-bottom: 16px; /* تصغير المسافة */
 }
 
 /* Branch Card */
 .branch-card {
   background: white;
-  border-radius: 16px;
+  border-radius: 12px; /* تصغير نصف القطر */
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   border: 1px solid #e1e5e9;
   overflow: hidden;
@@ -62,7 +39,7 @@
 .branch-header {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
-  padding: 20px 24px;
+  padding: 16px 20px; /* تصغير التباعد */
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -70,7 +47,7 @@
 
 .branch-header h3 {
   margin: 0;
-  font-size: 1.3rem;
+  font-size: 1.1rem; /* تصغير حجم العنوان */
   font-weight: 700;
   font-family: 'Cairo', sans-serif;
 }
@@ -79,9 +56,9 @@
   background: rgba(255, 255, 255, 0.2);
   color: white;
   border: 1px solid rgba(255, 255, 255, 0.3);
-  padding: 8px 16px;
-  border-radius: 20px;
-  font-size: 0.85rem;
+  padding: 6px 12px; /* تصغير التباعد */
+  border-radius: 16px; /* تصغير نصف القطر */
+  font-size: 0.8rem; /* تصغير حجم الخط */
   font-weight: 600;
   font-family: 'Cairo', sans-serif;
   cursor: pointer;
@@ -94,7 +71,7 @@
 }
 
 .branch-content {
-  padding: 24px;
+  padding: 16px; /* تصغير التباعد */
 }
 
 .branch-location {

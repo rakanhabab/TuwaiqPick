@@ -13,6 +13,8 @@
 .admin-container {
   display: flex;
   height: 100vh;
+  width: 100vw;
+  overflow: hidden;
   background: 
     radial-gradient(circle at 20% 80%, rgba(249, 115, 22, 0.08) 0%, transparent 50%),
     radial-gradient(circle at 80% 20%, rgba(159, 123, 234, 0.06) 0%, transparent 50%),
@@ -24,7 +26,7 @@
 
 /* Sidebar */
 .sidebar {
-  width: 350px;
+  width: 280px; /* تصغير عرض الشريط الجانبي */
   background: white;
   border-left: 1px solid rgba(249, 115, 22, 0.1);
   display: flex;
@@ -32,6 +34,13 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   position: relative;
   overflow: hidden;
+  flex-shrink: 0;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+}
+
+.sidebar::-webkit-scrollbar {
+  display: none; /* Chrome, Safari and Opera */
 }
 
 .sidebar::before {
@@ -45,49 +54,60 @@
 }
 
 .sidebar-header {
-  padding: 32px;
+  padding: 20px; /* تصغير التباعد */
   border-bottom: 1px solid rgba(249, 115, 22, 0.1);
 }
 
 .brand {
   display: flex;
   align-items: center;
-  gap: 16px;
+  justify-content: center; /* توسيط الشعار */
+  gap: 0; /* إزالة المسافة */
 }
 
 .brand img {
-  width: 48px;
-  height: 48px;
-  border-radius: 10px;
+  width: 120px; /* تكبير حجم الشعار أكثر */
+  height: 120px; /* تكبير حجم الشعار أكثر */
+  border-radius: 16px;
+  object-fit: contain; /* للتأكد من ظهور الشعار بشكل صحيح */
 }
 
 .brand span {
-  font-size: 1.4rem;
-  font-weight: 700;
-  color: var(--text-dark);
-  font-family: 'Tajawal', sans-serif;
+  display: none; /* إخفاء النص */
 }
 
 /* Sidebar Navigation */
 .sidebar-nav {
   flex: 1;
-  padding: 32px;
+  padding: 20px; /* تصغير التباعد */
   display: flex;
   flex-direction: column;
-  gap: 32px;
+  gap: 20px; /* تصغير المسافة بين العناصر */
+  overflow: hidden;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+}
+
+.sidebar-nav::-webkit-scrollbar {
+  display: none; /* Chrome, Safari and Opera */
 }
 
 .logout-btn {
   background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
   color: white;
   border: none;
-  padding: 16px 24px;
-  border-radius: 10px;
-  font-size: 1rem;
+  padding: 6px 10px; /* تصغير التباعد أكثر */
+  border-radius: 5px;
+  font-size: 0.75rem; /* تصغير حجم الخط أكثر */
   font-weight: 600;
   font-family: 'Tajawal', sans-serif;
   cursor: pointer;
   transition: all 0.3s ease;
+  margin: 0 auto; /* توسيط الزر */
+  width: fit-content; /* عرض مناسب للمحتوى */
+  margin-top: auto; /* دفع الزر إلى أسفل */
+  margin-bottom: 20px; /* مسافة من أسفل السايدبار */
+  display: block; /* لعرض الزر كعنصر منفصل */
 }
 
 .logout-btn:hover {
@@ -101,25 +121,33 @@
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 8px; /* تصغير المسافة بين العناصر */
+  overflow: hidden;
+  flex: 1;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+}
+
+.nav-menu::-webkit-scrollbar {
+  display: none; /* Chrome, Safari and Opera */
 }
 
 .nav-item {
-  border-radius: 10px;
+  border-radius: 8px;
   transition: all 0.3s ease;
 }
 
 .nav-link {
   display: flex;
   align-items: center;
-  gap: 16px;
-  padding: 16px 20px;
+  gap: 12px; /* تصغير المسافة بين الأيقونة والنص */
+  padding: 12px 16px; /* تصغير التباعد */
   color: var(--text-dark);
   text-decoration: none;
-  font-size: 1.1rem;
+  font-size: 0.95rem; /* تصغير حجم الخط */
   font-weight: 500;
   font-family: 'Tajawal', sans-serif;
-  border-radius: 10px;
+  border-radius: 8px;
   transition: all 0.3s ease;
 }
 
@@ -222,43 +250,62 @@
 /* Main Content */
 .main-content {
   flex: 1;
-  background: transparent;
+  padding: 20px; /* تصغير التباعد */
   overflow-y: auto;
+  overflow-x: hidden;
+  min-width: 0;
+  height: 100vh; /* إضافة ارتفاع كامل */
+  display: flex;
+  flex-direction: column;
 }
 
 .content-header {
-  background: white;
-  padding: 24px 32px;
+  margin-bottom: 24px; /* توحيد المسافة */
+  text-align: center;
+  padding: 24px 32px; /* توحيد التباعد */
   border-bottom: 1px solid rgba(249, 115, 22, 0.1);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-  position: relative;
-  overflow: hidden;
-}
-
-.content-header::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 3px;
-  background: linear-gradient(135deg, var(--grad-start) 0%, var(--grad-end) 100%);
+  flex-shrink: 0; /* منع التقلص */
+  background: linear-gradient(135deg, rgba(249, 115, 22, 0.05) 0%, rgba(159, 123, 234, 0.03) 100%); /* إضافة خلفية بسيطة */
+  border-radius: 12px; /* إضافة حواف مدورة */
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05); /* إضافة ظل خفيف */
 }
 
 .content-header h1 {
-  margin: 0 0 8px 0;
-  font-size: 1.8rem;
-  font-weight: 800;
+  font-size: 2.2rem; /* تكبير العنوان الرئيسي */
+  font-weight: 700;
   color: var(--text-dark);
+  margin-bottom: 12px;
   font-family: 'Tajawal', sans-serif;
 }
 
 .content-header h2 {
-  margin: 0;
-  font-size: 1.1rem;
-  font-weight: 500;
+  font-size: 1.3rem; /* تكبير العنوان الفرعي */
   color: #6b7280;
+  font-weight: 500;
   font-family: 'Tajawal', sans-serif;
+}
+
+/* Base styles for consistent sizing */
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+}
+
+/* Hide scrollbars for sidebar elements */
+.sidebar * {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+}
+
+.sidebar *::-webkit-scrollbar {
+  display: none; /* Chrome, Safari and Opera */
 }
 
 /* Responsive Design */
@@ -303,11 +350,13 @@
 @media (max-width: 768px) {
   .admin-container {
     flex-direction: column;
+    height: 100vh;
   }
   
   .sidebar {
     width: 100%;
     height: auto;
+    flex-shrink: 0;
   }
   
   .sidebar-header {
@@ -326,13 +375,14 @@
   .sidebar-nav {
     flex-direction: row;
     gap: 20px;
-    overflow-x: auto;
+    overflow: hidden;
     padding: 20px;
   }
   
   .nav-menu {
     flex-direction: row;
     gap: 8px;
+    overflow: hidden;
   }
   
   .nav-link {
@@ -378,18 +428,24 @@
   
   .content-header {
     padding: 20px 24px;
+    margin-bottom: 24px;
   }
   
   .content-header h1 {
-    font-size: 1.5rem;
+    font-size: 1.8rem;
   }
   
   .content-header h2 {
-    font-size: 1rem;
+    font-size: 1.1rem;
   }
 }
 
 @media (max-width: 480px) {
+  .admin-container {
+    height: 100vh;
+    width: 100vw;
+  }
+  
   .sidebar-header {
     padding: 20px;
   }
@@ -446,13 +502,14 @@
   
   .content-header {
     padding: 16px 20px;
+    margin-bottom: 20px;
   }
   
   .content-header h1 {
-    font-size: 1.3rem;
+    font-size: 1.5rem;
   }
   
   .content-header h2 {
-    font-size: 0.9rem;
+    font-size: 1rem;
   }
 }

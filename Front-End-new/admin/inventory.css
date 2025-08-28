@@ -4,69 +4,48 @@
 .header-top {
   display: flex;
   justify-content: flex-start;
-  margin-bottom: 16px;
+  margin-bottom: 12px; /* تصغير المسافة */
 }
 
-.back-btn {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 8px 16px;
-  background: #dc2626;
-  color: white;
-  text-decoration: none;
-  border-radius: 8px;
-  font-weight: 600;
-  font-size: 12px;
-  transition: all 0.3s ease;
-  box-shadow: 0 2px 8px rgba(220, 38, 38, 0.2);
-  margin-bottom: 20px;
-}
 
-.back-btn:hover {
-  /* Static - no hover effects */
-}
-
-.back-btn span {
-  font-size: 16px;
-  font-weight: bold;
-}
 
 /* Search and Filter Section */
 .search-filter-section {
-  padding: 24px;
+  padding: 20px; /* زيادة التباعد */
   background: white;
-  border-bottom: 1px solid #e2e8f0;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  margin-bottom: 20px;
+  flex-shrink: 0;
 }
 
 .filter-row {
   display: flex;
-  gap: 30px;
+  gap: 20px; /* تصغير المسافة */
   align-items: end;
   flex-wrap: wrap;
 }
 
 .filter-group {
   flex: 1;
-  min-width: 200px;
+  min-width: 180px; /* تصغير الحد الأدنى للعرض */
 }
 
 .filter-group label {
   display: block;
-  margin-bottom: 6px;
+  margin-bottom: 4px; /* تصغير المسافة */
   font-weight: 600;
   color: #2d3748;
-  font-size: 0.8rem;
+  font-size: 0.75rem; /* تصغير حجم الخط */
   font-family: 'Cairo', sans-serif;
 }
 
 .filter-input {
   width: 100%;
-  padding: 8px 12px;
+  padding: 6px 10px; /* تصغير التباعد */
   border: 1px solid #e2e8f0;
-  border-radius: 12px;
-  font-size: 0.8rem;
+  border-radius: 8px; /* تصغير نصف القطر */
+  font-size: 0.75rem; /* تصغير حجم الخط */
   font-family: 'Cairo', sans-serif;
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
@@ -78,17 +57,17 @@
 }
 
 .apply-btn {
-  padding: 8px 16px;
+  padding: 6px 12px; /* تصغير التباعد */
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
   border: none;
-  border-radius: 12px;
+  border-radius: 8px; /* تصغير نصف القطر */
   font-weight: 600;
-  font-size: 0.8rem;
+  font-size: 0.75rem; /* تصغير حجم الخط */
   font-family: 'Cairo', sans-serif;
   cursor: pointer;
   transition: all 0.2s ease;
-  min-width: 80px;
+  min-width: 70px; /* تصغير العرض الأدنى */
 }
 
 .apply-btn:hover {
@@ -103,23 +82,24 @@
 /* Inventory Table Section */
 .inventory-table-section {
   padding: 24px;
-  height: calc(100vh - 280px);
-  overflow-y: auto;
+  flex: 1;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
 /* Inventory Table */
 .inventory-table {
   width: 100%;
   border-collapse: collapse;
-  background: white;
+  background: transparent;
   border-radius: 12px;
   overflow: hidden;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   border: 1px solid #e1e5e9;
 }
 
 .inventory-table thead {
-  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
 }
 
 .inventory-table th {
@@ -142,8 +122,12 @@
   font-family: 'Cairo', sans-serif;
 }
 
-.inventory-table tbody tr:hover {
+.inventory-table tbody tr:nth-child(even) {
   background-color: #f8fafc;
+}
+
+.inventory-table tbody tr:hover {
+  background-color: #f1f5f9;
   transition: background-color 0.2s ease;
 }
 
@@ -277,6 +261,7 @@
 @media (max-width: 768px) {
   .search-filter-section {
     padding: 16px;
+    margin-bottom: 16px;
   }
 
   .filter-row {
@@ -294,6 +279,7 @@
 
   .inventory-table-section {
     padding: 16px;
+    flex: 1;
   }
 
   .inventory-table {
@@ -333,6 +319,11 @@
   .status-badge {
     font-size: 0.7rem;
     padding: 3px 6px;
+  }
+
+  .inventory-table-section {
+    padding: 12px;
+    flex: 1;
   }
 }
 

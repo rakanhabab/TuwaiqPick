@@ -13,54 +13,34 @@
 .header-top {
   display: flex;
   justify-content: flex-start;
-  margin-bottom: 16px;
-}
-
-.back-btn {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 12px 20px;
-  background: #dc2626;
-  color: white;
-  text-decoration: none;
-  border-radius: 10px;
-  font-weight: 600;
-  font-size: 14px;
-  transition: all 0.3s ease;
-  box-shadow: 0 2px 8px rgba(220, 38, 38, 0.2);
-}
-
-.back-btn:hover {
-  /* Static - no hover effects */
-}
-
-.back-btn span {
-  font-size: 18px;
-  font-weight: bold;
+  margin-bottom: 12px; /* تصغير المسافة */
 }
 
 /* Dashboard Grid */
 .dashboard-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  grid-template-rows: auto auto;
-  gap: 24px;
-  padding: 24px;
-  height: calc(100vh - 140px);
+  grid-template-rows: 1fr 1fr;
+  gap: 20px; /* زيادة المسافة بين البطاقات */
+  padding: 20px; /* زيادة التباعد */
+  flex: 1; /* أخذ المساحة المتبقية */
+  min-height: 600px; /* زيادة الحد الأدنى للارتفاع */
+  height: 100%; /* إضافة ارتفاع كامل */
 }
 
 /* Widget Cards */
 .widget-card {
   background: white;
-  border-radius: 16px;
-  padding: 24px;
+  border-radius: 12px; /* تصغير نصف القطر */
+  padding: 20px; /* زيادة التباعد */
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   border: 1px solid rgba(249, 115, 22, 0.1);
   display: flex;
   flex-direction: column;
   position: relative;
   overflow: hidden;
+  min-height: 250px; /* زيادة الحد الأدنى للارتفاع */
+  height: 100%; /* إضافة ارتفاع كامل */
 }
 
 .widget-card::before {
@@ -69,7 +49,7 @@
   top: 0;
   left: 0;
   right: 0;
-  height: 4px;
+  height: 3px; /* تصغير سمك الخط */
   background: linear-gradient(135deg, var(--grad-start) 0%, var(--grad-mid) 50%, var(--grad-end) 100%);
 }
 
@@ -77,13 +57,13 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
-  padding-bottom: 16px;
+  margin-bottom: 12px; /* تصغير المسافة */
+  padding-bottom: 12px; /* تصغير التباعد */
   border-bottom: 1px solid rgba(249, 115, 22, 0.1);
 }
 
 .card-header h3 {
-  font-size: 1.2rem;
+  font-size: 1rem; /* تصغير حجم العنوان */
   font-weight: 700;
   color: var(--text-dark);
   margin: 0;
@@ -186,6 +166,7 @@
 .revenue-chart {
   flex: 1;
   min-height: 200px;
+  height: 100%; /* إضافة ارتفاع كامل */
 }
 
 /* Orders Card */
@@ -272,6 +253,7 @@
 .orders-chart {
   flex: 1;
   min-height: 200px;
+  height: 100%; /* إضافة ارتفاع كامل */
 }
 
 /* Products Card */
@@ -359,6 +341,7 @@
 .products-chart {
   flex: 1;
   min-height: 200px;
+  height: 100%; /* إضافة ارتفاع كامل */
 }
 
 /* Activity Card */
@@ -474,6 +457,7 @@
     grid-template-columns: 1fr;
     grid-template-rows: auto auto auto auto;
     height: auto;
+    flex: 1;
   }
   
   .revenue-card {

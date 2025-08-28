@@ -35,11 +35,15 @@ class InventoryService {
                 }
             });
 
-            // Merge
+            // Merge and sort by SKU
             this.inventoryData = (products || []).map(p => ({
                 ...p,
                 quantity: idToQty.get(p.id) ?? 0
-            }));
+            })).sort((a, b) => {
+                const skuA = (a.id || '').toLowerCase();
+                const skuB = (b.id || '').toLowerCase();
+                return skuA.localeCompare(skuB);
+            });
             
             // Update UI with real data
             this.updateInventoryDisplay();
@@ -59,7 +63,14 @@ class InventoryService {
 
         tableBody.innerHTML = '';
 
-        this.inventoryData.forEach((product, index) => {
+        // Sort inventory data by SKU (product.id) in ascending order
+        const sortedData = [...this.inventoryData].sort((a, b) => {
+            const skuA = (a.id || '').toLowerCase();
+            const skuB = (b.id || '').toLowerCase();
+            return skuA.localeCompare(skuB);
+        });
+
+        sortedData.forEach((product, index) => {
             const row = this.createProductRow(product, index);
             tableBody.appendChild(row);
         });
@@ -91,10 +102,10 @@ class InventoryService {
         const qty = parseInt(quantity);
         if (qty === 0) {
             return { status: 'out', text: 'نفد المخزون', class: 'status-out' };
-        } else if (qty <= 5) {
+        } else if (qty <= 30) {
             return { status: 'low', text: 'مخزون منخفض', class: 'status-low' };
-        } else if (qty <= 20) {
-            return { status: 'normal', text: 'مخزون عادي', class: 'status-normal' };
+        } else if (qty <= 50) {
+            return { status: 'normal', text: 'مخزون متوسط', class: 'status-normal' };
         } else {
             return { status: 'high', text: 'مخزون مرتفع', class: 'status-high' };
         }
