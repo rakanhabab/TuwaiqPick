@@ -16,7 +16,7 @@
         <aside class="sidebar">
             <div class="sidebar-header">
                 <div class="brand">
-                    <img src="../../img/Logo.png" alt="دكان فيجين">
+                    <img src="../img/Logo.png" alt="دكان فيجين">
                     <span>دكان فيجين</span>
                 </div>
             </div>
@@ -50,14 +50,7 @@
                     </li>
                 </ul>
             </nav>
-            <!-- Virtual Assistant -->
-            <div class="virtual-assistant">
-                <h3>المساعد الافتراضي</h3>
-                <div class="assistant-input">
-                    <input type="text" placeholder="اكتب سؤالك..." id="assistantInput">
-                    <button class="send-btn" id="sendBtn">إرسال</button>
-                </div>
-            </div>
+            
         </aside>
         <!-- Main Content -->
         <main class="main-content">
@@ -79,7 +72,6 @@
                     <div class="branch-card">
                         <div class="branch-header">
                             <h3>العليا</h3>
-                            <button class="edit-btn" onclick="editBranch('olaya')">تعديل</button>
                         </div>
                         <div class="branch-content">
                             <div class="branch-location">
@@ -103,7 +95,6 @@
                     <div class="branch-card">
                         <div class="branch-header">
                             <h3>النرجس</h3>
-                            <button class="edit-btn" onclick="editBranch('narjis')">تعديل</button>
                         </div>
                         <div class="branch-content">
                             <div class="branch-location">
@@ -127,7 +118,6 @@
                     <div class="branch-card">
                         <div class="branch-header">
                             <h3>الياسمين</h3>
-                            <button class="edit-btn" onclick="editBranch('yasmeen')">تعديل</button>
                         </div>
                         <div class="branch-content">
                             <div class="branch-location">
@@ -182,49 +172,7 @@
         </main>
     </div>
 
-    <!-- Edit Branch Modal -->
-    <div class="modal" id="editBranchModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>تعديل الفرع</h3>
-                <button class="modal-close" onclick="closeModal()">&times;</button>
-            </div>
-            <form class="modal-form" id="editBranchForm">
-                <div class="form-group">
-                    <label for="branchName">اسم الفرع</label>
-                    <input type="text" id="branchName" name="branchName" required>
-                </div>
-                <div class="form-group">
-                    <label for="branchLocation">الموقع</label>
-                    <input type="text" id="branchLocation" name="branchLocation" required>
-                </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="weekDaysStart">أيام الأسبوع بداية</label>
-                        <input type="time" id="weekDaysStart" name="weekDaysStart" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="weekDaysEnd">أيام الأسبوع نهاية</label>
-                        <input type="time" id="weekDaysEnd" name="weekDaysEnd" required>
-                    </div>
-                </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="fridayStart">الجمعة بداية</label>
-                        <input type="time" id="fridayStart" name="fridayStart" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="fridayEnd">الجمعة نهاية</label>
-                        <input type="time" id="fridayEnd" name="fridayEnd" required>
-                    </div>
-                </div>
-                <div class="modal-actions">
-                    <button type="button" class="btn btn-outline" onclick="closeModal()">إلغاء</button>
-                    <button type="submit" class="btn btn-primary">حفظ التغييرات</button>
-                </div>
-            </form>
-        </div>
-    </div>
+    <!-- Removed Edit Branch Modal since editing is disabled -->
 
     <script type="module" src="./admin.js"></script>
     <script type="module" src="./branches.js"></script>

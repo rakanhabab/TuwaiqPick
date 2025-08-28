@@ -1,5 +1,5 @@
 // Operations Management JavaScript with Database Integration
-import { db } from '../../js/database.js';
+import { db } from '../js/database.js';
 
 class OperationsService {
     constructor() {
@@ -22,12 +22,12 @@ class OperationsService {
 
     async loadVirtualCarts() {
         try {
-            // Get active invoices (virtual carts) from database
-            const invoices = await db.getInvoices();
+            // Admin view: get all invoices
+            const invoices = await db.getAllInvoices();
             
             // Filter for active/pending invoices (virtual carts)
-            const activeCarts = invoices.filter(invoice => 
-                invoice.status === 'pending' || invoice.status === 'active'
+            const activeCarts = (invoices || []).filter(invoice => 
+                (invoice.status || '').toLowerCase() === 'pending' || (invoice.status || '').toLowerCase() === 'active'
             );
 
             this.virtualCarts = activeCarts;
@@ -90,13 +90,13 @@ class OperationsService {
     }
 
     generateCartItemsHTML(cart) {
-        // For now, we'll show basic cart info
-        // In a real implementation, you'd have cart_items table
+        // لا يوجد جدول cart_items حالياً؛ سنعرض ملخصاً حقيقياً بدون بيانات وهمية
+        const quantity = cart.items_count || 0;
         return `
             <tr>
-                <td>منتجات متعددة</td>
-                <td>MIXED</td>
-                <td>${cart.items_count || 1}</td>
+                <td>—</td>
+                <td>—</td>
+                <td>${quantity}</td>
                 <td>${db.formatCurrency(cart.total_amount || 0)}</td>
             </tr>
         `;
@@ -146,11 +146,8 @@ class OperationsService {
 
     async showCartDetails(cartId) {
         try {
-            // Get cart details from database
             const cart = this.virtualCarts.find(c => c.id === cartId);
             if (cart) {
-                console.log('Cart details:', cart);
-                // Here you could show a modal with detailed cart information
                 this.showNotification(`تم اختيار عربة العميل ${cart.user_id || 'غير محدد'}`);
             }
         } catch (error) {
@@ -198,13 +195,11 @@ class OperationsService {
             font-size: 0.9rem;
         `;
         
-        // Add search input to the page
         const virtualCartsSection = document.querySelector('.virtual-carts-section');
         if (virtualCartsSection) {
             virtualCartsSection.insertBefore(searchInput, virtualCartsSection.firstChild);
         }
         
-        // Search functionality
         searchInput.addEventListener('input', (e) => {
             const searchTerm = e.target.value.toLowerCase();
             const cartCards = document.querySelectorAll('.cart-card');
@@ -222,7 +217,6 @@ class OperationsService {
     }
 
     showNotification(message) {
-        // Create notification element
         const notification = document.createElement('div');
         notification.className = 'notification';
         notification.textContent = message;
@@ -243,7 +237,6 @@ class OperationsService {
         
         document.body.appendChild(notification);
         
-        // Remove notification after 3 seconds
         setTimeout(() => {
             notification.style.animation = 'slideOutLeft 0.3s ease-in';
             setTimeout(() => {
@@ -252,35 +245,6 @@ class OperationsService {
                 }
             }, 300);
         }, 3000);
-    }
-
-    // Add new cart functionality (for testing)
-    async addNewCart() {
-        try {
-            // Create a new test invoice in database
-            const newCartData = {
-                user_id: `CUS-${String(Math.floor(Math.random() * 999) + 1).padStart(3, '0')}`,
-                total_amount: Math.floor(Math.random() * 200) + 50,
-                status: 'pending',
-                items_count: Math.floor(Math.random() * 5) + 1
-            };
-
-            const newCart = await db.createInvoice(newCartData);
-            
-            if (newCart) {
-                // Add to local array
-                this.virtualCarts.unshift(newCart);
-                
-                // Update display
-                this.updateVirtualCartsDisplay();
-                
-                // Show notification
-                this.showNotification(`تم إضافة عربة جديدة للعميل ${newCartData.user_id}`);
-            }
-        } catch (error) {
-            console.error('Error adding new cart:', error);
-            this.showNotification('خطأ في إضافة عربة جديدة');
-        }
     }
 }
 
@@ -318,16 +282,6 @@ document.head.appendChild(style);
 
 // Keyboard shortcuts
 document.addEventListener('keydown', function(event) {
-    // Ctrl/Cmd + N to add new cart
-    if ((event.ctrlKey || event.metaKey) && event.key === 'n') {
-        event.preventDefault();
-        // Access the operations service instance
-        const operationsService = window.operationsService;
-        if (operationsService) {
-            operationsService.addNewCart();
-        }
-    }
-    
     // Escape to clear search
     if (event.key === 'Escape') {
         const searchInput = document.querySelector('.cart-search');

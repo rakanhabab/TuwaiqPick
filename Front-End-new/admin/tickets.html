@@ -53,15 +53,6 @@
                     </li>
                 </ul>
             </nav>
-
-            <!-- Virtual Assistant -->
-            <div class="virtual-assistant">
-                <h3>المساعد الافتراضي</h3>
-                <div class="assistant-input">
-                    <input type="text" placeholder="اكتب سؤالك..." id="assistantInput">
-                    <button class="send-btn" id="sendBtn">إرسال</button>
-                </div>
-            </div>
         </aside>
 
         <!-- Main Content -->
@@ -85,8 +76,8 @@
                         <div class="stat-color-indicator"></div>
                         <div class="stat-content">
                             <h3>إجمالي التذاكر</h3>
-                            <div class="stat-value">342</div>
-                            <div class="stat-change positive">+15</div>
+                            <div class="stat-value" id="totalTicketsValue">--</div>
+                            <div class="stat-change" id="totalTicketsChange"></div>
                         </div>
                     </div>
                     
@@ -94,8 +85,8 @@
                         <div class="stat-color-indicator"></div>
                         <div class="stat-content">
                             <h3>في الانتظار</h3>
-                            <div class="stat-value">28</div>
-                            <div class="stat-change negative">+5</div>
+                            <div class="stat-value" id="pendingTicketsValue">--</div>
+                            <div class="stat-change" id="pendingTicketsChange"></div>
                         </div>
                     </div>
                     
@@ -103,8 +94,8 @@
                         <div class="stat-color-indicator"></div>
                         <div class="stat-content">
                             <h3>تم الحل</h3>
-                            <div class="stat-value">298</div>
-                            <div class="stat-change positive">+12</div>
+                            <div class="stat-value" id="resolvedTicketsValue">--</div>
+                            <div class="stat-change" id="resolvedTicketsChange"></div>
                         </div>
                     </div>
                     
@@ -112,8 +103,8 @@
                         <div class="stat-color-indicator"></div>
                         <div class="stat-content">
                             <h3>إجمالي المبالغ المستردة</h3>
-                            <div class="stat-value">12,450 ر.س</div>
-                            <div class="stat-change positive">+850 ر.س</div>
+                            <div class="stat-value" id="refundTotalValue">--</div>
+                            <div class="stat-change" id="refundTotalChange"></div>
                         </div>
                     </div>
                 </div>
@@ -178,7 +169,7 @@
                                 </tr>
                             </thead>
                             <tbody id="ticketsTableBody">
-                                <!-- Sample data will be populated by JavaScript -->
+                                <!-- Filled dynamically -->
                             </tbody>
                         </table>
                     </div>
@@ -194,9 +185,7 @@
                 <h3>عرض الفاتورة</h3>
                 <button class="modal-close" onclick="closeInvoiceModal()">&times;</button>
             </div>
-            <div class="modal-body" id="invoiceModalBody">
-                <!-- Invoice content will be populated here -->
-            </div>
+            <div class="modal-body" id="invoiceModalBody"></div>
         </div>
     </div>
 
