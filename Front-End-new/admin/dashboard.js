@@ -8,6 +8,7 @@ class DashboardService {
 
     async initializeDashboard() {
         try {
+            console.log('=== INITIALIZING DASHBOARD ===');
 
             // Debug: Show all invoices
             await this.debugShowAllInvoices();
@@ -17,11 +18,12 @@ class DashboardService {
             
             // Initialize dashboard with default filters
             await this.updateDashboard();
+            
+            console.log('=== DASHBOARD INITIALIZATION COMPLETED ===');
         } catch (error) {
             console.error('Error initializing dashboard:', error);
         }
     }
-
 
     async loadBranches() {
         try {
@@ -139,7 +141,6 @@ class DashboardService {
             this.updateStatValue('refundsValue', db.formatCurrency(refunds));
             
         } catch (error) {
-
             console.error('Error updating statistics:', error);
         }
     }
@@ -152,10 +153,10 @@ class DashboardService {
             const invoices = await db.getDashboardInvoices(fromDate, toDate, branchNum);
             console.log('All invoices for period:', invoices);
             
-            // Filter paid invoices and calculate gross sales
-            const paidInvoices = invoices.filter(invoice => invoice.status === 'paid');
-            const grossSales = paidInvoices.reduce((sum, invoice) => sum + (Number(invoice.total_amount) || 0), 0);
-            console.log('Gross sales:', grossSales, 'from', paidInvoices.length, 'paid invoices');
+            // Filter paid and unpaid invoices and calculate gross sales
+            const validInvoices = invoices.filter(invoice => invoice.status === 'paid' || invoice.status === 'unpaid');
+            const grossSales = validInvoices.reduce((sum, invoice) => sum + (Number(invoice.total_amount) || 0), 0);
+            console.log('Gross sales:', grossSales, 'from', validInvoices.length, 'valid invoices');
             
             // Get refunds
             let refundsQuery = db.supabase
@@ -200,9 +201,9 @@ class DashboardService {
                 return { orders: 0, aov: 0, paidRate: 0 };
             }
             
-            const paidInvoices = invoices.filter(inv => inv.status === 'paid');
-            const orders = paidInvoices.length;
-            const totalAmount = paidInvoices.reduce((sum, inv) => sum + (Number(inv.total_amount) || 0), 0);
+            const validInvoices = invoices.filter(inv => inv.status === 'paid' || inv.status === 'unpaid');
+            const orders = validInvoices.length;
+            const totalAmount = validInvoices.reduce((sum, inv) => sum + (Number(inv.total_amount) || 0), 0);
             const aov = orders > 0 ? totalAmount / orders : 0;
             const paidRate = (orders / invoices.length) * 100;
             
@@ -243,6 +244,16 @@ class DashboardService {
         }
     }
 
+    // Helper function to convert branch codes to Arabic names
+    getBranchArabicName(branchCode) {
+        const branchNames = {
+            'BR001': 'الملقا',
+            'BR002': 'العليا',
+            'BR003': 'الياسمين'
+        };
+        return branchNames[branchCode] || branchCode;
+    }
+
     async updateBranchSalesChart(fromDate, toDate, branchNum) {
         try {
             console.log('Updating branch sales chart with filters:', { fromDate, toDate, branchNum });
@@ -255,9 +266,9 @@ class DashboardService {
             const allInvoices = await db.getDashboardInvoices(fromDate, toDate, branchNum);
             console.log('All invoices for branch sales:', allInvoices);
             
-            // Filter paid invoices
-            const salesData = allInvoices.filter(invoice => invoice.status === 'paid');
-            console.log('Paid invoices for branch sales:', salesData);
+            // Filter valid invoices (paid and unpaid)
+            const salesData = allInvoices.filter(invoice => invoice.status === 'paid' || invoice.status === 'unpaid');
+            console.log('Valid invoices for branch sales:', salesData);
             
             // Initialize sales for all branches with 0
             const branchSales = {};
@@ -275,10 +286,9 @@ class DashboardService {
             const sales = Object.values(branchSales);
             
             const data = [{
-                x: branches,
+                x: branches.map(branch => this.getBranchArabicName(branch)),
                 y: sales,
-            type: 'bar',
-
+                type: 'bar',
                 marker: {
                     color: 'rgba(59, 130, 246, 0.8)',
                     line: {
@@ -303,13 +313,15 @@ class DashboardService {
                 },
                 margin: { l: 60, r: 30, t: 40, b: 60 },
                 height: 250,
-            showlegend: false
-        };
-
+                showlegend: false
+            };
             
             // Check if Plotly is available
             if (typeof Plotly !== 'undefined') {
-                Plotly.newPlot('branchSalesChart', data, layout, { responsive: true });
+                Plotly.newPlot('branchSalesChart', data, layout, { 
+                    responsive: true,
+                    displayModeBar: false
+                });
             } else {
                 console.error('Plotly is not loaded');
                 this.createEmptyChart('branchSalesChart', 'خطأ في تحميل مكتبة الرسومات');
@@ -329,7 +341,7 @@ class DashboardService {
             
             // Get all invoices for the period
             const allInvoices = await db.getDashboardInvoices(fromDate, toDate, branchNum);
-            const paidInvoices = allInvoices.filter(invoice => invoice.status === 'paid');
+            const validInvoices = allInvoices.filter(invoice => invoice.status === 'paid' || invoice.status === 'unpaid');
             
             // Group by month and branch
             const monthlyData = {};
@@ -345,7 +357,7 @@ class DashboardService {
             });
             
             // Fill in actual data
-            paidInvoices.forEach(invoice => {
+            validInvoices.forEach(invoice => {
                 const date = new Date(invoice.timestamp);
                 const monthIndex = date.getMonth();
                 const amount = Number(invoice.total_amount) || 0;
@@ -377,7 +389,7 @@ class DashboardService {
                     y: months.map((_, index) => monthlyData[index][branch.branch_num] || 0),
                     type: 'scatter',
                     mode: 'lines+markers',
-                    name: branch.name || branch.branch_num,
+                    name: this.getBranchArabicName(branch.branch_num),
                     line: { width: 2 },
                     marker: { size: 4 }
                 });
@@ -405,7 +417,10 @@ class DashboardService {
             };
             
             if (typeof Plotly !== 'undefined') {
-                Plotly.newPlot('revenueChart', traces, layout, { responsive: true });
+                Plotly.newPlot('revenueChart', traces, layout, { 
+                    responsive: true,
+                    displayModeBar: false
+                });
             } else {
                 this.createEmptyChart('revenueChart', 'خطأ في تحميل مكتبة الرسومات');
             }
@@ -417,35 +432,80 @@ class DashboardService {
 
     async updateCategoryChart() {
         try {
-            console.log('Updating category chart');
-            
-            // Get all products
+            console.log('Updating category chart - sales by category');
+
+            // Get all invoices for the current month
+            const now = new Date();
+            const fromDate = new Date(now.getFullYear(), now.getMonth(), 1);
+            const toDate = now;
+
+            const fromDateStr = fromDate.toISOString().split('T')[0];
+            const toDateStr = toDate.toISOString().split('T')[0];
+
+            console.log('Date range for category chart:', { fromDateStr, toDateStr });
+
+            // Get all invoices for the period
+            const allInvoices = await db.getDashboardInvoices(fromDateStr, toDateStr, 'all');
+            console.log('All invoices for category chart:', allInvoices);
+
+            // Filter valid invoices (paid and unpaid)
+            const validInvoices = allInvoices.filter(invoice => invoice.status === 'paid' || invoice.status === 'unpaid');
+            console.log('Valid invoices for category chart:', validInvoices);
+
+            // Get all products for category mapping
             const products = await db.getProducts();
-            
-            // Group by category
-            const categoryCount = {};
+            const productMap = {};
             products.forEach(product => {
-                const category = product.category || 'غير محدد';
-                categoryCount[category] = (categoryCount[category] || 0) + 1;
+                productMap[product.name] = product; // Map by product name instead of ID
             });
-            
+
+            console.log('Product map:', productMap);
+
+            // Count sold products by category
+            const categoryCount = {};
+
+            validInvoices.forEach(invoice => {
+                try {
+                    const productsData = JSON.parse(invoice.products_and_quantities || '[]');
+                    console.log('Products data for invoice:', invoice.invoice_num, productsData);
+
+                    productsData.forEach(product => {
+                        const productName = product.name;
+                        const productInfo = productMap[productName];
+                        const category = productInfo?.category || 'غير محدد';
+                        const quantity = Number(product.quantity) || 1;
+
+                        categoryCount[category] = (categoryCount[category] || 0) + quantity;
+                        console.log(`Product: ${productName}, Category: ${category}, Quantity: ${quantity}`);
+                    });
+                } catch (error) {
+                    console.error('Error parsing products for invoice:', invoice.invoice_num, error);
+                }
+            });
+
+            console.log('Category count for sold products:', categoryCount);
+
             const categories = Object.keys(categoryCount);
             const counts = Object.values(categoryCount);
-            
+
+            if (categories.length === 0) {
+                this.createEmptyChart('categoryChart', 'لا توجد بيانات للمبيعات');
+                return;
+            }
+
             const data = [{
                 values: counts,
                 labels: categories,
                 type: 'pie',
-
                 hole: 0.4,
                 marker: {
                     colors: ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4']
                 }
             }];
-            
+
             const layout = {
                 title: {
-                    text: 'المنتجات حسب الفئة',
+                    text: 'المبيعات حسب الفئة',
                     font: { size: 14, family: 'Tajawal' }
                 },
                 margin: { l: 30, r: 30, t: 40, b: 30 },
@@ -455,9 +515,12 @@ class DashboardService {
                     font: { family: 'Tajawal', size: 10 }
                 }
             };
-            
+
             if (typeof Plotly !== 'undefined') {
-                Plotly.newPlot('categoryChart', data, layout, { responsive: true });
+                Plotly.newPlot('categoryChart', data, layout, { 
+                    responsive: true,
+                    displayModeBar: false
+                });
             } else {
                 this.createEmptyChart('categoryChart', 'خطأ في تحميل مكتبة الرسومات');
             }
@@ -491,15 +554,21 @@ class DashboardService {
                 productQuantities[productId] += Number(item.quantity) || 0;
             });
             
-            // Sort by quantity (ascending) and get top 7
+            // Sort by quantity (ascending) and get top 7, then reverse for display
             const sortedProducts = Object.entries(productQuantities)
                 .sort(([,a], [,b]) => a - b)
-                .slice(0, 7);
+                .slice(0, 7)
+                .reverse(); // Reverse to show lowest at top
+            
+            console.log('Sorted products for low stock chart:', sortedProducts);
             
             const productNames = sortedProducts.map(([productId]) => 
                 productMap[productId]?.name || productId
             );
             const quantities = sortedProducts.map(([, quantity]) => quantity);
+            
+            console.log('Product names:', productNames);
+            console.log('Quantities:', quantities);
             
             const data = [{
                 x: quantities,
@@ -525,111 +594,24 @@ class DashboardService {
                     tickfont: { family: 'Tajawal' }
                 },
                 yaxis: {
-                    title: { text: 'المنتج', font: { family: 'Tajawal' } },
                     tickfont: { family: 'Tajawal' }
                 },
                 margin: { l: 120, r: 30, t: 40, b: 60 },
                 height: 250,
                 showlegend: false
             };
-
             
             if (typeof Plotly !== 'undefined') {
-                Plotly.newPlot('lowStockChart', data, layout, { responsive: true });
+                Plotly.newPlot('lowStockChart', data, layout, { 
+                    responsive: true,
+                    displayModeBar: false
+                });
             } else {
                 this.createEmptyChart('lowStockChart', 'خطأ في تحميل مكتبة الرسومات');
             }
         } catch (error) {
             console.error('Error updating low stock chart:', error);
             this.createEmptyChart('lowStockChart', 'خطأ في تحميل البيانات');
-        }
-    }
-
-    async updateTopProductsChart(fromDate, toDate, branchNum) {
-        try {
-            console.log('Updating top products chart with filters:', { fromDate, toDate, branchNum });
-            
-            // Get all invoices for the period
-            const allInvoices = await db.getDashboardInvoices(fromDate, toDate, branchNum);
-            console.log('All invoices for products:', allInvoices);
-            
-            // Filter paid invoices
-            const invoices = allInvoices.filter(invoice => invoice.status === 'paid');
-            console.log('Paid invoices for products:', invoices);
-            
-            if (!invoices || invoices.length === 0) {
-                this.createEmptyChart('topProductsChart', 'لا توجد بيانات للمنتجات');
-                return;
-            }
-            
-            // Aggregate product data
-            const productStats = {};
-            
-            invoices.forEach(invoice => {
-                try {
-                    const products = JSON.parse(invoice.products_and_quantities || '[]');
-                    products.forEach(product => {
-                        const productName = product.name || 'غير محدد';
-                        if (!productStats[productName]) {
-                            productStats[productName] = { revenue: 0, units: 0 };
-                        }
-                        productStats[productName].revenue += Number(product.line_total) || 0;
-                        productStats[productName].units += Number(product.quantity) || 0;
-                    });
-                } catch (error) {
-                    console.error('Error parsing products:', error);
-                }
-            });
-            
-            // Sort by revenue and get top 10
-            const topProducts = Object.entries(productStats)
-                .sort(([,a], [,b]) => b.revenue - a.revenue)
-                .slice(0, 10);
-            
-            const productNames = topProducts.map(([name]) => name);
-            const revenues = topProducts.map(([,stats]) => stats.revenue);
-            
-            const data = [{
-                x: productNames,
-                y: revenues,
-                type: 'bar',
-                marker: {
-                    color: 'rgba(16, 185, 129, 0.8)',
-                    line: {
-                        color: '#059669',
-                        width: 1
-                    }
-                }
-            }];
-            
-            const layout = {
-                title: {
-                    text: 'أفضل 10 منتجات',
-                    font: { size: 14, family: 'Tajawal' }
-                },
-                xaxis: {
-                    title: { text: 'المنتج', font: { family: 'Tajawal' } },
-                    tickfont: { family: 'Tajawal' }
-                },
-                yaxis: {
-                    title: { text: 'الإيرادات (ر.س)', font: { family: 'Tajawal' } },
-                    tickfont: { family: 'Tajawal' }
-                },
-                margin: { l: 60, r: 30, t: 40, b: 80 },
-                height: 250,
-                showlegend: false
-            };
-            
-            // Check if Plotly is available
-            if (typeof Plotly !== 'undefined') {
-                Plotly.newPlot('topProductsChart', data, layout, { responsive: true });
-            } else {
-                console.error('Plotly is not loaded');
-                this.createEmptyChart('topProductsChart', 'خطأ في تحميل مكتبة الرسومات');
-            }
-        } catch (error) {
-            console.error('Error updating top products chart:', error);
-            this.createEmptyChart('topProductsChart', 'خطأ في تحميل البيانات');
         }
     }
 
@@ -719,60 +701,17 @@ class DashboardService {
     }
 }
 
+export default DashboardService;
+
 // Initialize dashboard when DOM is loaded
-document.addEventListener('DOMContentLoaded', function() {
-    // Check if Plotly is loaded
-    if (typeof Plotly === 'undefined') {
-        console.error('Plotly is not loaded. Loading from CDN...');
-        const script = document.createElement('script');
-        script.src = 'https://cdn.plot.ly/plotly-latest.min.js';
-        script.onload = function() {
-            console.log('Plotly loaded successfully');
-            window.dashboardService = new DashboardService();
-        };
-        script.onerror = function() {
-            console.error('Failed to load Plotly');
-            window.dashboardService = new DashboardService();
-        };
-        document.head.appendChild(script);
-    } else {
-        console.log('Plotly is already loaded');
+document.addEventListener('DOMContentLoaded', async () => {
+    try {
+        console.log('=== DASHBOARD INITIALIZATION STARTED ===');
+        console.log('Creating dashboard service instance...');
         window.dashboardService = new DashboardService();
+        console.log('Dashboard service created successfully');
+        console.log('=== DASHBOARD INITIALIZATION COMPLETED ===');
+    } catch (error) {
+        console.error('Error initializing dashboard:', error);
     }
 });
-
-// Add CSS for empty charts
-const style = document.createElement('style');
-style.textContent = `
-    .chart-container {
-        position: relative;
-    }
-    
-    .chart-container > div {
-        width: 100% !important;
-        height: 100% !important;
-    }
-    
-    .chart-loading {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        height: 100%;
-        color: #6b7280;
-        font-family: 'Tajawal';
-        font-size: 0.9rem;
-    }
-`;
-document.head.appendChild(style);
-
-// Add loading message to charts
-document.addEventListener('DOMContentLoaded', function() {
-
-    const chartContainers = document.querySelectorAll('.chart');
-    chartContainers.forEach(container => {
-        container.innerHTML = '<div class="chart-loading">جاري تحميل البيانات...</div>';
-    });
-});
-
-
-
