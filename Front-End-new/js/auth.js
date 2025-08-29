@@ -68,7 +68,7 @@ class AuthService {
             
             setTimeout(() => {
                 if (isAdmin) {
-                    window.location.href = '../admin/index.html'
+                    window.location.href = '../admin/dashboard.html'
                 } else {
                     window.location.href = '../pages/user.html'
                 }
