@@ -9,7 +9,10 @@ class InventoryService {
     async initializeInventory() {
         try {
             // Load real data from database
-            await this.loadInventoryData();
+            await Promise.all([
+                this.loadInventoryData(),
+                this.loadBranchesData()
+            ]);
             
             // Initialize UI components
             this.initializeTableInteractions();
@@ -19,31 +22,123 @@ class InventoryService {
         }
     }
 
+    async loadBranchesData() {
+        try {
+            const branches = await db.getBranches();
+            this.branches = branches || [];
+            this.populateBranchDropdown();
+        } catch (error) {
+            console.error('Error loading branches data:', error);
+            this.branches = [];
+        }
+    }
+
+    populateBranchDropdown() {
+        const branchSelect = document.getElementById('branchSelect');
+        if (!branchSelect) return;
+
+        // Clear existing options except "الكل"
+        branchSelect.innerHTML = '<option value="">الكل</option>';
+
+        // Sort branches by branch_num in ascending order
+        const sortedBranches = [...this.branches].sort((a, b) => {
+            const aNum = a.branch_num || '';
+            const bNum = b.branch_num || '';
+            return aNum.localeCompare(bNum);
+        });
+
+        // Add branch options
+        sortedBranches.forEach(branch => {
+            const option = document.createElement('option');
+            option.value = branch.branch_num || branch.id;
+            option.textContent = branch.branch_num || branch.name || `فرع ${branch.id}`;
+            branchSelect.appendChild(option);
+        });
+
+        // Debug: Log branches for troubleshooting
+        console.log('Available branches:', sortedBranches.map(b => ({ 
+            id: b.id, 
+            branch_num: b.branch_num, 
+            name: b.name 
+        })));
+    }
+
     async loadInventoryData() {
         try {
-            // Get products and quantities
-            const [products, quantities] = await Promise.all([
+            // Get products and all inventory data
+            const [products, allInventoryData] = await Promise.all([
                 db.getProducts(),
-                db.getInventoryQuantities()
+                db.getAllInventoryData() // Debug function
             ]);
             
-            // Build map product_id -> quantity
-            const idToQty = new Map();
-            (quantities || []).forEach(row => {
+            // Debug: Log raw data
+            console.log('Raw products:', products);
+            console.log('All inventory data:', allInventoryData);
+            
+            // Check if there are any BR003 entries in the raw data
+            const br003Entries = allInventoryData.filter(item => item.branch_num === 'BR003');
+            console.log('BR003 entries in raw inventory data:', br003Entries);
+            
+            // Build map product_id -> total quantity and branch quantities
+            const idToInventory = new Map();
+            
+            // Group inventory data by product_id and calculate totals
+            (allInventoryData || []).forEach(row => {
                 if (row && row.product_id) {
-                    idToQty.set(row.product_id, Number(row.quantity) || 0);
+                    const productId = row.product_id;
+                    const quantity = Number(row.quantity) || 0;
+                    const branchNum = row.branch_num || null;
+                    
+                    if (!idToInventory.has(productId)) {
+                        idToInventory.set(productId, {
+                            totalQuantity: 0,
+                            branchQuantities: new Map(),
+                            branches: []
+                        });
+                    }
+                    
+                    const inventory = idToInventory.get(productId);
+                    inventory.totalQuantity += quantity;
+                    inventory.branchQuantities.set(branchNum, quantity);
+                    inventory.branches.push(branchNum);
                 }
             });
 
+            // Debug: Log inventory map
+            console.log('Inventory map with totals:', Object.fromEntries(idToInventory));
+
             // Merge and sort by SKU
-            this.inventoryData = (products || []).map(p => ({
-                ...p,
-                quantity: idToQty.get(p.id) ?? 0
-            })).sort((a, b) => {
+            this.inventoryData = (products || []).map(p => {
+                const inventory = idToInventory.get(p.id) || { 
+                    totalQuantity: 0, 
+                    branchQuantities: new Map(), 
+                    branches: [] 
+                };
+                return {
+                    ...p,
+                    quantity: inventory.totalQuantity, // Total quantity across all branches
+                    branchQuantities: inventory.branchQuantities, // Quantities per branch
+                    branches: inventory.branches, // List of branches
+                    branch_num: null // Will be set during filtering
+                };
+            }).sort((a, b) => {
                 const skuA = (a.id || '').toLowerCase();
                 const skuB = (b.id || '').toLowerCase();
                 return skuA.localeCompare(skuB);
             });
+            
+            // Debug: Log final inventory data
+            console.log('Final inventory data with totals:', this.inventoryData.map(p => ({
+                id: p.id,
+                name: p.name,
+                totalQuantity: p.quantity,
+                branchQuantities: Object.fromEntries(p.branchQuantities),
+                branches: p.branches
+            })));
+            
+            // Debug: Check BR003 products specifically
+            const br003Products = this.inventoryData.filter(p => p.branches.includes('BR003'));
+            console.log('Products available in BR003:', br003Products);
             
             // Update UI with real data
             this.updateInventoryDisplay();
@@ -83,6 +178,8 @@ class InventoryService {
         const statusInfo = this.calculateInventoryStatus(qty);
         const row = document.createElement('tr');
         
+        row.setAttribute('data-product-id', product.id);
+        
         row.innerHTML = `
             <td>${product.name || 'غير محدد'}</td>
             <td>${product.id || 'غير محدد'}</td>
@@ -99,25 +196,21 @@ class InventoryService {
     }
 
     calculateInventoryStatus(quantity) {
-        const qty = parseInt(quantity);
-        if (qty === 0) {
-            return { status: 'out', text: 'نفد المخزون', class: 'status-out' };
-        } else if (qty <= 30) {
-            return { status: 'low', text: 'مخزون منخفض', class: 'status-low' };
-        } else if (qty <= 50) {
-            return { status: 'normal', text: 'مخزون متوسط', class: 'status-normal' };
+        if (quantity === 0) {
+            return { status: 'empty', text: 'نفذ', class: 'status-empty' };
+        } else if (quantity <= 10) {
+            return { status: 'low', text: 'منخفض', class: 'status-low' };
+        } else if (quantity <= 50) {
+            return { status: 'medium', text: 'متوسط', class: 'status-medium' };
         } else {
-            return { status: 'high', text: 'مخزون مرتفع', class: 'status-high' };
+            return { status: 'high', text: 'متوفر', class: 'status-high' };
         }
     }
 
     createStatusBadge(statusInfo) {
-        return `
-            <span class="status-badge ${statusInfo.class}">
-                <span class="status-dot"></span>
-                ${statusInfo.text}
-            </span>
-        `;
+        return `<span class="status-badge ${statusInfo.class}">
+            <span class="status-dot"></span>${statusInfo.text}
+        </span>`;
     }
 
     initializeTableInteractions() {
@@ -152,27 +245,29 @@ class InventoryService {
     }
 
     initializeSearchAndFilter() {
-        const branchInput = document.getElementById('branchInput');
+        const branchSelect = document.getElementById('branchSelect');
         const searchInput = document.getElementById('searchInput');
         const applyBtn = document.getElementById('applyBtn');
         
-        if (!branchInput || !searchInput || !applyBtn) return;
+        if (!branchSelect || !searchInput || !applyBtn) return;
         
         // Apply button click handler
         applyBtn.addEventListener('click', (e) => {
-            const branchId = branchInput.value.trim();
+            const branchNum = branchSelect.value;
             const searchTerm = searchInput.value.trim();
             
-            this.filterInventory(branchId, searchTerm);
+            this.filterInventory(branchNum, searchTerm);
         });
         
-        // Enter key handlers
-        branchInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                applyBtn.click();
-            }
+        // Branch select change handler
+        branchSelect.addEventListener('change', (e) => {
+            const branchNum = e.target.value;
+            const searchTerm = searchInput.value.trim();
+            
+            this.filterInventory(branchNum, searchTerm);
         });
         
+        // Enter key handler for search input
         searchInput.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') {
                 applyBtn.click();
@@ -181,16 +276,16 @@ class InventoryService {
         
         // Real-time search
         searchInput.addEventListener('input', (e) => {
-            const branchId = branchInput.value.trim();
+            const branchNum = branchSelect.value;
             const searchTerm = e.target.value.trim();
             
             if (searchTerm.length >= 2 || searchTerm.length === 0) {
-                this.filterInventory(branchId, searchTerm);
+                this.filterInventory(branchNum, searchTerm);
             }
         });
     }
 
-    filterInventory(branchId, searchTerm) {
+    filterInventory(branchNum, searchTerm) {
         const tableBody = document.querySelector('.inventory-table tbody');
         if (!tableBody) return;
         
@@ -198,6 +293,9 @@ class InventoryService {
         
         // Show loading state
         this.showLoadingState(true);
+        
+        // Debug: Log filtering parameters
+        console.log('Filtering with:', { branchNum, searchTerm });
         
         // Simulate API call delay
         setTimeout(() => {
@@ -209,12 +307,33 @@ class InventoryService {
                 const category = row.cells[2].textContent.toLowerCase();
                 
                 let shouldShow = true;
+                let displayQuantity = 0;
                 
-                // Branch filter (if provided)
-                if (branchId) {
-                    // In a real app, you would check if the product belongs to this branch
-                    shouldShow = productName.includes(branchId.toLowerCase()) || 
-                               sku.includes(branchId.toLowerCase());
+                // Get the product data for this row
+                const productId = row.getAttribute('data-product-id');
+                const product = this.inventoryData.find(p => p.id === productId);
+                
+                if (product) {
+                    // Branch filter (if provided)
+                    if (branchNum) {
+                        // Check if the product is available in the selected branch
+                        shouldShow = product.branches.includes(branchNum);
+                        
+                        if (shouldShow) {
+                            // Get quantity for this specific branch
+                            displayQuantity = product.branchQuantities.get(branchNum) || 0;
+                        }
+                        
+                        // Debug: Log product branch matching
+                        console.log(`Product ${product.id} (${product.name}): branches=${product.branches}, selected=${branchNum}, shouldShow=${shouldShow}, branchQuantity=${displayQuantity}`);
+                    } else {
+                        // Show total quantity for all branches
+                        displayQuantity = product.quantity;
+                        console.log(`Product ${product.id} (${product.name}): totalQuantity=${displayQuantity}`);
+                    }
+                } else {
+                    shouldShow = false;
+                    console.log(`Product not found for row with data-product-id: ${productId}`);
                 }
                 
                 // Search filter (if provided)
@@ -229,6 +348,25 @@ class InventoryService {
                     row.style.display = 'table-row';
                     row.classList.add('fade-in');
                     visibleCount++;
+                    
+                    // Update quantity display
+                    const quantityCell = row.cells[5]; // Quantity column
+                    if (quantityCell) {
+                        quantityCell.textContent = displayQuantity;
+                    }
+                    
+                    // Update status badge based on the displayed quantity
+                    const statusCell = row.cells[6]; // Status column
+                    if (statusCell) {
+                        const statusInfo = this.calculateInventoryStatus(displayQuantity);
+                        const newStatusBadge = this.createStatusBadge(statusInfo);
+                        statusCell.innerHTML = newStatusBadge;
+                        
+                        // Debug: Log status update
+                        console.log(`Updated status for ${product?.name || 'unknown'}: quantity=${displayQuantity}, status=${statusInfo.text}, color=${statusInfo.class}`);
+                    } else {
+                        console.log('Status cell not found for row');
+                    }
                     
                     // Highlight search terms
                     if (searchTerm) {
@@ -254,7 +392,7 @@ class InventoryService {
             this.showLoadingState(false);
             
             // Show notification
-            if (searchTerm || branchId) {
+            if (searchTerm || branchNum) {
                 this.showNotification(`تم العثور على ${visibleCount} منتج`);
             }
             
@@ -274,186 +412,87 @@ class InventoryService {
     removeHighlights(row) {
         const cells = row.querySelectorAll('td');
         cells.forEach(cell => {
-            const highlights = cell.querySelectorAll('.highlight');
-            highlights.forEach(highlight => {
-                highlight.replaceWith(highlight.textContent);
-            });
+            const text = cell.textContent;
+            cell.innerHTML = text;
         });
     }
 
     showLoadingState(show) {
-        const table = document.querySelector('.inventory-table');
+        const tableBody = document.querySelector('.inventory-table tbody');
+        if (!tableBody) return;
+        
         if (show) {
-            table.classList.add('loading');
+            tableBody.style.opacity = '0.6';
+            tableBody.style.pointerEvents = 'none';
         } else {
-            table.classList.remove('loading');
+            tableBody.style.opacity = '1';
+            tableBody.style.pointerEvents = 'auto';
         }
     }
 
     showNoResultsMessage() {
-        const tableBody = document.querySelector('.inventory-table tbody');
-        let noResultsRow = tableBody.querySelector('.no-results');
-        
-        if (!noResultsRow) {
-            noResultsRow = document.createElement('tr');
-            noResultsRow.className = 'no-results';
-            noResultsRow.innerHTML = `
-                <td colspan="7" style="text-align: center; padding: 40px; color: #718096; font-style: italic;">
-                    لا توجد منتجات تطابق معايير البحث
-                </td>
+        let noResults = document.querySelector('.no-results-message');
+        if (!noResults) {
+            noResults = document.createElement('div');
+            noResults.className = 'no-results-message';
+            noResults.innerHTML = `
+                <div class="no-results-content">
+                    <i class="no-results-icon">🔍</i>
+                    <h3>لا توجد نتائج</h3>
+                    <p>جرب تغيير معايير البحث أو الفلترة</p>
+                </div>
             `;
-            tableBody.appendChild(noResultsRow);
+            document.querySelector('.inventory-table-section').appendChild(noResults);
         }
+        noResults.style.display = 'block';
     }
 
     hideNoResultsMessage() {
-        const noResultsRow = document.querySelector('.no-results');
-        if (noResultsRow) {
-            noResultsRow.remove();
+        const noResults = document.querySelector('.no-results-message');
+        if (noResults) {
+            noResults.style.display = 'none';
         }
     }
 
-    showNotification(message) {
-        // Create notification element
+    showNotification(message, type = 'info') {
+        // Remove existing notifications
+        const existingNotifications = document.querySelectorAll('.notification');
+        existingNotifications.forEach(notification => notification.remove());
+        
+        // Create new notification
         const notification = document.createElement('div');
-        notification.className = 'notification';
-        notification.textContent = message;
-        notification.style.cssText = `
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: linear-gradient(135deg, #48bb78 0%, #38b2ac 100%);
-            color: white;
-            padding: 12px 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-            z-index: 1000;
-            font-family: 'Cairo', sans-serif;
-            font-size: 0.9rem;
-            animation: slideInRight 0.3s ease-out;
+        notification.className = `notification ${type}`;
+        notification.innerHTML = `
+            <div class="notification-content">
+                <span class="notification-message">${message}</span>
+                <button class="notification-close">&times;</button>
+            </div>
         `;
         
+        // Add to page
         document.body.appendChild(notification);
         
-        // Remove notification after 3 seconds
+        // Auto remove after 3 seconds
         setTimeout(() => {
-            notification.style.animation = 'slideOutRight 0.3s ease-in';
-            setTimeout(() => {
-                if (notification.parentNode) {
-                    notification.parentNode.removeChild(notification);
-                }
-            }, 300);
+            notification.remove();
         }, 3000);
-    }
-
-    // Add new product functionality
-    async addNewProduct(productData) {
-        try {
-            const newProduct = await db.supabase
-                .from('products')
-                .insert([productData])
-                .select()
-                .single();
-
-            if (newProduct) {
-                // Add to local array
-                this.inventoryData.push(newProduct);
-                
-                // Update display
-                this.updateInventoryDisplay();
-                
-                // Show notification
-                this.showNotification(`تم إضافة منتج جديد: ${productData.name}`);
-            }
-        } catch (error) {
-            console.error('Error adding new product:', error);
-            this.showNotification('خطأ في إضافة المنتج الجديد');
-        }
-    }
-
-    // Update product quantity
-    async updateProductQuantity(productId, newQuantity) {
-        try {
-            const { data, error } = await db.supabase
-                .from('products')
-                .update({ quantity: newQuantity })
-                .eq('id', productId)
-                .select()
-                .single();
-
-            if (data) {
-                // Update local data
-                const productIndex = this.inventoryData.findIndex(p => p.id === productId);
-                if (productIndex !== -1) {
-                    this.inventoryData[productIndex].quantity = newQuantity;
-                }
-                
-                // Update display
-                this.updateInventoryDisplay();
-                
-                // Show notification
-                this.showNotification(`تم تحديث كمية المنتج`);
-            }
-        } catch (error) {
-            console.error('Error updating product quantity:', error);
-            this.showNotification('خطأ في تحديث كمية المنتج');
+        
+        // Close button handler
+        const closeBtn = notification.querySelector('.notification-close');
+        if (closeBtn) {
+            closeBtn.addEventListener('click', () => {
+                notification.remove();
+            });
         }
     }
 }
 
-// Initialize inventory when DOM is loaded
+// Initialize inventory service when DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {
-    window.inventoryService = new InventoryService();
+    new InventoryService();
 });
 
-// Add CSS animations for notifications
-const style = document.createElement('style');
-style.textContent = `
-    @keyframes slideInRight {
-        from {
-            opacity: 0;
-            transform: translateX(20px);
-        }
-        to {
-            opacity: 1;
-            transform: translateX(0);
-        }
-    }
-    
-    @keyframes slideOutRight {
-        from {
-            opacity: 1;
-            transform: translateX(0);
-        }
-        to {
-            opacity: 0;
-            transform: translateX(20px);
-        }
-    }
-    
-    @keyframes fadeIn {
-        from {
-            opacity: 0;
-            transform: translateY(10px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-    
-    .fade-in {
-        animation: fadeIn 0.3s ease-out;
-    }
-    
-    .inventory-table tbody tr.active {
-        background-color: rgba(66, 153, 225, 0.1) !important;
-        border-left: 4px solid #4299e1;
-    }
-`;
-document.head.appendChild(style);
-
-// Keyboard shortcuts
+// Global keyboard shortcuts
 document.addEventListener('keydown', function(event) {
     // Ctrl/Cmd + F to focus search
     if ((event.ctrlKey || event.metaKey) && event.key === 'f') {
@@ -466,33 +505,17 @@ document.addEventListener('keydown', function(event) {
     
     // Escape to clear filters
     if (event.key === 'Escape') {
-        const branchInput = document.getElementById('branchInput');
+        const branchSelect = document.getElementById('branchSelect');
         const searchInput = document.getElementById('searchInput');
         
-        if (branchInput && searchInput && (branchInput.value || searchInput.value)) {
-            branchInput.value = '';
+        if (branchSelect && searchInput && (branchSelect.value || searchInput.value)) {
+            branchSelect.value = '';
             searchInput.value = '';
             // Access the inventory service instance
-            const inventoryService = window.inventoryService;
-            if (inventoryService) {
-                inventoryService.filterInventory('', '');
+            if (window.inventoryService) {
+                window.inventoryService.filterInventory('', '');
             }
         }
     }
 });
 
-// Export for potential use
-window.inventoryModule = {
-    filterInventory: (branchId, searchTerm) => {
-        const inventoryService = window.inventoryService;
-        if (inventoryService) {
-            inventoryService.filterInventory(branchId, searchTerm);
-        }
-    },
-    showNotification: (message) => {
-        const inventoryService = window.inventoryService;
-        if (inventoryService) {
-            inventoryService.showNotification(message);
-        }
-    }
-};

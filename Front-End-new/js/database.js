@@ -106,11 +106,24 @@ class DatabaseService {
     async getInventoryQuantities() {
         const { data, error } = await this.supabase
             .from('inventory')
-            .select('product_id, quantity')
+            .select('product_id, quantity, branch_num')
         if (error) {
             console.error('Error fetching inventory quantities:', error)
             return []
         }
+        return data
+    }
+
+    // Debug function to get all inventory data
+    async getAllInventoryData() {
+        const { data, error } = await this.supabase
+            .from('inventory')
+            .select('*')
+        if (error) {
+            console.error('Error fetching all inventory data:', error)
+            return []
+        }
+        console.log('All inventory data from database:', data)
         return data
     }
 

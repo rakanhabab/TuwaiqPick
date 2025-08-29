@@ -210,13 +210,13 @@
   background-color: #38a169;
 }
 
-.status-badge.status-normal {
+.status-badge.status-medium {
   background: rgba(66, 153, 225, 0.1);
   color: #4299e1;
   border: 1px solid rgba(66, 153, 225, 0.2);
 }
 
-.status-badge.status-normal .status-dot {
+.status-badge.status-medium .status-dot {
   background-color: #4299e1;
 }
 
@@ -230,13 +230,13 @@
   background-color: #f59e0b;
 }
 
-.status-badge.status-out {
+.status-badge.status-empty {
   background: rgba(229, 62, 62, 0.1);
   color: #e53e3e;
   border: 1px solid rgba(229, 62, 62, 0.2);
 }
 
-.status-badge.status-out .status-dot {
+.status-badge.status-empty .status-dot {
   background-color: #e53e3e;
 }
 

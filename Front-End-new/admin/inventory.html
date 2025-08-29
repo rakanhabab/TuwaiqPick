@@ -64,8 +64,11 @@
             <div class="search-filter-section">
                 <div class="filter-row">
                     <div class="filter-group">
-                        <label for="branchInput">الفرع</label>
-                        <input type="text" id="branchInput" placeholder="branch_id" class="filter-input">
+                        <label for="branchSelect">الفرع</label>
+                        <select id="branchSelect" class="filter-input">
+                            <option value="">الكل</option>
+                            <!-- Branch options will be loaded dynamically -->
+                        </select>
                     </div>
                     <div class="filter-group">
                         <label for="searchInput">بحث (اسم/SKU)</label>

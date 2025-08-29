@@ -28,21 +28,52 @@ class DashboardService {
             const paidStatuses = new Set(['paid', 'completed', 'success', 'settled']);
             const paid = (invoices || []).filter(inv => paidStatuses.has(normalize(inv.status)));
 
-            const sumAmount = arr => arr.reduce((sum, inv) => sum + (inv.total_amount || 0), 0);
+            const sumAmount = arr => arr.reduce((sum, inv) => sum + (parseFloat(inv.total_amount) || 0), 0);
 
             const totalRevenue = sumAmount(paid);
             const averageOrderValue = paid.length > 0 ? totalRevenue / paid.length : 0;
 
-            this.revenueData = { total: totalRevenue || 0, average: averageOrderValue || 0 };
+            // Create timeline data for chart
+            const timelineData = this.processInvoicesForTimeline(paid);
+
+            this.revenueData = { 
+                total: totalRevenue || 0, 
+                average: averageOrderValue || 0,
+                timeline: timelineData
+            };
 
             this.updateRevenueDisplay();
             this.updateStatisticsDisplay();
         } catch (error) {
             console.error('Error loading revenue data:', error);
-            this.revenueData = { total: 0, average: 0 };
+            this.revenueData = { total: 0, average: 0, timeline: [] };
             this.updateRevenueDisplay();
             this.updateStatisticsDisplay();
         }
+    }
+
+    processInvoicesForTimeline(invoices) {
+        // Group invoices by date and sum amounts
+        const dailyData = {};
+        
+        invoices.forEach(invoice => {
+            if (invoice.timestamp) {
+                const date = new Date(invoice.timestamp);
+                const dateKey = date.toISOString().split('T')[0]; // YYYY-MM-DD format
+                
+                if (!dailyData[dateKey]) {
+                    dailyData[dateKey] = 0;
+                }
+                dailyData[dateKey] += parseFloat(invoice.total_amount) || 0;
+            }
+        });
+
+        // Convert to sorted array
+        const sortedDates = Object.keys(dailyData).sort();
+        return sortedDates.map(date => ({
+            date: date,
+            amount: dailyData[date]
+        }));
     }
 
     async loadProductsData() {
@@ -95,29 +126,44 @@ class DashboardService {
             return;
         }
 
-        // Revenue Chart: single total bar
+        // Revenue Chart: Timeline line chart with smaller size
+        const revenueTimeline = this.revenueData.timeline || [];
         const revenueData = {
-            x: ['الإجمالي'],
-            y: [this.revenueData.total],
-            type: 'bar',
-            name: 'إجمالي الإيرادات (مدفوعة)',
-            marker: { color: '#f9953b', opacity: 0.8 }
+            x: revenueTimeline.map(item => item.date),
+            y: revenueTimeline.map(item => item.amount),
+            type: 'scatter',
+            mode: 'lines+markers',
+            name: 'الإيرادات اليومية',
+            line: { color: '#f9953b', width: 2 },
+            marker: { color: '#f9953b', size: 4 }
         };
         const revenueLayout = {
             title: '',
-            margin: { t: 10, r: 20, b: 40, l: 50 },
+            margin: { t: 5, r: 10, b: 20, l: 25 },
             paper_bgcolor: 'rgba(0,0,0,0)',
             plot_bgcolor: 'rgba(0,0,0,0)',
-            font: { family: 'Tajawal', color: '#6b7280', size: 12 },
-            xaxis: { color: '#6b7280' },
-            yaxis: { color: '#6b7280', tickformat: ',.0f', ticksuffix: ' ر.س' },
-            showlegend: false
+            font: { family: 'Tajawal', color: '#6b7280', size: 10 },
+            xaxis: { 
+                color: '#6b7280',
+                title: 'التاريخ',
+                type: 'date',
+                tickfont: { size: 9 }
+            },
+            yaxis: { 
+                color: '#6b7280', 
+                tickformat: ',.0f', 
+                ticksuffix: ' ر.س',
+                title: 'المبيعات',
+                tickfont: { size: 9 }
+            },
+            showlegend: false,
+            height: 200
         };
         if (window.Plotly) {
             Plotly.newPlot('revenueChart', [revenueData], revenueLayout, { responsive: true, displayModeBar: false });
         }
 
-        // Products Chart by categories
+        // Products Chart by categories with smaller size
         if (this.productsData.categories) {
             const categories = Object.keys(this.productsData.categories);
             const values = Object.values(this.productsData.categories);
@@ -128,15 +174,17 @@ class DashboardService {
                 hole: 0.6,
                 marker: { colors: ['#f9953b', '#9f7bea', '#f97316', '#e7a7ff', '#f59e0b', '#10b981'] },
                 textinfo: 'label+percent',
-                textposition: 'outside'
+                textposition: 'outside',
+                textfont: { size: 9 }
             }];
             const productsLayout = {
                 title: '',
-                margin: { t: 10, r: 10, b: 10, l: 10 },
+                margin: { t: 5, r: 5, b: 5, l: 5 },
                 paper_bgcolor: 'rgba(0,0,0,0)',
                 plot_bgcolor: 'rgba(0,0,0,0)',
-                font: { family: 'Tajawal', color: '#6b7280', size: 11 },
-                showlegend: false
+                font: { family: 'Tajawal', color: '#6b7280', size: 9 },
+                showlegend: false,
+                height: 200
             };
             if (window.Plotly) {
                 Plotly.newPlot('productsChart', productsData, productsLayout, { responsive: true, displayModeBar: false });
