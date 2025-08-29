@@ -136,10 +136,10 @@ class TicketsService {
         if (!dateString) return 'غير محدد';
         
         try {
-            const date = new Date(dateString);
+        const date = new Date(dateString);
             return date.toLocaleDateString('en-US', {
-                year: 'numeric',
-                month: 'short',
+            year: 'numeric',
+            month: 'short',
                 day: 'numeric',
                 hour: '2-digit',
                 minute: '2-digit'
@@ -402,39 +402,39 @@ class TicketsService {
                     <button class="modal-close" onclick="this.closest('.modal').remove()">&times;</button>
                 </div>
                 <div class="modal-body">
-                    <div class="invoice-preview">
-                        <div class="invoice-header">
-                            <h4>فاتورة رقم: ${invoice.id}</h4>
-                            <p>تاريخ الإصدار: ${this.formatDate(invoice.timestamp)}</p>
-                        </div>
-                        <div class="invoice-items">
-                            <table class="invoice-table">
-                                <thead>
-                                    <tr>
-                                        <th>المنتج</th>
-                                        <th>الكمية</th>
-                                        <th>السعر</th>
-                                        <th>الإجمالي</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td>منتجات متعددة</td>
-                                        <td>1</td>
-                                        <td>${db.formatCurrency(invoice.total_amount || 0)}</td>
-                                        <td>${db.formatCurrency(invoice.total_amount || 0)}</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                        <div class="invoice-total">
-                            <strong>المجموع: ${db.formatCurrency(invoice.total_amount || 0)}</strong>
+            <div class="invoice-preview">
+                <div class="invoice-header">
+                    <h4>فاتورة رقم: ${invoice.id}</h4>
+                    <p>تاريخ الإصدار: ${this.formatDate(invoice.timestamp)}</p>
+                </div>
+                <div class="invoice-items">
+                    <table class="invoice-table">
+                        <thead>
+                            <tr>
+                                <th>المنتج</th>
+                                <th>الكمية</th>
+                                <th>السعر</th>
+                                <th>الإجمالي</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>منتجات متعددة</td>
+                                <td>1</td>
+                                <td>${db.formatCurrency(invoice.total_amount || 0)}</td>
+                                <td>${db.formatCurrency(invoice.total_amount || 0)}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="invoice-total">
+                    <strong>المجموع: ${db.formatCurrency(invoice.total_amount || 0)}</strong>
                         </div>
                     </div>
                 </div>
             </div>
         `;
-
+        
         document.body.appendChild(modal);
     }
 

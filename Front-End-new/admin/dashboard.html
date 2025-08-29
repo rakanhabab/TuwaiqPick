@@ -10,6 +10,16 @@
     <link rel="stylesheet" href="./admin.css">
     <link rel="stylesheet" href="./dashboard.css">
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script>
+        // Verify Plotly is loaded
+        window.addEventListener('load', function() {
+            if (typeof Plotly === 'undefined') {
+                console.error('Plotly failed to load from CDN');
+            } else {
+                console.log('Plotly loaded successfully from CDN');
+            }
+        });
+    </script>
 </head>
 <body>
     <div class="admin-container">
@@ -56,57 +66,150 @@
             </nav>
             <button class="logout-btn">تسجيل الخروج</button>
         </aside>
+
         <!-- Main Content -->
         <main class="main-content">
             <header class="content-header">
                 <h1>الواجهة الرئيسية</h1>
-                <h2>نظرة عامة</h2>
+                <h2>نظرة عامة على الأداء</h2>
             </header>
-            <!-- Dashboard Widgets -->
-            <div class="dashboard-grid">
-                <!-- Revenue Overview -->
-                <div class="widget-card revenue-card">
-                    <div class="card-header">
-                        <h3>الإيرادات</h3>
+
+            <!-- Dashboard Filters -->
+            <div class="dashboard-filters">
+                <div class="filter-group">
+                    <label for="timeFilter">الفترة الزمنية:</label>
+                    <select id="timeFilter" onchange="dashboardService.updateDashboard()">
+                        <option value="today">اليوم</option>
+                        <option value="week">هذا الأسبوع</option>
+                        <option value="month" selected>هذا الشهر</option>
+                        <option value="quarter">هذا الربع</option>
+                        <option value="year">هذا العام</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="branchFilter">الفرع:</label>
+                    <select id="branchFilter" onchange="dashboardService.updateDashboard()">
+                        <option value="all">جميع الفروع</option>
+                        <!-- Branch options will be loaded dynamically -->
+                    </select>
+                </div>
+            </div>
+
+            <!-- Statistics Cards -->
+            <div class="stats-grid">
+                <div class="stat-card stat-sales">
+                    <div class="stat-color-indicator"></div>
+                    <div class="stat-content">
+                        <h3>إجمالي المبيعات (صافي)</h3>
+                        <div class="stat-value" id="netSalesValue">-- ر.س</div>
+                        <div class="stat-change" id="netSalesChange"></div>
                     </div>
-                    <div class="card-content">
-                        <div class="revenue-stats">
-                            <div class="revenue-main">
-                                <div class="revenue-amount">-- ر.س</div>
-                                <div class="revenue-change"></div>
-                            </div>
-                            <div class="revenue-metrics">
-                                <div class="metric">
-                                    <span class="metric-label">متوسط الطلب</span>
-                                    <span class="metric-value stat-value" data-stat="average">-- ر.س</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="revenue-chart" id="revenueChart"></div>
+                </div>
+                
+                <div class="stat-card stat-orders">
+                    <div class="stat-color-indicator"></div>
+                    <div class="stat-content">
+                        <h3>عدد الفواتير</h3>
+                        <div class="stat-value" id="ordersValue">--</div>
+                        <div class="stat-change" id="ordersChange"></div>
+                    </div>
+                </div>
+                
+                <div class="stat-card stat-aov">
+                    <div class="stat-color-indicator"></div>
+                    <div class="stat-content">
+                        <h3>متوسط سلة الشراء (AOV)</h3>
+                        <div class="stat-value" id="aovValue">-- ر.س</div>
+                        <div class="stat-change" id="aovChange"></div>
+                    </div>
+                </div>
+                
+                <div class="stat-card stat-paid">
+                    <div class="stat-color-indicator"></div>
+                    <div class="stat-content">
+                        <h3>نسبة المدفوعات (Paid%)</h3>
+                        <div class="stat-value" id="paidRateValue">--%</div>
+                        <div class="stat-change" id="paidRateChange"></div>
+                    </div>
+                </div>
+                
+                <div class="stat-card stat-refunds">
+                    <div class="stat-color-indicator"></div>
+                    <div class="stat-content">
+                        <h3>قيمة المرتجعات</h3>
+                        <div class="stat-value" id="refundsValue">-- ر.س</div>
+                        <div class="stat-change" id="refundsChange"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Charts Section -->
+            <div class="charts-grid">
+                <!-- Sales by Branch Chart -->
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <h3>مبيعات حسب الفرع</h3>
+                    </div>
+                    <div class="chart-container">
+                        <div id="branchSalesChart" class="chart"></div>
                     </div>
                 </div>
 
-                <!-- Products Overview -->
-                <div class="widget-card products-card">
-                    <div class="card-header">
-                        <h3>المنتجات</h3>
+                <!-- Revenue Line Chart -->
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <h3>الإيرادات الشهرية</h3>
                     </div>
-                    <div class="card-content">
-                        <div class="products-stats">
-                            <div class="products-main">
-                                <div class="products-amount">--</div>
-                                <div class="products-category">منتج متاح</div>
-                            </div>
-                            <div class="products-categories">
-                                <!-- Filled dynamically by charts/data -->
-                            </div>
-                        </div>
-                        <div class="products-chart" id="productsChart"></div>
+                    <div class="chart-container">
+                        <div id="revenueChart" class="chart"></div>
                     </div>
+                </div>
+
+                <!-- Products by Category Donut Chart -->
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <h3>المنتجات حسب الفئة</h3>
+                    </div>
+                    <div class="chart-container">
+                        <div id="categoryChart" class="chart"></div>
+                    </div>
+                </div>
+
+                <!-- Low Stock Products Chart -->
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <h3>أقل 7 منتجات توفراً</h3>
+                    </div>
+                    <div class="chart-container">
+                        <div id="lowStockChart" class="chart"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Low Stock Table -->
+            <div class="table-card">
+                <div class="table-header">
+                    <h3>مخزون منخفض</h3>
+                </div>
+                <div class="table-container">
+                    <table class="low-stock-table">
+                        <thead>
+                            <tr>
+                                <th>الفرع</th>
+                                <th>المنتج</th>
+                                <th>الكمية المتوفرة</th>
+                                <th>الحالة</th>
+                            </tr>
+                        </thead>
+                        <tbody id="lowStockTableBody">
+                            <!-- Filled dynamically -->
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </main>
     </div>
+
     <script type="module" src="./admin.js"></script>
     <script type="module" src="./dashboard.js"></script>
 </body>

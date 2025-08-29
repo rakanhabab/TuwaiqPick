@@ -161,6 +161,42 @@ class DatabaseService {
         return data
     }
 
+    // Get invoices for dashboard with filters
+    async getDashboardInvoices(fromDate, toDate, branchNum = null) {
+        try {
+            console.log('getDashboardInvoices called with:', { fromDate, toDate, branchNum });
+            
+            let query = this.supabase
+                .from('invoices')
+                .select('*');
+            
+            // Add date filters if provided
+            if (fromDate && toDate) {
+                query = query
+                    .gte('timestamp', fromDate + 'T00:00:00')
+                    .lte('timestamp', toDate + 'T23:59:59');
+            }
+            
+            // Add branch filter if provided
+            if (branchNum && branchNum !== 'all') {
+                query = query.eq('branch_num', branchNum);
+            }
+            
+            const { data, error } = await query;
+            
+            if (error) {
+                console.error('Error fetching dashboard invoices:', error);
+                return [];
+            }
+            
+            console.log('getDashboardInvoices returned:', data?.length || 0, 'invoices');
+            return data || [];
+        } catch (error) {
+            console.error('Exception in getDashboardInvoices:', error);
+            return [];
+        }
+    }
+
     async createInvoice(invoiceData) {
         const { data, error } = await this.supabase
             .from('invoices')
