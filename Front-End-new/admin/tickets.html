@@ -147,7 +147,6 @@
                         <h3>التذاكر</h3>
                         <div class="table-actions">
                             <input type="text" placeholder="البحث في التذاكر أو رقم الفاتورة..." class="search-input" id="ticketsSearch" oninput="searchTickets()">
-                            <button class="btn btn-secondary" onclick="exportTickets()">تصدير</button>
                         </div>
                     </div>
                     
@@ -158,7 +157,7 @@
                                     <th>رقم التذكرة</th>
                                     <th>رقم الفاتورة</th>
                                     <th>الحالة</th>
-                                    <th>المبلغ المسترد</th>
+                                    <th>المبلغ</th>
                                     <th>تاريخ الإنشاء</th>
                                     <th>الإجراءات</th>
                                 </tr>
@@ -173,16 +172,7 @@
         </main>
     </div>
 
-    <!-- View Invoice Modal -->
-    <div class="modal" id="invoiceModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>عرض الفاتورة</h3>
-                <button class="modal-close" onclick="closeInvoiceModal()">&times;</button>
-            </div>
-            <div class="modal-body" id="invoiceModalBody"></div>
-        </div>
-    </div>
+
 
     <script type="module" src="./admin.js"></script>
     <script type="module" src="./tickets.js"></script>

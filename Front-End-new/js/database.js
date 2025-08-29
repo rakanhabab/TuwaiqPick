@@ -243,10 +243,7 @@ class DatabaseService {
     async getTickets() {
         const { data, error } = await this.supabase
             .from('tickets')
-            .select(`
-                *,
-                invoices(total_amount, status)
-            `)
+            .select('*')
             .order('timestamp', { ascending: false })
         
         if (error) {
@@ -256,12 +253,41 @@ class DatabaseService {
         return data
     }
 
+    async getTicketById(ticketId) {
+        const { data, error } = await this.supabase
+            .from('tickets')
+            .select('*')
+            .eq('id', ticketId)
+            .single()
+        
+        if (error) {
+            console.error('Error fetching ticket:', error)
+            return null
+        }
+        return data
+    }
+
+    async updateTicketStatus(ticketId, status) {
+        const { data, error } = await this.supabase
+            .from('tickets')
+            .update({ status })
+            .eq('id', ticketId)
+            .select()
+            .single()
+        
+        if (error) {
+            console.error('Error updating ticket status:', error)
+            return null
+        }
+        return data
+    }
+
     async createTicket(ticketData) {
         const { data, error } = await this.supabase
             .from('tickets')
             .insert([{
                 ...ticketData,
-                status: 'open'
+                status: 'pending'
             }])
             .select()
         

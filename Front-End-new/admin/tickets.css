@@ -273,7 +273,7 @@
 
 .tickets-table th {
   padding: 12px 10px;
-  text-align: right;
+  text-align: center;
   font-size: 0.8rem;
   font-weight: 600;
   color: #374151;
@@ -284,7 +284,7 @@
 
 .tickets-table td {
   padding: 12px 10px;
-  text-align: right;
+  text-align: center;
   font-size: 0.8rem;
   color: #6b7280;
   border-bottom: 1px solid rgba(249, 115, 22, 0.05);
@@ -356,6 +356,7 @@
   display: flex;
   gap: 6px;
   align-items: center;
+  justify-content: center;
 }
 
 .action-btn {

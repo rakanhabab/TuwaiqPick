@@ -62,33 +62,36 @@ class TicketsService {
         
         tableBody.innerHTML = '';
         
-        tickets.forEach((ticket, index) => {
+        // Sort tickets: pending first, then by timestamp (newest first)
+        const sortedTickets = this.sortTicketsByPriority(tickets);
+        
+        sortedTickets.forEach((ticket, index) => {
             const row = document.createElement('tr');
             row.style.animationDelay = `${index * 0.1}s`;
             
             const refund = Number(ticket.refund_price) || 0;
             row.innerHTML = `
-                <td>
-                    <strong class="ticket-number">${ticket.id || 'غير محدد'}</strong>
+                <td style="text-align: center;">
+                    <strong class="ticket-number">${ticket.ticket_num || 'غير محدد'}</strong>
                 </td>
-                <td>
-                    <span class="invoice-number">${ticket.invoice_id || 'غير محدد'}</span>
+                <td style="text-align: center;">
+                    <span class="invoice-number">${ticket.invoice_num || 'غير محدد'}</span>
                 </td>
-                <td>
+                <td style="text-align: center;">
                     ${this.getStatusBadge(ticket.status)}
                 </td>
-                <td>
+                <td style="text-align: center;">
                     <span class="refund-amount ${refund === 0 ? 'zero' : ''}">
                         ${db.formatCurrency(refund)}
                     </span>
                 </td>
-                <td>
+                <td style="text-align: center;">
                     <span class="creation-date">${this.formatDate(ticket.timestamp)}</span>
                 </td>
-                <td>
+                <td style="text-align: center;">
                     <div class="actions-buttons">
-                        <button class="action-btn view" onclick="ticketsService.viewInvoice('${ticket.invoice_id}')" title="عرض الفاتورة">
-                            عرض الفاتورة
+                        <button class="action-btn view" onclick="ticketsService.viewTicketDetails('${ticket.id}')" title="عرض التفاصيل">
+                            عرض التفاصيل
                         </button>
                         ${(ticket.status || '').toLowerCase() === 'pending' ? `
                             <button class="action-btn approve" onclick="ticketsService.approveTicket('${ticket.id}')" title="قبول الطلب">
@@ -132,12 +135,118 @@ class TicketsService {
     formatDate(dateString) {
         if (!dateString) return 'غير محدد';
         
-        const date = new Date(dateString);
-        return date.toLocaleDateString('ar-SA', {
-            year: 'numeric',
-            month: 'short',
-            day: 'numeric'
+        try {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        } catch (error) {
+            console.error('Error formatting date:', error);
+            return 'غير محدد';
+        }
+    }
+
+    parseProductsAndQuantities(productsString) {
+        try {
+            if (!productsString) return [];
+            return JSON.parse(productsString);
+        } catch (error) {
+            console.error('Error parsing products:', error);
+            return [];
+        }
+    }
+
+    // Helper function to sort tickets: pending first, then by timestamp
+    sortTicketsByPriority(tickets) {
+        return tickets.sort((a, b) => {
+            const aStatus = (a.status || '').toLowerCase();
+            const bStatus = (b.status || '').toLowerCase();
+            
+            // If one is pending and the other is not, pending comes first
+            if (aStatus === 'pending' && bStatus !== 'pending') {
+                return -1;
+            }
+            if (aStatus !== 'pending' && bStatus === 'pending') {
+                return 1;
+            }
+            
+            // If both have the same status, sort by timestamp (newest first)
+            const aTime = new Date(a.timestamp || 0);
+            const bTime = new Date(b.timestamp || 0);
+            return bTime - aTime;
         });
+    }
+
+    // Ticket Operations
+    async viewTicketDetails(ticketId) {
+        try {
+            const ticket = await db.getTicketById(ticketId);
+            if (!ticket) {
+                this.showNotification('لم يتم العثور على التذكرة', 'error');
+                return;
+            }
+
+            const products = this.parseProductsAndQuantities(ticket.products_and_quantities);
+            
+            // Create modal content
+            const modalContent = `
+                <div class="ticket-details-modal">
+                    <h3>تفاصيل التذكرة</h3>
+                    <div class="ticket-info">
+                        <p><strong>رقم التذكرة:</strong> ${ticket.ticket_num || ticket.id}</p>
+                        <p><strong>رقم الفاتورة:</strong> ${ticket.invoice_num || ticket.invoice_id}</p>
+                        <p><strong>الحالة:</strong> ${this.getStatusBadge(ticket.status)}</p>
+                        <p><strong>مبلغ الاسترداد:</strong> ${db.formatCurrency(ticket.refund_price || 0)}</p>
+                        <p><strong>التاريخ:</strong> ${this.formatDate(ticket.timestamp)}</p>
+                    </div>
+                    <div class="products-details">
+                        <h4>المنتجات المطلوب استردادها:</h4>
+                        ${products.map(product => `
+                            <div class="product-detail">
+                                <span class="product-name">${product.name}</span>
+                                <span class="product-quantity">الكمية: ${product.quantity}</span>
+                                <span class="product-price">السعر: ${db.formatCurrency(product.line_total)}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+
+            this.showModal('تفاصيل التذكرة', modalContent);
+        } catch (error) {
+            console.error('Error viewing ticket details:', error);
+            this.showNotification('خطأ في عرض تفاصيل التذكرة', 'error');
+        }
+    }
+
+    showModal(title, content) {
+        // Remove existing modal
+        const existingModal = document.querySelector('.modal');
+        if (existingModal) {
+            existingModal.remove();
+        }
+
+        // Create modal
+        const modal = document.createElement('div');
+        modal.className = 'modal';
+        modal.style.display = 'flex';
+        modal.innerHTML = `
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>${title}</h3>
+                    <button class="modal-close" onclick="this.closest('.modal').remove()">&times;</button>
+                </div>
+                <div class="modal-body">
+                    ${content}
+                </div>
+            </div>
+        `;
+
+        document.body.appendChild(modal);
     }
 
     addTableRowEffects() {
@@ -230,14 +339,20 @@ class TicketsService {
             return true;
         });
         
-        this.populateTicketsTable(filteredTickets);
+        // Sort filtered tickets: pending first, then by timestamp
+        const sortedFilteredTickets = this.sortTicketsByPriority(filteredTickets);
+        
+        this.populateTicketsTable(sortedFilteredTickets);
     }
 
     searchTickets() {
         const searchTerm = document.getElementById('ticketsSearch')?.value.toLowerCase() || '';
         
         if (!searchTerm) {
-            this.populateTicketsTable(this.ticketsData);
+            // Sort all tickets: pending first, then by timestamp
+            const sortedTickets = this.sortTicketsByPriority(this.ticketsData);
+            
+            this.populateTicketsTable(sortedTickets);
             return;
         }
         
@@ -246,7 +361,10 @@ class TicketsService {
                    (ticket.invoice_id && ticket.invoice_id.toLowerCase().includes(searchTerm));
         });
         
-        this.populateTicketsTable(filteredTickets);
+        // Sort filtered tickets: pending first, then by timestamp
+        const sortedFilteredTickets = this.sortTicketsByPriority(filteredTickets);
+        
+        this.populateTicketsTable(sortedFilteredTickets);
     }
 
     // Action Functions
@@ -267,46 +385,57 @@ class TicketsService {
     }
 
     showInvoiceModal(invoice) {
-        // Show modal with invoice details
-        const modal = document.getElementById('invoiceModal');
-        const modalBody = document.getElementById('invoiceModalBody');
-        
-        if (!modal || !modalBody) return;
-        
-        // Create invoice content
-        modalBody.innerHTML = `
-            <div class="invoice-preview">
-                <div class="invoice-header">
-                    <h4>فاتورة رقم: ${invoice.id}</h4>
-                    <p>تاريخ الإصدار: ${this.formatDate(invoice.timestamp)}</p>
+        // Remove existing modal
+        const existingModal = document.querySelector('.modal');
+        if (existingModal) {
+            existingModal.remove();
+        }
+
+        // Create modal
+        const modal = document.createElement('div');
+        modal.className = 'modal';
+        modal.style.display = 'flex';
+        modal.innerHTML = `
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>عرض الفاتورة</h3>
+                    <button class="modal-close" onclick="this.closest('.modal').remove()">&times;</button>
                 </div>
-                <div class="invoice-items">
-                    <table class="invoice-table">
-                        <thead>
-                            <tr>
-                                <th>المنتج</th>
-                                <th>الكمية</th>
-                                <th>السعر</th>
-                                <th>الإجمالي</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>منتجات متعددة</td>
-                                <td>1</td>
-                                <td>${db.formatCurrency(invoice.total_amount || 0)}</td>
-                                <td>${db.formatCurrency(invoice.total_amount || 0)}</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-                <div class="invoice-total">
-                    <strong>المجموع: ${db.formatCurrency(invoice.total_amount || 0)}</strong>
+                <div class="modal-body">
+                    <div class="invoice-preview">
+                        <div class="invoice-header">
+                            <h4>فاتورة رقم: ${invoice.id}</h4>
+                            <p>تاريخ الإصدار: ${this.formatDate(invoice.timestamp)}</p>
+                        </div>
+                        <div class="invoice-items">
+                            <table class="invoice-table">
+                                <thead>
+                                    <tr>
+                                        <th>المنتج</th>
+                                        <th>الكمية</th>
+                                        <th>السعر</th>
+                                        <th>الإجمالي</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>منتجات متعددة</td>
+                                        <td>1</td>
+                                        <td>${db.formatCurrency(invoice.total_amount || 0)}</td>
+                                        <td>${db.formatCurrency(invoice.total_amount || 0)}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="invoice-total">
+                            <strong>المجموع: ${db.formatCurrency(invoice.total_amount || 0)}</strong>
+                        </div>
+                    </div>
                 </div>
             </div>
         `;
-        
-        modal.classList.add('show');
+
+        document.body.appendChild(modal);
     }
 
     async approveTicket(ticketId) {
@@ -364,17 +493,15 @@ class TicketsService {
     }
 
     closeInvoiceModal() {
-        const modal = document.getElementById('invoiceModal');
+        const modal = document.querySelector('.modal');
         if (modal) {
-            modal.classList.remove('show');
+            modal.remove();
         }
     }
 
 
 
-    exportTickets() {
-        this.showNotification('تم تصدير البيانات بنجاح', 'success');
-    }
+
 
     // Utility Functions
     debounce(func, wait) {
@@ -513,19 +640,112 @@ style.textContent = `
         padding-top: 15px;
         border-top: 2px solid #e2e8f0;
     }
+
+
+
+    .modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.6);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+    }
+
+    .modal-content {
+        background-color: #fff;
+        border-radius: 10px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        width: 90%;
+        max-width: 600px;
+        max-height: 90%;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+    }
+
+    .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 15px 20px;
+        background-color: #4299e1;
+        color: white;
+    }
+
+    .modal-header h3 {
+        margin: 0;
+        font-size: 1.2rem;
+    }
+
+    .modal-close {
+        background: none;
+        border: none;
+        font-size: 1.5rem;
+        cursor: pointer;
+        color: white;
+        transition: opacity 0.2s ease;
+    }
+
+    .modal-close:hover {
+        opacity: 0.8;
+    }
+
+    .modal-body {
+        padding: 20px;
+        overflow-y: auto;
+        flex-grow: 1;
+    }
+
+    .ticket-details-modal {
+        font-family: 'Cairo', sans-serif;
+    }
+
+    .ticket-info {
+        margin-bottom: 20px;
+        padding-bottom: 15px;
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+    .ticket-info p {
+        margin: 8px 0;
+        color: #4a5568;
+        font-size: 0.95rem;
+    }
+
+    .ticket-info strong {
+        color: #2d3748;
+        font-weight: 600;
+    }
+
+    .products-details h4 {
+        margin-bottom: 15px;
+        color: #2d3748;
+    }
+
+    .product-detail {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 10px;
+        padding-bottom: 10px;
+        border-bottom: 1px dashed #e2e8f0;
+    }
+
+    .product-detail:last-child {
+        border-bottom: none;
+        margin-bottom: 0;
+        padding-bottom: 0;
+    }
 `;
 document.head.appendChild(style);
 
 // Keyboard shortcuts
 document.addEventListener('keydown', function(event) {
-    // Ctrl/Cmd + E to export tickets
-    if ((event.ctrlKey || event.metaKey) && event.key === 'e') {
-        event.preventDefault();
-        const ticketsService = window.ticketsService;
-        if (ticketsService) {
-            ticketsService.exportTickets();
-        }
-    }
+
     
     // Ctrl/Cmd + F to focus on search
     if ((event.ctrlKey || event.metaKey) && event.key === 'f') {
@@ -538,8 +758,8 @@ document.addEventListener('keydown', function(event) {
     
     // Escape to close modal
     if (event.key === 'Escape') {
-        const modal = document.getElementById('invoiceModal');
-        if (modal && modal.classList.contains('show')) {
+        const modal = document.querySelector('.modal');
+        if (modal) {
             const ticketsService = window.ticketsService;
             if (ticketsService) {
                 ticketsService.closeInvoiceModal();
@@ -550,10 +770,10 @@ document.addEventListener('keydown', function(event) {
 
 // Export for potential use
 window.ticketsModule = {
-    viewInvoice: (invoiceId) => {
+    viewTicketDetails: (ticketId) => {
         const ticketsService = window.ticketsService;
         if (ticketsService) {
-            ticketsService.viewInvoice(invoiceId);
+            ticketsService.viewTicketDetails(ticketId);
         }
     },
     approveTicket: (ticketId) => {
