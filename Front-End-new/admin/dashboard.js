@@ -627,10 +627,9 @@ class DashboardService {
                 productQuantities[productId] += Number(item.quantity) || 0;
             });
             
-            // Sort by quantity (ascending) and get top 7, then reverse for display
+            // Sort by quantity (ascending) and get all products, then reverse for display
             const sortedProducts = Object.entries(productQuantities)
                 .sort(([,a], [,b]) => a - b)
-                .slice(0, 7)
                 .reverse(); // Reverse to show lowest at top
             
             console.log('Sorted products for low stock chart:', sortedProducts);
@@ -659,7 +658,7 @@ class DashboardService {
             
             const layout = {
                 title: {
-                    text: 'أقل 7 منتجات توفراً',
+                    text: 'توافر المنتجات',
                     font: { size: 14, family: 'Tajawal' }
                 },
                 xaxis: {
@@ -669,8 +668,8 @@ class DashboardService {
                 yaxis: {
                     tickfont: { family: 'Tajawal' }
                 },
-                margin: { l: 120, r: 30, t: 40, b: 60 },
-                height: 250,
+                margin: { l: 80, r: 30, t: 40, b: 60 },
+                height: 260,
                 showlegend: false
             };
             
