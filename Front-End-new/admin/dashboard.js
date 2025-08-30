@@ -365,9 +365,9 @@ class DashboardService {
             if (error) {
                 console.error('Error fetching invoices for revenue chart:', error);
                 this.createEmptyChart('revenueChart', 'خطأ في تحميل البيانات');
-                return;
-            }
-            
+            return;
+        }
+
             const validInvoices = allInvoices.filter(invoice => invoice.status === 'paid' || invoice.status === 'unpaid');
             
             console.log('All invoices for revenue chart:', allInvoices.length);
@@ -484,7 +484,7 @@ class DashboardService {
                     font: { family: 'Tajawal', size: 9 },
                     orientation: 'h', // Horizontal legend
                     x: 0.5, // Center horizontally
-                    y: -0.15, // Position below the chart
+                    y: 1.15, // Position above the chart
                     xanchor: 'center',
                     yanchor: 'top'
                 }
