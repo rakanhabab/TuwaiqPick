@@ -254,6 +254,16 @@ class DashboardService {
         return branchNames[branchCode] || branchCode;
     }
 
+    // Helper function to get branch colors (consistent with line chart)
+    getBranchColor(branchCode) {
+        const branchColors = {
+            'BR001': '#ef4444', // Red - الملقا
+            'BR002': '#10b981', // Green - العليا
+            'BR003': '#f59e0b'  // Orange - الياسمين
+        };
+        return branchColors[branchCode] || '#6b7280'; // Gray for unknown branches
+    }
+
     async updateBranchSalesChart(fromDate, toDate, branchNum) {
         try {
             console.log('Updating branch sales chart with filters:', { fromDate, toDate, branchNum });
@@ -285,18 +295,21 @@ class DashboardService {
             const branches = Object.keys(branchSales);
             const sales = Object.values(branchSales);
             
-            const data = [{
-                x: branches.map(branch => this.getBranchArabicName(branch)),
-                y: sales,
+            // Create separate trace for each branch with consistent colors
+            const traces = branches.map((branch, index) => ({
+                x: [this.getBranchArabicName(branch)],
+                y: [sales[index]],
                 type: 'bar',
+                name: this.getBranchArabicName(branch),
                 marker: {
-                    color: 'rgba(59, 130, 246, 0.8)',
+                    color: this.getBranchColor(branch),
                     line: {
-                        color: '#2563eb',
+                        color: this.getBranchColor(branch),
                         width: 1
                     }
-                }
-            }];
+                },
+                showlegend: false
+            }));
             
             const layout = {
                 title: {
@@ -318,7 +331,7 @@ class DashboardService {
             
             // Check if Plotly is available
             if (typeof Plotly !== 'undefined') {
-                Plotly.newPlot('branchSalesChart', data, layout, { 
+                Plotly.newPlot('branchSalesChart', traces, layout, { 
                     responsive: true,
                     displayModeBar: false
                 });
@@ -440,8 +453,14 @@ class DashboardService {
                     type: 'scatter',
                     mode: 'lines+markers',
                     name: this.getBranchArabicName(branch.branch_num),
-                    line: { width: 2 },
-                    marker: { size: 4 }
+                    line: { 
+                        color: this.getBranchColor(branch.branch_num),
+                        width: 2 
+                    },
+                    marker: { 
+                        color: this.getBranchColor(branch.branch_num),
+                        size: 4 
+                    }
                 });
             });
             
@@ -458,14 +477,14 @@ class DashboardService {
                     title: { text: 'الإيرادات (ر.س)', font: { family: 'Tajawal' } },
                     tickfont: { family: 'Tajawal' }
                 },
-                margin: { l: 60, r: 30, t: 80, b: 60 }, // Increased top margin for legend
+                margin: { l: 60, r: 30, t: 40, b: 60 }, // Increased top margin for legend
                 height: 250,
                 showlegend: true,
                 legend: {
                     font: { family: 'Tajawal', size: 10 },
                     orientation: 'h', // Horizontal legend
                     x: 0.5, // Center horizontally
-                    y: 1.02, // Position above the chart
+                    y: 0.9, // Position above the chart title with more space
                     xanchor: 'center',
                     yanchor: 'bottom'
                 }
