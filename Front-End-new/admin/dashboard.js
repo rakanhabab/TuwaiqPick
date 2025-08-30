@@ -339,9 +339,26 @@ class DashboardService {
             // Get all branches
             const allBranches = await db.getBranches();
             
-            // Get all invoices for the period
-            const allInvoices = await db.getDashboardInvoices(fromDate, toDate, branchNum);
+            // Get ALL invoices (not filtered by date) for monthly revenue chart
+            let query = db.supabase.from('invoices').select('*');
+            
+            // Only add branch filter if specified
+            if (branchNum && branchNum !== 'all') {
+                query = query.eq('branch_num', branchNum);
+            }
+            
+            const { data: allInvoices, error } = await query;
+            
+            if (error) {
+                console.error('Error fetching invoices for revenue chart:', error);
+                this.createEmptyChart('revenueChart', 'خطأ في تحميل البيانات');
+                return;
+            }
+            
             const validInvoices = allInvoices.filter(invoice => invoice.status === 'paid' || invoice.status === 'unpaid');
+            
+            console.log('All invoices for revenue chart:', allInvoices.length);
+            console.log('Valid invoices for revenue chart:', validInvoices.length);
             
             // Group by month and branch
             const monthlyData = {};
@@ -358,23 +375,49 @@ class DashboardService {
             
             // Fill in actual data
             validInvoices.forEach(invoice => {
-                const date = new Date(invoice.timestamp);
-                const monthIndex = date.getMonth();
-                const amount = Number(invoice.total_amount) || 0;
-                
-                monthlyData[monthIndex].total += amount;
-                if (invoice.branch_num) {
-                    monthlyData[monthIndex][invoice.branch_num] += amount;
+                try {
+                    console.log('Processing invoice:', invoice.invoice_num, 'timestamp:', invoice.timestamp);
+                    
+                    const date = new Date(invoice.timestamp);
+                    console.log('Parsed date:', date, 'month index:', date.getMonth());
+                    
+                    const monthIndex = date.getMonth();
+                    const amount = Number(invoice.total_amount) || 0;
+                    
+                    console.log(`Adding ${amount} to month ${months[monthIndex]} (index ${monthIndex})`);
+                    
+                    monthlyData[monthIndex].total += amount;
+                    if (invoice.branch_num) {
+                        monthlyData[monthIndex][invoice.branch_num] += amount;
+                    }
+                } catch (error) {
+                    console.error('Error processing invoice date:', invoice.invoice_num, error);
                 }
             });
+            
+            console.log('Monthly data after processing:', monthlyData);
+            
+            // Filter out months with no data (only show months that have invoices)
+            const monthsWithData = [];
+            const monthlyTotals = [];
+            
+            months.forEach((month, index) => {
+                if (monthlyData[index].total > 0) {
+                    monthsWithData.push(month);
+                    monthlyTotals.push(monthlyData[index].total);
+                }
+            });
+            
+            console.log('Months with data:', monthsWithData);
+            console.log('Monthly totals:', monthlyTotals);
             
             // Prepare data for plotting
             const traces = [];
             
             // Add total line
             traces.push({
-                x: months,
-                y: months.map((_, index) => monthlyData[index].total),
+                x: monthsWithData,
+                y: monthlyTotals,
                 type: 'scatter',
                 mode: 'lines+markers',
                 name: 'إجمالي الفروع',
@@ -384,9 +427,16 @@ class DashboardService {
             
             // Add branch lines
             allBranches.forEach(branch => {
+                const branchData = [];
+                months.forEach((month, index) => {
+                    if (monthlyData[index].total > 0) {
+                        branchData.push(monthlyData[index][branch.branch_num] || 0);
+                    }
+                });
+                
                 traces.push({
-                    x: months,
-                    y: months.map((_, index) => monthlyData[index][branch.branch_num] || 0),
+                    x: monthsWithData,
+                    y: branchData,
                     type: 'scatter',
                     mode: 'lines+markers',
                     name: this.getBranchArabicName(branch.branch_num),
@@ -408,11 +458,16 @@ class DashboardService {
                     title: { text: 'الإيرادات (ر.س)', font: { family: 'Tajawal' } },
                     tickfont: { family: 'Tajawal' }
                 },
-                margin: { l: 60, r: 30, t: 40, b: 60 },
+                margin: { l: 60, r: 30, t: 80, b: 60 }, // Increased top margin for legend
                 height: 250,
                 showlegend: true,
                 legend: {
-                    font: { family: 'Tajawal', size: 10 }
+                    font: { family: 'Tajawal', size: 10 },
+                    orientation: 'h', // Horizontal legend
+                    x: 0.5, // Center horizontally
+                    y: 1.02, // Position above the chart
+                    xanchor: 'center',
+                    yanchor: 'bottom'
                 }
             };
             
@@ -434,23 +489,22 @@ class DashboardService {
         try {
             console.log('Updating category chart - sales by category');
 
-            // Get all invoices for the current month
-            const now = new Date();
-            const fromDate = new Date(now.getFullYear(), now.getMonth(), 1);
-            const toDate = now;
+            // Get ALL invoices (not filtered by date)
+            const { data: allInvoices, error } = await db.supabase
+                .from('invoices')
+                .select('*');
 
-            const fromDateStr = fromDate.toISOString().split('T')[0];
-            const toDateStr = toDate.toISOString().split('T')[0];
+            if (error) {
+                console.error('Error fetching invoices for category chart:', error);
+                this.createEmptyChart('categoryChart', 'خطأ في تحميل البيانات');
+                return;
+            }
 
-            console.log('Date range for category chart:', { fromDateStr, toDateStr });
-
-            // Get all invoices for the period
-            const allInvoices = await db.getDashboardInvoices(fromDateStr, toDateStr, 'all');
-            console.log('All invoices for category chart:', allInvoices);
+            console.log('All invoices for category chart:', allInvoices.length);
 
             // Filter valid invoices (paid and unpaid)
             const validInvoices = allInvoices.filter(invoice => invoice.status === 'paid' || invoice.status === 'unpaid');
-            console.log('Valid invoices for category chart:', validInvoices);
+            console.log('Valid invoices for category chart:', validInvoices.length);
 
             // Get all products for category mapping
             const products = await db.getProducts();

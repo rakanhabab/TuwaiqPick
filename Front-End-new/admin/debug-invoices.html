@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>تصحيح بيانات الفواتير</title>
+    <style>
+        body { font-family: 'Tajawal', sans-serif; padding: 20px; }
+        .invoice-item { 
+            margin: 10px 0; 
+            padding: 10px; 
+            border: 1px solid #ddd; 
+            border-radius: 5px; 
+            background-color: #f9f9f9; 
+        }
+        .timestamp { color: #e74c3c; font-weight: bold; }
+        .amount { color: #27ae60; font-weight: bold; }
+        .status { color: #3498db; font-weight: bold; }
+        .branch { color: #9b59b6; font-weight: bold; }
+        .error { color: #e74c3c; background-color: #fdf2f2; padding: 10px; border-radius: 5px; }
+        .success { color: #27ae60; background-color: #f0f9ff; padding: 10px; border-radius: 5px; }
+    </style>
+</head>
+<body>
+    <h1>تصحيح بيانات الفواتير - فحص التواريخ</h1>
+    <div id="results"></div>
+
+    <script type="module">
+        import { db } from '../js/database.js';
+
+        const resultsDiv = document.getElementById('results');
+
+        function addResult(message, type = 'info') {
+            const div = document.createElement('div');
+            div.className = type;
+            div.textContent = message;
+            resultsDiv.appendChild(div);
+            console.log(`[${type.toUpperCase()}] ${message}`);
+        }
+
+        function addInvoiceItem(invoice) {
+            const div = document.createElement('div');
+            div.className = 'invoice-item';
+            
+            const timestamp = new Date(invoice.timestamp);
+            const monthName = timestamp.toLocaleDateString('ar-SA', { month: 'long' });
+            const year = timestamp.getFullYear();
+            
+            div.innerHTML = `
+                <div><strong>رقم الفاتورة:</strong> ${invoice.invoice_num}</div>
+                <div><strong>التاريخ الأصلي:</strong> <span class="timestamp">${invoice.timestamp}</span></div>
+                <div><strong>التاريخ المحول:</strong> <span class="timestamp">${timestamp.toISOString()}</span></div>
+                <div><strong>الشهر:</strong> <span class="timestamp">${monthName} ${year}</span></div>
+                <div><strong>رقم الشهر:</strong> <span class="timestamp">${timestamp.getMonth()}</span></div>
+                <div><strong>المبلغ:</strong> <span class="amount">${invoice.total_amount} ر.س</span></div>
+                <div><strong>الحالة:</strong> <span class="status">${invoice.status}</span></div>
+                <div><strong>الفرع:</strong> <span class="branch">${invoice.branch_num}</span></div>
+            `;
+            
+            resultsDiv.appendChild(div);
+        }
+
+        async function debugInvoices() {
+            try {
+                addResult('بدء فحص بيانات الفواتير...', 'success');
+
+                // Get all invoices
+                const { data: invoices, error } = await db.supabase
+                    .from('invoices')
+                    .select('*')
+                    .order('timestamp', { ascending: false })
+                    .limit(20);
+
+                if (error) {
+                    addResult(`خطأ في جلب الفواتير: ${error.message}`, 'error');
+                    return;
+                }
+
+                addResult(`تم جلب ${invoices.length} فاتورة`, 'success');
+
+                // Group by month
+                const monthlyData = {};
+                const months = ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 
+                               'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'];
+
+                invoices.forEach(invoice => {
+                    try {
+                        const timestamp = new Date(invoice.timestamp);
+                        const monthIndex = timestamp.getMonth();
+                        const monthName = months[monthIndex];
+                        const year = timestamp.getFullYear();
+                        const key = `${monthName} ${year}`;
+
+                        if (!monthlyData[key]) {
+                            monthlyData[key] = {
+                                count: 0,
+                                total: 0,
+                                invoices: []
+                            };
+                        }
+
+                        monthlyData[key].count++;
+                        monthlyData[key].total += Number(invoice.total_amount) || 0;
+                        monthlyData[key].invoices.push(invoice);
+                    } catch (error) {
+                        addResult(`خطأ في معالجة فاتورة ${invoice.invoice_num}: ${error.message}`, 'error');
+                    }
+                });
+
+                addResult('=== توزيع الفواتير حسب الشهر ===', 'success');
+                Object.entries(monthlyData).forEach(([month, data]) => {
+                    addResult(`${month}: ${data.count} فاتورة - إجمالي: ${data.total.toFixed(2)} ر.س`, 'success');
+                });
+
+                addResult('=== تفاصيل الفواتير ===', 'success');
+                invoices.forEach(invoice => {
+                    addInvoiceItem(invoice);
+                });
+
+                // Test date parsing
+                addResult('=== اختبار تحليل التواريخ ===', 'success');
+                const testDates = [
+                    '2025-01-15 10:30:00',
+                    '2025-02-20 14:45:00',
+                    '2025-03-10 09:15:00',
+                    '2025-04-05 16:20:00',
+                    '2025-05-12 11:30:00',
+                    '2025-06-18 13:45:00',
+                    '2025-07-25 08:30:00',
+                    '2025-08-30 15:20:00',
+                    '2025-09-08 12:10:00',
+                    '2025-10-14 17:35:00',
+                    '2025-11-22 10:50:00',
+                    '2025-12-03 14:25:00'
+                ];
+
+                testDates.forEach(dateStr => {
+                    const date = new Date(dateStr);
+                    const monthIndex = date.getMonth();
+                    const monthName = months[monthIndex];
+                    addResult(`اختبار: ${dateStr} → ${monthName} (${monthIndex})`, 'success');
+                });
+
+            } catch (error) {
+                addResult(`خطأ عام: ${error.message}`, 'error');
+                console.error('Debug error:', error);
+            }
+        }
+
+        // Run debug when page loads
+        debugInvoices();
+    </script>
+</body>
+</html>
