@@ -51,11 +51,11 @@ async function initializePage() {
             loadPaymentMethodsFromDatabase()
         ]);
         
-        // Setup UI components
+                // Setup UI components
         setupSmoothScrolling();
         setupAnimations();
         setupMap();
-        setupSparklines();
+        setupPlotlyCharts();
         setupAccountDropdown();
         setupQRCode();
         setupContactForm();
@@ -74,14 +74,26 @@ async function initializePage() {
 async function checkUserLogin() {
     const currentUserStr = localStorage.getItem('current_user');
     if (!currentUserStr) {
+        console.log('❌ No user data found in localStorage');
         return false;
     }
 
     try {
         currentUser = JSON.parse(currentUserStr);
+        console.log('🔍 Parsed user data:', currentUser);
+        
+        // Set current user in database service
+        if (currentUser && currentUser.id) {
+            db.setCurrentUser(currentUser.id);
+            console.log('✅ Current user set in database service:', currentUser.id);
+        } else {
+            console.error('❌ Invalid user data - missing ID');
+            return false;
+        }
+        
         return currentUser && currentUser.id;
     } catch (error) {
-        console.error('Error parsing user data:', error);
+        console.error('❌ Error parsing user data:', error);
         return false;
     }
 }
@@ -148,29 +160,31 @@ async function loadUserKPIsFromDatabase() {
         const branchVisits = {};
         invoices.data?.forEach(invoice => {
             if (invoice.branch_id) {
-                branchVisits[invoice.branch_id] = (branchVisits[invoice.branch_id] || 0) + 1;
+                let branchName = 'فرع غير محدد';
+                
+                // Map branch IDs to real names
+                switch (invoice.branch_id) {
+                    case '9852c8e7-0be0-4f5c-aa8d-68e289fe9552':
+                        branchName = 'فرع العليا';
+                        break;
+                    case 'af73abd0-04f7-44bb-b0d6-396a58cbd33a':
+                        branchName = 'فرع الياسمين';
+                        break;
+                    case '130df862-b9e2-4233-8d67-d87a3d3b8323':
+                        branchName = 'فرع الملقا';
+                        break;
+                }
+                
+                branchVisits[branchName] = (branchVisits[branchName] || 0) + 1;
             }
         });
 
         let mostVisitedBranch = 'غير محدد';
         let maxVisits = 0;
-        for (const [branchId, visits] of Object.entries(branchVisits)) {
+        for (const [branchName, visits] of Object.entries(branchVisits)) {
             if (visits > maxVisits) {
                 maxVisits = visits;
-                mostVisitedBranch = branchId;
-            }
-        }
-
-        // Get branch name if we have a most visited branch
-        if (mostVisitedBranch !== 'غير محدد') {
-            const { data: branch } = await db.supabase
-                .from('branches')
-                .select('name')
-                .eq('id', mostVisitedBranch)
-                .single();
-            
-            if (branch) {
-                mostVisitedBranch = branch.name;
+                mostVisitedBranch = branchName;
             }
         }
 
@@ -251,7 +265,7 @@ async function loadInvoicesFromDatabase() {
             .from('invoices')
             .select(`
                 *,
-                branches(name, address, lat, long)
+                branches!inner(name, address, lat, long)
             `)
             .eq('user_id', currentUser.id)
             .order('timestamp', { ascending: false })
@@ -391,102 +405,441 @@ async function setupMap() {
     }
 }
 
-// Setup sparklines with real data
-async function setupSparklines() {
+// Setup Plotly charts with real data
+async function setupPlotlyCharts() {
     try {
         if (!currentUser) return;
+        
+        // Check if Plotly is loaded
+        if (typeof Plotly === 'undefined') {
+            console.error('❌ Plotly library not loaded');
+            return;
+        }
+        
+        console.log('✅ Plotly library is available');
 
-        // Get invoice data for sparklines
-        const { data: invoices } = await db.supabase
+        // Get invoice data for charts with branch information
+        const { data: invoices, error } = await db.supabase
             .from('invoices')
-            .select('total_amount, timestamp')
+            .select(`
+                total_amount, 
+                timestamp,
+                branch_id
+            `)
             .eq('user_id', currentUser.id)
             .order('timestamp', { ascending: true });
 
-        if (!invoices || invoices.length === 0) {
-            // Use default data if no invoices
-            drawDefaultSparklines();
+        if (error) {
+            console.error('❌ Error fetching invoices:', error);
+            createEmptyCharts();
             return;
         }
 
-        // Generate sparkline data from real invoices
+        if (!invoices || invoices.length === 0) {
+            // Show empty charts if no data
+            console.log('📊 No invoices found in database for user:', currentUser.id);
+            createEmptyCharts();
+            return;
+        }
+
+        // Generate chart data from real invoices
         const monthlyData = {};
+        const branchVisits = {};
+        
+        console.log('📊 Processing invoices for charts:', invoices.length, 'invoices from database');
+        
         invoices.forEach(invoice => {
             const month = new Date(invoice.timestamp).getMonth();
             monthlyData[month] = (monthlyData[month] || 0) + invoice.total_amount;
+            
+            // Count visits per branch using branch_id with real names
+            if (invoice.branch_id) {
+                let branchName = 'فرع غير محدد';
+                
+                // Map branch IDs to real names
+                switch (invoice.branch_id) {
+                    case '9852c8e7-0be0-4f5c-aa8d-68e289fe9552':
+                        branchName = 'فرع العليا';
+                        break;
+                    case 'af73abd0-04f7-44bb-b0d6-396a58cbd33a':
+                        branchName = 'فرع الياسمين';
+                        break;
+                    case '130df862-b9e2-4233-8d67-d87a3d3b8323':
+                        branchName = 'فرع الملقا';
+                        break;
+                }
+                
+                branchVisits[branchName] = (branchVisits[branchName] || 0) + 1;
+            }
         });
+        
+        console.log('📊 Raw monthly data:', monthlyData);
+        console.log('🏢 Raw branch visits:', branchVisits);
+        console.log('📅 Available months in data:', Object.keys(monthlyData).map(m => parseInt(m) + 1));
 
-        // Convert to array for sparklines
-        const spendData = Array.from({ length: 12 }, (_, i) => monthlyData[i] || 0);
-        const visitsData = Array.from({ length: 12 }, (_, i) => 
-            invoices.filter(inv => new Date(inv.timestamp).getMonth() === i).length
-        );
+        // Month names for x-axis - January to August
+        const monthNames = ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 
+                           'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'];
+        const chartMonths = monthNames.slice(0, 8); // January to August
+        
+        // Convert to array for charts - show all months from January to August
+        const spendData = [];
+        const visitsData = [];
+        
+        // Get data for months 0-7 (January to August)
+        for (let i = 0; i < 8; i++) {
+            const monthSpend = monthlyData[i] || 0;
+            const monthVisits = invoices.filter(inv => new Date(inv.timestamp).getMonth() === i).length;
+            
+            spendData.push(monthSpend);
+            visitsData.push(monthVisits);
+        }
+        
+        console.log('📊 Chart data for January-August:');
+        console.log('  - Spend data:', spendData);
+        console.log('  - Visits data:', visitsData);
+        console.log('  - Months:', chartMonths);
 
-        // Draw sparklines
-        drawSparkline(document.getElementById('sparkSpend'), spendData);
-        drawSparkline(document.getElementById('sparkVisits'), visitsData);
-        drawSparkline(document.getElementById('sparkTop'), visitsData); // Use visits data for top branch
-        drawSparkline(document.getElementById('sparkAvg'), spendData.map((spend, i) => 
-            visitsData[i] > 0 ? spend / visitsData[i] : 0
-        ));
+        // Get all branches for pie chart (not just top 3)
+        const allBranches = Object.entries(branchVisits)
+            .sort(([,a], [,b]) => b - a)
+            .map(([name, visits]) => ({ name, visits }));
+            
+        console.log('🥧 All branches for pie chart from database:', allBranches);
+        
+        // Use real data from database
+        console.log('📊 Using real data from database');
+        
+        // If no branch data from database, show empty state
+        if (allBranches.length === 0) {
+            console.log('🏢 No branch visits found in database');
+        }
+        
+        // If no spend/visits data, show empty charts
+        if (spendData.every(val => val === 0) && visitsData.every(val => val === 0)) {
+            console.log('📊 No spend/visits data found in database');
+        }
+        
+        // Log final processed data
+        console.log('📊 Final processed data from database:');
+        console.log('  - Spend data:', spendData);
+        console.log('  - Visits data:', visitsData);
+        console.log('  - Chart months:', chartMonths);
+        console.log('  - Branch visits:', branchVisits);
+        console.log('  - All branches for pie chart:', allBranches);
+        
+        console.log('🏢 Final branch data for pie chart:', allBranches);
+        console.log('📊 Total invoices processed:', invoices.length);
 
-        console.log('✅ Sparklines setup successfully');
+        // Clear existing charts first
+        const containers = ['spendChart', 'visitsChart', 'topChart', 'avgChart'];
+        containers.forEach(id => {
+            const container = document.getElementById(id);
+            if (container) {
+                container.innerHTML = '';
+            }
+        });
+        
+        // Create Plotly charts with delay
+        setTimeout(() => {
+            console.log('🎨 Creating charts with data...');
+            createSpendChart(spendData, chartMonths);
+            createVisitsChart(visitsData, chartMonths);
+            createTopChart(allBranches); // Pass all branch data for pie chart
+            createAvgChart(spendData.map((spend, i) => 
+                visitsData[i] > 0 ? spend / visitsData[i] : 0
+            ), chartMonths);
+        }, 100);
+        
+        console.log('✅ All charts created successfully');
+
+        console.log('✅ Plotly charts setup successfully with real database data');
+        console.log('📈 Final spend data:', spendData);
+        console.log('📊 Final visits data:', visitsData);
+        console.log('🏢 Final branch data:', allBranches);
+        console.log('📅 Final months:', chartMonths);
+        
+        // Force charts to redraw after a short delay
+        setTimeout(() => {
+            try {
+                Plotly.Plots.resize('spendChart');
+                Plotly.Plots.resize('visitsChart');
+                Plotly.Plots.resize('topChart');
+                Plotly.Plots.resize('avgChart');
+            } catch (error) {
+                console.log('Charts already rendered');
+            }
+        }, 500);
         
     } catch (error) {
-        console.error('Error setting up sparklines:', error);
-        drawDefaultSparklines();
+        console.error('Error setting up Plotly charts:', error);
+        createEmptyCharts();
     }
 }
 
-// Draw default sparklines
-function drawDefaultSparklines() {
-    const sparklineData = {
-        spend: [65, 59, 80, 81, 56, 55, 40, 45, 60, 70, 75, 80],
-        visits: [28, 48, 40, 19, 86, 27, 90, 45, 60, 70, 75, 80],
-        top: [45, 55, 65, 75, 85, 95, 85, 75, 65, 55, 45, 35],
-        avg: [30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85]
+// Create spend chart
+function createSpendChart(data, months) {
+    console.log('📈 Creating spend chart with data:', data, 'months:', months);
+    
+    const trace = {
+        x: months,
+        y: data,
+        type: 'scatter',
+        mode: 'lines+markers',
+        line: {
+            color: '#8b5cf6',
+            width: 3
+        },
+        marker: {
+            color: '#8b5cf6',
+            size: 6
+        },
+        fill: 'tonexty',
+        fillcolor: 'rgba(139, 92, 246, 0.1)'
     };
 
-    Object.keys(sparklineData).forEach(key => {
-        const canvas = document.getElementById(`spark${key.charAt(0).toUpperCase() + key.slice(1)}`);
-        if (canvas) {
-            drawSparkline(canvas, sparklineData[key]);
+    const layout = {
+        margin: { l: 30, r: 20, t: 20, b: 30 },
+        showlegend: false,
+        paper_bgcolor: 'transparent',
+        plot_bgcolor: 'transparent',
+        autosize: true,
+        xaxis: {
+            showgrid: false,
+            showticklabels: true,
+            zeroline: false,
+            tickfont: { size: 10, color: '#6b7280' },
+            tickangle: -45
+        },
+        yaxis: {
+            showgrid: false,
+            showticklabels: true,
+            zeroline: false,
+            tickfont: { size: 10, color: '#6b7280' }
         }
-    });
+    };
+
+    const container = document.getElementById('spendChart');
+    if (!container) {
+        console.error('❌ spendChart container not found');
+        return;
+    }
+    
+    Plotly.newPlot('spendChart', [trace], layout, { displayModeBar: false, responsive: true });
+    console.log('✅ Spend chart created successfully');
 }
 
-// Draw sparkline
-function drawSparkline(canvas, data) {
-    if (!canvas) return;
+// Create visits chart
+function createVisitsChart(data, months) {
+    console.log('📊 Creating visits chart with data:', data, 'months:', months);
     
-    const ctx = canvas.getContext('2d');
-    const width = canvas.width;
-    const height = canvas.height;
+    const trace = {
+        x: months,
+        y: data,
+        type: 'bar',
+        marker: {
+            color: '#10b981',
+            line: {
+                color: '#059669',
+                width: 1
+            }
+        }
+    };
+
+    const layout = {
+        margin: { l: 30, r: 20, t: 20, b: 30 },
+        showlegend: false,
+        paper_bgcolor: 'transparent',
+        plot_bgcolor: 'transparent',
+        xaxis: {
+            showgrid: false,
+            showticklabels: true,
+            zeroline: false,
+            tickfont: { size: 10, color: '#6b7280' },
+            tickangle: -45
+        },
+        yaxis: {
+            showgrid: false,
+            showticklabels: true,
+            zeroline: false,
+            tickfont: { size: 10, color: '#6b7280' }
+        }
+    };
+
+    const container = document.getElementById('visitsChart');
+    if (!container) {
+        console.error('❌ visitsChart container not found');
+        return;
+    }
     
-    ctx.clearRect(0, 0, width, height);
+    Plotly.newPlot('visitsChart', [trace], layout, { displayModeBar: false, responsive: true });
+    console.log('✅ Visits chart created successfully');
+}
+
+// Create branch visits pie chart
+function createTopChart(branchData) {
+    console.log('🥧 Creating branch visits pie chart with data:', branchData);
     
-    if (data.length === 0) return;
-    
-    const max = Math.max(...data);
-    const min = Math.min(...data);
-    const range = max - min || 1;
-    
-    ctx.strokeStyle = '#8b5cf6';
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    
-    data.forEach((value, index) => {
-        const x = (index / (data.length - 1)) * width;
-        const y = height - ((value - min) / range) * height;
+    // If no branch data, show empty state
+    if (!branchData || branchData.length === 0) {
+        const emptyTrace = {
+            values: [1],
+            labels: ['لا توجد بيانات'],
+            type: 'pie',
+            marker: {
+                colors: ['#e5e7eb']
+            },
+            textinfo: 'label',
+            textfont: { size: 14, color: '#6b7280' },
+            hole: 0.4
+        };
+
+        const layout = {
+            margin: { l: 10, r: 10, t: 10, b: 10 },
+            showlegend: false,
+            paper_bgcolor: 'transparent',
+            plot_bgcolor: 'transparent'
+        };
+
+        const container = document.getElementById('topChart');
+        if (!container) {
+            console.error('❌ topChart container not found');
+            return;
+        }
         
-        if (index === 0) {
-            ctx.moveTo(x, y);
-        } else {
-            ctx.lineTo(x, y);
+        Plotly.newPlot('topChart', [emptyTrace], layout, { displayModeBar: false, responsive: true });
+        console.log('✅ Empty top chart created successfully');
+        return;
+    }
+
+    // Calculate percentages and format labels
+    const totalVisits = branchData.reduce((sum, branch) => sum + branch.visits, 0);
+    const values = branchData.map(branch => branch.visits);
+    const labels = branchData.map(branch => {
+        const percentage = ((branch.visits / totalVisits) * 100).toFixed(1);
+        return `${branch.name} (${percentage}%)`;
+    });
+
+    // Create pie chart trace with dynamic colors
+    const colors = [
+        '#f97316', '#fb923c', '#fdba74', '#fbbf24', '#f59e0b',
+        '#d97706', '#92400e', '#78350f', '#451a03', '#7c2d12'
+    ];
+    
+    const trace = {
+        values: values,
+        labels: branchData.map(branch => branch.name), // Use original names for legend
+        type: 'pie',
+        marker: {
+            colors: colors.slice(0, values.length)
+        },
+        textinfo: 'percent',
+        textfont: { size: 11, color: '#ffffff' },
+        hole: 0.4,
+        textposition: 'inside',
+        hoverinfo: 'label+percent+value'
+    };
+
+    const layout = {
+        margin: { l: 10, r: 10, t: 10, b: 10 },
+        showlegend: true,
+        legend: {
+            x: 0.5,
+            y: -0.1,
+            xanchor: 'center',
+            orientation: 'h',
+            font: { size: 10 }
+        },
+        paper_bgcolor: 'transparent',
+        plot_bgcolor: 'transparent',
+        autosize: true,
+        height: 150
+    };
+
+    const container = document.getElementById('topChart');
+    if (!container) {
+        console.error('❌ topChart container not found');
+        return;
+    }
+    
+    Plotly.newPlot('topChart', [trace], layout, { displayModeBar: false, responsive: true });
+    console.log('✅ Top chart created successfully');
+}
+
+// Create average chart
+function createAvgChart(data, months) {
+    console.log('📊 Creating average chart with data:', data, 'months:', months);
+    
+    const trace = {
+        x: months,
+        y: data,
+        type: 'scatter',
+        mode: 'lines+markers',
+        line: {
+            color: '#06b6d4',
+            width: 3
+        },
+        marker: {
+            color: '#06b6d4',
+            size: 6
+        },
+        fill: 'tonexty',
+        fillcolor: 'rgba(6, 182, 212, 0.1)'
+    };
+
+    const layout = {
+        margin: { l: 30, r: 20, t: 20, b: 30 },
+        showlegend: false,
+        paper_bgcolor: 'transparent',
+        plot_bgcolor: 'transparent',
+        xaxis: {
+            showgrid: false,
+            showticklabels: true,
+            zeroline: false,
+            tickfont: { size: 10, color: '#6b7280' },
+            tickangle: -45
+        },
+        yaxis: {
+            showgrid: false,
+            showticklabels: true,
+            zeroline: false,
+            tickfont: { size: 10, color: '#6b7280' }
+        }
+    };
+
+    const container = document.getElementById('avgChart');
+    if (!container) {
+        console.error('❌ avgChart container not found');
+        return;
+    }
+    
+    Plotly.newPlot('avgChart', [trace], layout, { displayModeBar: false, responsive: true });
+    console.log('✅ Average chart created successfully');
+}
+
+// Create empty charts when no data is available
+function createEmptyCharts() {
+    console.log('📊 No invoice data found in database, creating empty charts');
+    
+    const months = ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس'];
+    const emptyData = Array(8).fill(0);
+    
+    // Clear existing charts first
+    const containers = ['spendChart', 'visitsChart', 'topChart', 'avgChart'];
+    containers.forEach(id => {
+        const container = document.getElementById(id);
+        if (container) {
+            container.innerHTML = '';
         }
     });
     
-    ctx.stroke();
+    // Create empty charts with zero data for all months
+    setTimeout(() => {
+        createSpendChart(emptyData, months);
+        createVisitsChart(emptyData, months);
+        createTopChart([]); // Empty branch data
+        createAvgChart(emptyData, months);
+    }, 100);
 }
 
 // Setup account dropdown
@@ -899,6 +1252,14 @@ async function testRAGConnection() {
 // Initialize when DOM is loaded
 document.addEventListener('DOMContentLoaded', async () => {
     console.log('🚀 Initializing user page...');
+    
+    // Test Plotly availability first
+    if (typeof Plotly === 'undefined') {
+        console.error('❌ Plotly library not loaded');
+        alert('خطأ: مكتبة الرسوم البيانية غير محملة');
+        return;
+    }
+    console.log('✅ Plotly library is available');
     
     // Test RAG API connection first
     const isConnected = await testRAGConnection();

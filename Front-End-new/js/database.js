@@ -8,18 +8,32 @@ const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 // Create Supabase client
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY)
 
-// Test user ID for local development
-const TEST_USER_ID = 'test-user-123'
-
 // Database Service Class
 class DatabaseService {
     constructor() {
         this.supabase = supabase
-        this.userId = TEST_USER_ID
+        this.userId = null
+    }
+
+    // Set current user ID
+    setCurrentUser(userId) {
+        this.userId = userId
+        console.log('✅ Database service: User ID set to:', userId)
+    }
+
+    // Get current user ID
+    getCurrentUserId() {
+        return this.userId
     }
 
     // ===== USERS =====
     async getCurrentUser() {
+        if (!this.userId) {
+            console.error('❌ No user ID set in database service')
+            return null
+        }
+        
+        console.log('🔍 Fetching user data for ID:', this.userId)
         const { data, error } = await this.supabase
             .from('users')
             .select('*')
@@ -27,9 +41,11 @@ class DatabaseService {
             .single()
         
         if (error) {
-            console.error('Error fetching user:', error)
+            console.error('❌ Error fetching user:', error)
             return null
         }
+        
+        console.log('✅ User data fetched successfully:', data)
         return data
     }
 
@@ -129,6 +145,12 @@ class DatabaseService {
 
     // ===== INVOICES =====
     async getInvoices() {
+        if (!this.userId) {
+            console.error('❌ No user ID set for invoices')
+            return []
+        }
+        
+        console.log('🔍 Fetching invoices for user ID:', this.userId)
         const { data, error } = await this.supabase
             .from('invoices')
             .select(`
@@ -139,9 +161,11 @@ class DatabaseService {
             .order('timestamp', { ascending: false })
         
         if (error) {
-            console.error('Error fetching invoices:', error)
+            console.error('❌ Error fetching invoices:', error)
             return []
         }
+        
+        console.log('✅ Invoices fetched successfully:', data?.length || 0, 'invoices')
         return data
     }
 

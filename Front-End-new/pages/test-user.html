@@ -84,6 +84,7 @@
             <button class="test-button" onclick="testNotifications()">اختبار الإشعارات</button>
             <button class="test-button" onclick="testAnimations()">اختبار الانيميشن</button>
             <button class="test-button" onclick="testResponsive()">اختبار التجاوب</button>
+            <button class="test-button" onclick="testPlotlyCharts()">اختبار الرسوم البيانية</button>
             <div id="ui-result" class="test-result"></div>
         </div>
 
@@ -288,6 +289,58 @@
                 result.innerHTML = '<span class="success">✅ التجاوب للتابلت يعمل</span>';
             } else {
                 result.innerHTML = '<span class="success">✅ التجاوب للديسكتوب يعمل</span>';
+            }
+        };
+
+        // اختبار الرسوم البيانية
+        window.testPlotlyCharts = function() {
+            const result = document.getElementById('ui-result');
+            result.innerHTML = '<span class="info">جاري اختبار الرسوم البيانية...</span>';
+            
+            try {
+                // اختبار وجود Plotly
+                if (typeof Plotly === 'undefined') {
+                    throw new Error('Plotly library not loaded');
+                }
+
+                // إنشاء رسم بياني تجريبي
+                const testData = [10, 20, 15, 25, 30, 35, 40, 45, 50, 55, 60, 65];
+                const months = ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 
+                               'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'];
+
+                const trace = {
+                    x: months,
+                    y: testData,
+                    type: 'scatter',
+                    mode: 'lines+markers',
+                    line: { color: '#8b5cf6', width: 3 },
+                    marker: { color: '#8b5cf6', size: 6 }
+                };
+
+                const layout = {
+                    margin: { l: 20, r: 20, t: 20, b: 20 },
+                    showlegend: false,
+                    paper_bgcolor: 'rgba(0,0,0,0)',
+                    plot_bgcolor: 'rgba(0,0,0,0)',
+                    xaxis: { showgrid: false, showticklabels: false, zeroline: false },
+                    yaxis: { showgrid: false, showticklabels: false, zeroline: false }
+                };
+
+                // إنشاء عنصر مؤقت للاختبار
+                const testDiv = document.createElement('div');
+                testDiv.id = 'testChart';
+                testDiv.style.cssText = 'width: 200px; height: 100px; margin: 10px 0;';
+                document.querySelector('.test-container').appendChild(testDiv);
+
+                Plotly.newPlot('testChart', [trace], layout, { displayModeBar: false });
+
+                setTimeout(() => {
+                    testDiv.remove();
+                    result.innerHTML = '<span class="success">✅ الرسوم البيانية تعمل بشكل صحيح</span>';
+                }, 2000);
+
+            } catch (error) {
+                result.innerHTML = `<span class="error">❌ فشل في الرسوم البيانية: ${error.message}</span>`;
             }
         };
 
