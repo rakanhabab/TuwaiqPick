@@ -1,33 +1,11 @@
 // ===== USER PAGE JAVASCRIPT WITH DATABASE INTEGRATION =====
 import { db } from './database.js'
 
-// Page content for language toggle
-const pageContent = {
-    ar: {
-        title: "صفحة المستخدم",
-        welcome: "مرحباً بك في صفحة المستخدم",
-        description: "هذه صفحة المستخدم لتصميم دكان فيجين. يمكنك إضافة المحتوى الخاص بك هنا.",
-        statsTitle: "إحصائيات المستخدم",
-        contentTitle: "قسم المحتوى",
-        contentText: "أضف المحتوى الخاص بك في هذا القسم."
-    },
-    en: {
-        title: "User Page",
-        welcome: "Welcome to the User Page",
-        description: "This is the user page for Dukkan Vision design. You can add your content here.",
-        statsTitle: "User Statistics",
-        contentTitle: "Content Section",
-        contentText: "Add your content in this section."
-    }
-};
-
 // User account data (will be loaded from database)
 let userAccount = {
     name: "",
     email: "",
-    phone: "",
-    balance: "0.00 ر.س",
-    lastLogin: ""
+    balance: "0.00 ر.س"
 };
 
 // Current user data
@@ -59,11 +37,10 @@ async function initializePage() {
         setupAccountDropdown();
         setupQRCode();
         setupContactForm();
-        setupProductSearch();
         setupInvoices();
         setupChat();
         
-        console.log('✅ User page initialized successfully');
+
     } catch (error) {
         console.error('❌ Error initializing user page:', error);
         showErrorMessage('حدث خطأ في تحميل البيانات. يرجى المحاولة مرة أخرى.');
@@ -74,18 +51,17 @@ async function initializePage() {
 async function checkUserLogin() {
     const currentUserStr = localStorage.getItem('current_user');
     if (!currentUserStr) {
-        console.log('❌ No user data found in localStorage');
         return false;
     }
 
     try {
         currentUser = JSON.parse(currentUserStr);
-        console.log('🔍 Parsed user data:', currentUser);
+
         
         // Set current user in database service
         if (currentUser && currentUser.id) {
             db.setCurrentUser(currentUser.id);
-            console.log('✅ Current user set in database service:', currentUser.id);
+
         } else {
             console.error('❌ Invalid user data - missing ID');
             return false;
@@ -122,7 +98,7 @@ async function loadUserDataFromDatabase() {
         localStorage.setItem('current_user', JSON.stringify(currentUser));
 
         displayUserInfo(user);
-        console.log('✅ User data loaded successfully');
+
         
     } catch (error) {
         console.error('Error loading user data:', error);
@@ -196,7 +172,7 @@ async function loadUserKPIsFromDatabase() {
             mostVisitedBranch: mostVisitedBranch
         });
 
-        console.log('✅ User KPIs loaded successfully');
+
         
     } catch (error) {
         console.error('Error loading user KPIs:', error);
@@ -249,9 +225,7 @@ function displayUserInfo(user) {
     userAccount = {
         name: `${user.first_name || ''} ${user.last_name || ''}`.trim(),
         email: user.email || '',
-        phone: user.phone || '',
-        balance: db.formatCurrency(user.owed_balance || 0),
-        lastLogin: new Date().toLocaleDateString('ar-SA')
+        balance: db.formatCurrency(user.owed_balance || 0)
     };
 }
 
@@ -277,7 +251,7 @@ async function loadInvoicesFromDatabase() {
         }
 
         displayInvoices(invoices || []);
-        console.log('✅ Invoices loaded successfully');
+
         
     } catch (error) {
         console.error('Error loading invoices:', error);
@@ -316,16 +290,7 @@ function displayInvoices(invoices) {
     `).join('');
 }
 
-// Get status text in Arabic
-function getStatusText(status) {
-    const statusMap = {
-        'pending': 'في الانتظار',
-        'paid': 'مدفوع',
-        'cancelled': 'ملغي',
-        'refunded': 'مسترد'
-    };
-    return statusMap[status] || status;
-}
+
 
 // Load payment methods from database
 async function loadPaymentMethodsFromDatabase() {
@@ -346,7 +311,7 @@ async function loadPaymentMethodsFromDatabase() {
         }
 
         displayPaymentMethods(paymentMethods || []);
-        console.log('✅ Payment methods loaded successfully');
+
         
     } catch (error) {
         console.error('Error loading payment methods:', error);
@@ -398,7 +363,7 @@ async function setupMap() {
                 }
             });
             
-            console.log('✅ Map setup successfully');
+
         } catch (error) {
             console.error('Error setting up map:', error);
         }
@@ -415,8 +380,6 @@ async function setupPlotlyCharts() {
             console.error('❌ Plotly library not loaded');
             return;
         }
-        
-        console.log('✅ Plotly library is available');
 
         // Get invoice data for charts with branch information
         const { data: invoices, error } = await db.supabase
@@ -437,16 +400,13 @@ async function setupPlotlyCharts() {
 
         if (!invoices || invoices.length === 0) {
             // Show empty charts if no data
-            console.log('📊 No invoices found in database for user:', currentUser.id);
-            createEmptyCharts();
-            return;
+                    createEmptyCharts();
+        return;
         }
 
         // Generate chart data from real invoices
         const monthlyData = {};
         const branchVisits = {};
-        
-        console.log('📊 Processing invoices for charts:', invoices.length, 'invoices from database');
         
         invoices.forEach(invoice => {
             const month = new Date(invoice.timestamp).getMonth();
@@ -472,10 +432,6 @@ async function setupPlotlyCharts() {
                 branchVisits[branchName] = (branchVisits[branchName] || 0) + 1;
             }
         });
-        
-        console.log('📊 Raw monthly data:', monthlyData);
-        console.log('🏢 Raw branch visits:', branchVisits);
-        console.log('📅 Available months in data:', Object.keys(monthlyData).map(m => parseInt(m) + 1));
 
         // Month names for x-axis - January to August
         const monthNames = ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 
@@ -495,41 +451,10 @@ async function setupPlotlyCharts() {
             visitsData.push(monthVisits);
         }
         
-        console.log('📊 Chart data for January-August:');
-        console.log('  - Spend data:', spendData);
-        console.log('  - Visits data:', visitsData);
-        console.log('  - Months:', chartMonths);
-
         // Get all branches for pie chart (not just top 3)
         const allBranches = Object.entries(branchVisits)
             .sort(([,a], [,b]) => b - a)
             .map(([name, visits]) => ({ name, visits }));
-            
-        console.log('🥧 All branches for pie chart from database:', allBranches);
-        
-        // Use real data from database
-        console.log('📊 Using real data from database');
-        
-        // If no branch data from database, show empty state
-        if (allBranches.length === 0) {
-            console.log('🏢 No branch visits found in database');
-        }
-        
-        // If no spend/visits data, show empty charts
-        if (spendData.every(val => val === 0) && visitsData.every(val => val === 0)) {
-            console.log('📊 No spend/visits data found in database');
-        }
-        
-        // Log final processed data
-        console.log('📊 Final processed data from database:');
-        console.log('  - Spend data:', spendData);
-        console.log('  - Visits data:', visitsData);
-        console.log('  - Chart months:', chartMonths);
-        console.log('  - Branch visits:', branchVisits);
-        console.log('  - All branches for pie chart:', allBranches);
-        
-        console.log('🏢 Final branch data for pie chart:', allBranches);
-        console.log('📊 Total invoices processed:', invoices.length);
 
         // Clear existing charts first
         const containers = ['spendChart', 'visitsChart', 'topChart', 'avgChart'];
@@ -542,24 +467,15 @@ async function setupPlotlyCharts() {
         
         // Create Plotly charts with delay
         setTimeout(() => {
-            console.log('🎨 Creating charts with data...');
             createSpendChart(spendData, chartMonths);
             createVisitsChart(visitsData, chartMonths);
-            createTopChart(allBranches); // Pass all branch data for pie chart
+            createTopChart(allBranches);
             createAvgChart(spendData.map((spend, i) => 
                 visitsData[i] > 0 ? spend / visitsData[i] : 0
             ), chartMonths);
-            createTopProductsChart(); // Create top products chart
-            createCaloriesHeatmap(); // Create calories heatmap
+            createTopProductsChart();
+            createCaloriesHeatmap();
         }, 100);
-        
-        console.log('✅ All charts created successfully');
-
-        console.log('✅ Plotly charts setup successfully with real database data');
-        console.log('📈 Final spend data:', spendData);
-        console.log('📊 Final visits data:', visitsData);
-        console.log('🏢 Final branch data:', allBranches);
-        console.log('📅 Final months:', chartMonths);
         
         // Force charts to redraw after a short delay
         setTimeout(() => {
@@ -568,9 +484,9 @@ async function setupPlotlyCharts() {
                 Plotly.Plots.resize('visitsChart');
                 Plotly.Plots.resize('topChart');
                 Plotly.Plots.resize('avgChart');
-            } catch (error) {
-                console.log('Charts already rendered');
-            }
+                    } catch (error) {
+            // Charts already rendered
+        }
         }, 500);
         
     } catch (error) {
@@ -581,7 +497,6 @@ async function setupPlotlyCharts() {
 
 // Create spend chart
 function createSpendChart(data, months) {
-    console.log('📈 Creating spend chart with data:', data, 'months:', months);
     
     const trace = {
         x: months,
@@ -628,12 +543,10 @@ function createSpendChart(data, months) {
     }
     
     Plotly.newPlot('spendChart', [trace], layout, { displayModeBar: false, responsive: true });
-    console.log('✅ Spend chart created successfully');
 }
 
 // Create visits chart
 function createVisitsChart(data, months) {
-    console.log('📊 Creating visits chart with data:', data, 'months:', months);
     
     const trace = {
         x: months,
@@ -675,12 +588,10 @@ function createVisitsChart(data, months) {
     }
     
     Plotly.newPlot('visitsChart', [trace], layout, { displayModeBar: false, responsive: true });
-    console.log('✅ Visits chart created successfully');
 }
 
 // Create branch visits pie chart
 function createTopChart(branchData) {
-    console.log('🥧 Creating branch visits pie chart with data:', branchData);
     
     // If no branch data, show empty state
     if (!branchData || branchData.length === 0) {
@@ -710,7 +621,6 @@ function createTopChart(branchData) {
         }
         
         Plotly.newPlot('topChart', [emptyTrace], layout, { displayModeBar: false, responsive: true });
-        console.log('✅ Empty top chart created successfully');
         return;
     }
 
@@ -765,12 +675,10 @@ function createTopChart(branchData) {
     }
     
     Plotly.newPlot('topChart', [trace], layout, { displayModeBar: false, responsive: true });
-    console.log('✅ Top chart created successfully');
 }
 
 // Create average chart
 function createAvgChart(data, months) {
-    console.log('📊 Creating average chart with data:', data, 'months:', months);
     
     const trace = {
         x: months,
@@ -816,12 +724,10 @@ function createAvgChart(data, months) {
     }
     
     Plotly.newPlot('avgChart', [trace], layout, { displayModeBar: false, responsive: true });
-    console.log('✅ Average chart created successfully');
 }
 
 // Create empty charts when no data is available
 function createEmptyCharts() {
-    console.log('📊 No invoice data found in database, creating empty charts');
     
     const months = ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس'];
     const emptyData = Array(8).fill(0);
@@ -848,7 +754,6 @@ function createEmptyCharts() {
 
 // Create top products horizontal bar chart
 async function createTopProductsChart() {
-    console.log('🛍️ Creating top products chart...');
     
     try {
         if (!currentUser) {
@@ -870,17 +775,8 @@ async function createTopProductsChart() {
         }
         
         if (!invoices || invoices.length === 0) {
-            console.log('📦 No paid invoices found for user');
-            createEmptyTopProductsChart();
-            return;
-        }
-        
-        console.log('📋 Found invoices with products:', invoices.length);
-        
-        if (error) {
-            console.error('❌ Error fetching invoice items:', error);
-            createEmptyTopProductsChart();
-            return;
+                    createEmptyTopProductsChart();
+        return;
         }
         
         // Process product data from JSONB
@@ -897,15 +793,11 @@ async function createTopProductsChart() {
             }
         });
         
-        console.log('🛍️ Processed product counts:', productCounts);
-        
         // Get top 5 products
         const topProducts = Object.entries(productCounts)
             .sort(([,a], [,b]) => b - a)
             .slice(0, 5)
             .map(([name, count]) => ({ name, count }));
-        
-        console.log('🛍️ Top products data:', topProducts);
         
         if (topProducts.length === 0) {
             createEmptyTopProductsChart();
@@ -960,7 +852,6 @@ async function createTopProductsChart() {
         }
         
         Plotly.newPlot('topProductsChart', [trace], layout, { displayModeBar: false, responsive: true });
-        console.log('✅ Top products chart created successfully');
         
         // Update KPI value
         const kTopProducts = document.getElementById('kTopProducts');
@@ -976,7 +867,6 @@ async function createTopProductsChart() {
 
 // Create empty top products chart
 function createEmptyTopProductsChart() {
-    console.log('📦 Creating empty top products chart');
     
     const trace = {
         x: [1],
@@ -1019,7 +909,6 @@ function createEmptyTopProductsChart() {
     }
     
     Plotly.newPlot('topProductsChart', [trace], layout, { displayModeBar: false, responsive: true });
-    console.log('✅ Empty top products chart created successfully');
     
     // Update KPI value
     const kTopProducts = document.getElementById('kTopProducts');
@@ -1030,7 +919,6 @@ function createEmptyTopProductsChart() {
 
 // Create calories heatmap chart
 async function createCaloriesHeatmap() {
-    console.log('🔥 Creating calories heatmap...');
     
     try {
         if (!currentUser) {
@@ -1055,12 +943,9 @@ async function createCaloriesHeatmap() {
         }
         
         if (!invoices || invoices.length === 0) {
-            console.log('📦 No paid invoices found for calories heatmap');
-            createEmptyCaloriesHeatmap();
-            return;
+                    createEmptyCaloriesHeatmap();
+        return;
         }
-        
-        console.log('📋 Found invoices for calories:', invoices.length);
         
         // Extract all unique product IDs from invoices
         const productIds = new Set();
@@ -1073,8 +958,6 @@ async function createCaloriesHeatmap() {
                 });
             }
         });
-        
-        console.log('🆔 Unique product IDs found:', productIds.size);
         
         // Fetch calories for all products
         const { data: products, error: productsError } = await db.supabase
@@ -1093,8 +976,6 @@ async function createCaloriesHeatmap() {
         products.forEach(product => {
             productCaloriesMap[product.id] = parseInt(product.calories) || 0;
         });
-        
-        console.log('🔥 Product calories map:', productCaloriesMap);
         
         // Process calories data by hour
         const hourlyCalories = {};
@@ -1116,9 +997,6 @@ async function createCaloriesHeatmap() {
                 });
             }
         });
-        
-        console.log('🔥 Processed hourly calories:', hourlyCalories);
-        console.log('🔥 Total calories:', totalCalories);
         
         // Create data for heatmap (24 hours)
         const hours = Array.from({length: 24}, (_, i) => i);
@@ -1179,7 +1057,6 @@ async function createCaloriesHeatmap() {
         }
         
         Plotly.newPlot('caloriesHeatmap', [trace], layout, { displayModeBar: false, responsive: true });
-        console.log('✅ Calories heatmap created successfully');
         
         // Update KPI value
         const kCalories = document.getElementById('kCalories');
@@ -1195,7 +1072,6 @@ async function createCaloriesHeatmap() {
 
 // Create empty calories heatmap
 function createEmptyCaloriesHeatmap() {
-    console.log('🔥 Creating empty calories heatmap');
     
     const hours = Array.from({length: 24}, (_, i) => i);
     const emptyData = Array(24).fill(0);
@@ -1234,7 +1110,6 @@ function createEmptyCaloriesHeatmap() {
     }
     
     Plotly.newPlot('caloriesHeatmap', [trace], layout, { displayModeBar: false, responsive: true });
-    console.log('✅ Empty calories heatmap created successfully');
     
     // Update KPI value
     const kCalories = document.getElementById('kCalories');
@@ -1320,17 +1195,7 @@ function setupContactForm() {
     }
 }
 
-// Setup product search
-function setupProductSearch() {
-    const searchInput = document.getElementById('productSearch');
-    if (searchInput) {
-        searchInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                searchProducts();
-            }
-        });
-    }
-}
+
 
 // Setup invoices
 function setupInvoices() {
@@ -1391,11 +1256,7 @@ function setupChat() {
                 }
             }
             
-            console.log('Sending request to RAG API:', {
-                question: query,
-                user_id: currentUser?.id || null,
-                user_name: userName
-            });
+            
             
             // Call RAG API
             const response = await fetch('http://localhost:8001/ask', {
@@ -1417,7 +1278,7 @@ function setupChat() {
 
             if (response.ok) {
                 const result = await response.json();
-                console.log('RAG API response:', result);
+
                 addMessage(result.answer, 'bot');
             } else {
                 const errorText = await response.text();
@@ -1462,7 +1323,7 @@ function setupChat() {
         });
     }
 
-    console.log('✅ Chat functionality setup successfully');
+
 }
 
 // Setup smooth scrolling
@@ -1573,16 +1434,8 @@ function showAccountInfo() {
                         <span class="value">${userAccount.email}</span>
                     </div>
                     <div class="info-item">
-                        <span class="label">رقم الهاتف:</span>
-                        <span class="value">${userAccount.phone}</span>
-                    </div>
-                    <div class="info-item">
                         <span class="label">الرصيد:</span>
                         <span class="value balance">${userAccount.balance}</span>
-                    </div>
-                    <div class="info-item">
-                        <span class="label">آخر تسجيل دخول:</span>
-                        <span class="value">${userAccount.lastLogin}</span>
                     </div>
                 </div>
             </div>
@@ -1627,7 +1480,6 @@ function scrollToSection(sectionId) {
 // Test connection to RAG API
 async function testRAGConnection() {
     try {
-        console.log('Testing RAG API connection...');
         const response = await fetch('http://localhost:8001/', {
             method: 'GET',
             headers: {
@@ -1638,21 +1490,18 @@ async function testRAGConnection() {
         
         if (response.ok) {
             const data = await response.json();
-            console.log('✅ RAG API is running:', data);
             return true;
         } else {
-            console.error('❌ RAG API is not responding properly');
             return false;
         }
     } catch (error) {
-        console.error('❌ Cannot connect to RAG API:', error);
         return false;
     }
 }
 
 // Initialize when DOM is loaded
 document.addEventListener('DOMContentLoaded', async () => {
-    console.log('🚀 Initializing user page...');
+
     
     // Test Plotly availability first
     if (typeof Plotly === 'undefined') {
@@ -1660,12 +1509,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         alert('خطأ: مكتبة الرسوم البيانية غير محملة');
         return;
     }
-    console.log('✅ Plotly library is available');
     
     // Test RAG API connection first
     const isConnected = await testRAGConnection();
     if (!isConnected) {
-        console.warn('⚠️ RAG API is not available. Chat functionality may not work.');
         // Add a warning message to the chat
         const chatMessages = document.getElementById('chatMessages');
         if (chatMessages) {
@@ -1686,4 +1533,3 @@ window.showAccountInfo = showAccountInfo;
 window.closeModal = closeModal;
 window.logoutUser = logoutUser;
 window.scrollToSection = scrollToSection;
-

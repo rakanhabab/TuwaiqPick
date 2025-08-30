@@ -712,7 +712,8 @@ input:focus, textarea:focus, select:focus { outline: none; border-color: #8b5cf6
   left: 0;
   right: 0;
   z-index: 1000;
-  padding: 16px 0;
+  padding: 12px 0;
+  min-height: 70px;
 }
 
 .nav .wrap {
@@ -720,7 +721,7 @@ input:focus, textarea:focus, select:focus { outline: none; border-color: #8b5cf6
   align-items: center;
   justify-content: space-between;
   gap: 24px;
-  min-height: auto;
+  min-height: 46px;
 }
 
 /* Smaller header buttons without affecting rest of the site */
@@ -744,12 +745,12 @@ input:focus, textarea:focus, select:focus { outline: none; border-color: #8b5cf6
   border: none;
   border-radius: 8px;
   transition: all 0.3s ease;
-  width: 70px;
-  height: 70px;
+  width: 60px;
+  height: 60px;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-top: -10px;
+  margin-top: -8px;
 }
 
 .btn-qr:hover {
@@ -762,19 +763,19 @@ input:focus, textarea:focus, select:focus { outline: none; border-color: #8b5cf6
   align-items: center;
   gap: 12px;
   font-weight: 700;
-  font-size: 18px;
+  font-size: 16px;
   color: #111827;
   flex-shrink: 0;
 }
 /* Make main brand name extra bold and the sub text lighter */
-.brand-sub { font-weight: 400; color: #6b7280; font-size: 16px; white-space: nowrap; line-height: 1; max-width: 220px; overflow: hidden; text-overflow: ellipsis; }
-.brand-name { font-weight: 400; color: #6b7280; font-size: 18px; }
+.brand-sub { font-weight: 400; color: #6b7280; font-size: 14px; white-space: nowrap; line-height: 1; max-width: 200px; overflow: hidden; text-overflow: ellipsis; }
+.brand-name { font-weight: 400; color: #6b7280; font-size: 16px; }
 /* Ensure nested brand-name fully matches the surrounding text */
 .brand-sub .brand-name { font-weight: 800; font-size: inherit; color: inherit; }
 
 .brand img {
-  width: 40px;
-  height: 40px;
+  width: 36px;
+  height: 36px;
   border-radius: 8px;
 }
 /* Header sizes follow landing.css */
@@ -793,9 +794,9 @@ input:focus, textarea:focus, select:focus { outline: none; border-color: #8b5cf6
     font-weight: 500;
     transition: color 0.3s ease;
     white-space: nowrap;
-    padding: 10px 20px; /* match index */
+    padding: 8px 16px;
     border-radius: 8px;
-    font-size: 16px;
+    font-size: 15px;
 }
 
 .nav-links a:hover {
@@ -884,7 +885,7 @@ input:focus, textarea:focus, select:focus { outline: none; border-color: #8b5cf6
 
 /* Main Content Adjustment */
 .main {
-    margin-top: 80px; /* Match index header spacing */
+    margin-top: 70px; /* Adjusted for smaller header */
 }
 
 
