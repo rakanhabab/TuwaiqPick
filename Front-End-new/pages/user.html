@@ -99,51 +99,55 @@
                                 <h3 class="dashboard-title">ملخّص زياراتك وإنفاقك</h3>
                                 <div class="summary-cards">
                                     
-                                    <!-- First Row -->
+                                    <!-- First Row - Combined Spend & Average -->
                                     <div class="summary-card yellow">
                                         <div class="card-content">
-                                            <div class="card-title">إجمالي المصروف</div>
-                                            <div class="card-value" id="kSpend">0.00 ر.س</div>
+                                            <div class="card-title">إجمالي المصروفات & متوسط فواتيرك</div>
+                                            <div class="card-values">
+                                                <div class="value-item">
+                                                    <span class="value-label">الإجمالي:</span>
+                                                    <span class="card-value" id="kSpend">0.00 ر.س</span>
+                                                </div>
+                                                <div class="value-item">
+                                                    <span class="value-label">متوسط الفواتير:</span>
+                                                    <span class="card-value" id="kAvg">0.00 ر.س</span>
+                                                </div>
+                                            </div>
                                             <div class="chart-container" id="spendChart"></div>
                                         </div>
                                     </div>
                                     <div class="summary-card green">
                                         <div class="card-content">
                                             <div class="card-title">عدد الزيارات</div>
+                                            <div class="card-subtitle">عدد زياراتك للفروع خلال الأشهر الماضية</div>
                                             <div class="card-value" id="kVisits">0</div>
                                             <div class="chart-container" id="visitsChart"></div>
                                         </div>
                                     </div>
                                     
-                                    <!-- Second Row -->
-                                    <div class="summary-card yellow">
-                                        <div class="card-content">
-                                            <div class="card-title">أكثر فرع زيارة</div>
-                                            <div class="card-value" id="kTop">غير محدد</div>
-                                            <div class="chart-container" id="topChart"></div>
-                                        </div>
-                                    </div>
-                                    <div class="summary-card green">
-                                        <div class="card-content">
-                                            <div class="card-title">متوسط الفاتورة</div>
-                                            <div class="card-value" id="kAvg">0.00 ر.س</div>
-                                            <div class="chart-container" id="avgChart"></div>
-                                        </div>
-                                    </div>
-                                    
-                                    <!-- Third Row - Top Products -->
+
+                                </div>
+
+                                <!-- Charts Row - Three charts in one row -->
+                                <div class="charts-row">
                                     <div class="summary-card orange">
                                         <div class="card-content">
                                             <div class="card-title">أكثر المنتجات شراءً</div>
-                                            <div class="card-value" id="kTopProducts">5 منتجات</div>
-                                            <div class="chart-container" id="topProductsChart"></div>
+                                            <div class="card-value" id="kTopProducts" style="font-size: 18px;">5 منتجات</div>
+                                            <div class="chart-container" id="topProductsChart" style="height: 170px;"></div>
                                         </div>
                                     </div>
-                                    
-                                    <!-- Fourth Row - Calories Heatmap -->
+                                    <div class="summary-card purple">
+                                        <div class="card-content">
+                                            <div class="card-title">توزيع الزيارات</div>
+                                            <div class="card-subtitle">أكثر فرع زيارة ***</div>
+                                            <div class="chart-container" id="branchVisitsChart"></div>
+                                        </div>
+                                    </div>
                                     <div class="summary-card red">
                                         <div class="card-content">
-                                            <div class="card-title">السعرات حسب ساعة اليوم</div>
+                                            <div class="card-title">السعرات الحرارية</div>
+                                            <div class="card-subtitle">مشترياتك من السعرات حسب ساعة اليوم</div>
                                             <div class="card-value" id="kCalories">0 سعرة</div>
                                             <div class="chart-container" id="caloriesHeatmap"></div>
                                         </div>

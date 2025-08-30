@@ -164,12 +164,28 @@ async function loadUserKPIsFromDatabase() {
             }
         }
 
+        // Calculate previous month visits
+        const currentDate = new Date();
+        const currentMonth = currentDate.getMonth();
+        const currentYear = currentDate.getFullYear();
+        const previousMonth = currentMonth === 0 ? 11 : currentMonth - 1;
+        const previousYear = currentMonth === 0 ? currentYear - 1 : currentYear;
+        
+        let previousMonthVisits = 0;
+        invoices.data?.forEach(invoice => {
+            const invoiceDate = new Date(invoice.timestamp);
+            if (invoiceDate.getMonth() === previousMonth && invoiceDate.getFullYear() === previousYear) {
+                previousMonthVisits++;
+            }
+        });
+
         // Update KPI elements
         updateKPIElements({
             visits: visits,
             totalSpend: totalSpend,
             avgInvoice: avgInvoice,
-            mostVisitedBranch: mostVisitedBranch
+            mostVisitedBranch: mostVisitedBranch,
+            previousMonthVisits: previousMonthVisits
         });
 
 
@@ -181,7 +197,8 @@ async function loadUserKPIsFromDatabase() {
             visits: 0,
             totalSpend: 0,
             avgInvoice: 0,
-            mostVisitedBranch: 'غير محدد'
+            mostVisitedBranch: 'غير محدد',
+            previousMonthVisits: 0
         });
     }
 }
@@ -191,15 +208,37 @@ function updateKPIElements(kpis) {
     const spendEl = document.getElementById('kSpend');
     const visitsEl = document.getElementById('kVisits');
     const avgEl = document.getElementById('kAvg');
-    const topEl = document.getElementById('kTop');
 
-    if (spendEl) spendEl.textContent = db.formatCurrency(kpis.totalSpend);
-    if (visitsEl) visitsEl.textContent = kpis.visits;
-    if (avgEl) avgEl.textContent = db.formatCurrency(kpis.avgInvoice);
-    if (topEl) topEl.textContent = kpis.mostVisitedBranch;
+    if (spendEl) {
+        const spendValue = db.formatCurrency(kpis.totalSpend);
+        spendEl.innerHTML = spendValue;
+    }
+    
+    if (visitsEl) {
+        const visitsValue = kpis.visits;
+        
+        // Calculate if current month visits are less than previous month
+        let visitsIcon = '';
+        let visitsText = '';
+        if (kpis.previousMonthVisits !== undefined && kpis.previousMonthVisits > 0) {
+            if (kpis.visits < kpis.previousMonthVisits) {
+                visitsIcon = '<span class="kpi-icon down">⬇︎</span>';
+            } else if (kpis.visits > kpis.previousMonthVisits) {
+                visitsIcon = '<span class="kpi-icon up">⬆︎</span>';
+                visitsText = '<span class="change-text">(أعلى من الشهر السابق)</span>';
+            }
+        }
+        
+        visitsEl.innerHTML = `${visitsValue} ${visitsIcon} ${visitsText}`;
+    }
+    
+    if (avgEl) {
+        const avgValue = db.formatCurrency(kpis.avgInvoice);
+        avgEl.innerHTML = avgValue;
+    }
 
     // Add animation to show data is loaded
-    [spendEl, visitsEl, avgEl, topEl].forEach(el => {
+    [spendEl, visitsEl, avgEl].forEach(el => {
         if (el) {
             el.style.animation = 'fadeInUp 0.5s ease-out';
         }
@@ -457,7 +496,7 @@ async function setupPlotlyCharts() {
             .map(([name, visits]) => ({ name, visits }));
 
         // Clear existing charts first
-        const containers = ['spendChart', 'visitsChart', 'topChart', 'avgChart'];
+        const containers = ['spendChart', 'visitsChart', 'branchVisitsChart'];
         containers.forEach(id => {
             const container = document.getElementById(id);
             if (container) {
@@ -469,24 +508,20 @@ async function setupPlotlyCharts() {
         setTimeout(() => {
             createSpendChart(spendData, chartMonths);
             createVisitsChart(visitsData, chartMonths);
-            createTopChart(allBranches);
-            createAvgChart(spendData.map((spend, i) => 
-                visitsData[i] > 0 ? spend / visitsData[i] : 0
-            ), chartMonths);
+            createBranchVisitsChart(allBranches);
             createTopProductsChart();
             createCaloriesHeatmap();
         }, 100);
         
-        // Force charts to redraw after a short delay
+                // Force charts to redraw after a short delay
         setTimeout(() => {
             try {
                 Plotly.Plots.resize('spendChart');
                 Plotly.Plots.resize('visitsChart');
-                Plotly.Plots.resize('topChart');
-                Plotly.Plots.resize('avgChart');
-                    } catch (error) {
-            // Charts already rendered
-        }
+                Plotly.Plots.resize('branchVisitsChart');
+            } catch (error) {
+                // Charts already rendered
+            }
         }, 500);
         
     } catch (error) {
@@ -522,16 +557,28 @@ function createSpendChart(data, months) {
         plot_bgcolor: 'transparent',
         autosize: true,
         xaxis: {
-            showgrid: false,
+            title: 'الشهر',
+            titlefont: { size: 12, color: '#374151', weight: 'bold' },
+            showgrid: true,
+            gridcolor: 'rgba(107, 114, 128, 0.2)',
+            gridwidth: 1,
             showticklabels: true,
-            zeroline: false,
+            zeroline: true,
+            zerolinecolor: 'rgba(107, 114, 128, 0.3)',
+            zerolinewidth: 1,
             tickfont: { size: 10, color: '#6b7280' },
             tickangle: -45
         },
         yaxis: {
-            showgrid: false,
+            title: 'المصروفات (ريال)',
+            titlefont: { size: 12, color: '#374151', weight: 'bold' },
+            showgrid: true,
+            gridcolor: 'rgba(107, 114, 128, 0.2)',
+            gridwidth: 1,
             showticklabels: true,
-            zeroline: false,
+            zeroline: true,
+            zerolinecolor: 'rgba(107, 114, 128, 0.3)',
+            zerolinewidth: 1,
             tickfont: { size: 10, color: '#6b7280' }
         }
     };
@@ -548,14 +595,25 @@ function createSpendChart(data, months) {
 // Create visits chart
 function createVisitsChart(data, months) {
     
+    // Create colors array: c4b5fd for all months except the last one which gets green
+    const colors = data.map((value, index) => {
+        if (index === data.length - 1) {
+            // Last month: different color
+            return '#4C1D95';
+        } else {
+            // Other months: c4b5fd
+            return '#c4b5fd';
+        }
+    });
+
     const trace = {
         x: months,
         y: data,
         type: 'bar',
         marker: {
-            color: '#10b981',
+            color: colors,
             line: {
-                color: '#059669',
+                color: '#c4b5fd',
                 width: 1
             }
         }
@@ -567,16 +625,28 @@ function createVisitsChart(data, months) {
         paper_bgcolor: 'transparent',
         plot_bgcolor: 'transparent',
         xaxis: {
-            showgrid: false,
+            title: 'الشهر',
+            titlefont: { size: 12, color: '#374151', weight: 'bold' },
+            showgrid: true,
+            gridcolor: 'rgba(107, 114, 128, 0.2)',
+            gridwidth: 1,
             showticklabels: true,
-            zeroline: false,
+            zeroline: true,
+            zerolinecolor: 'rgba(107, 114, 128, 0.3)',
+            zerolinewidth: 1,
             tickfont: { size: 10, color: '#6b7280' },
             tickangle: -45
         },
         yaxis: {
-            showgrid: false,
+            title: 'عدد الزيارات',
+            titlefont: { size: 12, color: '#374151', weight: 'bold' },
+            showgrid: true,
+            gridcolor: 'rgba(107, 114, 128, 0.2)',
+            gridwidth: 1,
             showticklabels: true,
-            zeroline: false,
+            zeroline: true,
+            zerolinecolor: 'rgba(107, 114, 128, 0.3)',
+            zerolinewidth: 1,
             tickfont: { size: 10, color: '#6b7280' }
         }
     };
@@ -590,8 +660,10 @@ function createVisitsChart(data, months) {
     Plotly.newPlot('visitsChart', [trace], layout, { displayModeBar: false, responsive: true });
 }
 
-// Create branch visits pie chart
-function createTopChart(branchData) {
+
+
+// Create branch visits chart
+function createBranchVisitsChart(branchData) {
     
     // If no branch data, show empty state
     if (!branchData || branchData.length === 0) {
@@ -603,127 +675,86 @@ function createTopChart(branchData) {
                 colors: ['#e5e7eb']
             },
             textinfo: 'label',
-            textfont: { size: 14, color: '#6b7280' },
+            textfont: { size: 11, color: '#6b7280' },
             hole: 0.4
         };
 
         const layout = {
-            margin: { l: 10, r: 10, t: 10, b: 10 },
+            margin: { l: 10, r: 10, t: 40, b: 10 },
             showlegend: false,
             paper_bgcolor: 'transparent',
-            plot_bgcolor: 'transparent'
+            plot_bgcolor: 'transparent',
+            height: 200
         };
 
-        const container = document.getElementById('topChart');
+        const container = document.getElementById('branchVisitsChart');
         if (!container) {
-            console.error('❌ topChart container not found');
+            console.error('❌ branchVisitsChart container not found');
             return;
         }
         
-        Plotly.newPlot('topChart', [emptyTrace], layout, { displayModeBar: false, responsive: true });
+        Plotly.newPlot('branchVisitsChart', [emptyTrace], layout, { displayModeBar: false, responsive: true });
         return;
     }
 
+    // Sort branches by visits in descending order
+    const sortedBranches = branchData.sort((a, b) => b.visits - a.visits);
+    
     // Calculate percentages and format labels
-    const totalVisits = branchData.reduce((sum, branch) => sum + branch.visits, 0);
-    const values = branchData.map(branch => branch.visits);
-    const labels = branchData.map(branch => {
-        const percentage = ((branch.visits / totalVisits) * 100).toFixed(1);
-        return `${branch.name} (${percentage}%)`;
-    });
+    const totalVisits = sortedBranches.reduce((sum, branch) => sum + branch.visits, 0);
+    const values = sortedBranches.map(branch => branch.visits);
+    const labels = sortedBranches.map(branch => branch.name);
 
     // Create pie chart trace with dynamic colors
     const colors = [
-        '#f97316', '#fb923c', '#fdba74', '#fbbf24', '#f59e0b',
-        '#d97706', '#92400e', '#78350f', '#451a03', '#7c2d12'
+        '#8b5cf6', '#a855f7', '#c084fc', '#d8b4fe', '#e9d5ff',
+        '#f3e8ff', '#faf5ff', '#c4b5fd', '#fde68a', '#fbbf24'
     ];
     
     const trace = {
         values: values,
-        labels: branchData.map(branch => branch.name), // Use original names for legend
+        labels: labels,
         type: 'pie',
         marker: {
             colors: colors.slice(0, values.length)
         },
         textinfo: 'percent',
-        textfont: { size: 11, color: '#ffffff' },
+        textfont: { size: 11, color: '#374151' },
         hole: 0.4,
-        textposition: 'inside',
-        hoverinfo: 'label+percent+value'
+        hoverinfo: 'label+percent+value',
+        textposition: 'inside'
     };
 
-    const layout = {
-        margin: { l: 10, r: 10, t: 10, b: 10 },
-        showlegend: true,
-        legend: {
-            x: 0.5,
-            y: -0.1,
-            xanchor: 'center',
-            orientation: 'h',
-            font: { size: 10 }
-        },
-        paper_bgcolor: 'transparent',
-        plot_bgcolor: 'transparent',
-        autosize: true,
-        height: 150
-    };
+            const layout = {
+            margin: { l: 10, r: 10, t: 40, b: 10 },
+            showlegend: true,
+            legend: {
+                x: 1.1,
+                y: 0.5,
+                xanchor: 'left',
+                orientation: 'v',
+                font: { size: 10 }
+            },
+            paper_bgcolor: 'transparent',
+            plot_bgcolor: 'transparent',
+            autosize: true,
+            height: 200
+        };
 
-    const container = document.getElementById('topChart');
+    const container = document.getElementById('branchVisitsChart');
     if (!container) {
-        console.error('❌ topChart container not found');
+        console.error('❌ branchVisitsChart container not found');
         return;
     }
     
-    Plotly.newPlot('topChart', [trace], layout, { displayModeBar: false, responsive: true });
-}
-
-// Create average chart
-function createAvgChart(data, months) {
+    Plotly.newPlot('branchVisitsChart', [trace], layout, { displayModeBar: false, responsive: true });
     
-    const trace = {
-        x: months,
-        y: data,
-        type: 'scatter',
-        mode: 'lines+markers',
-        line: {
-            color: '#06b6d4',
-            width: 3
-        },
-        marker: {
-            color: '#06b6d4',
-            size: 6
-        },
-        fill: 'tonexty',
-        fillcolor: 'rgba(6, 182, 212, 0.1)'
-    };
-
-    const layout = {
-        margin: { l: 30, r: 20, t: 20, b: 30 },
-        showlegend: false,
-        paper_bgcolor: 'transparent',
-        plot_bgcolor: 'transparent',
-        xaxis: {
-            showgrid: false,
-            showticklabels: true,
-            zeroline: false,
-            tickfont: { size: 10, color: '#6b7280' },
-            tickangle: -45
-        },
-        yaxis: {
-            showgrid: false,
-            showticklabels: true,
-            zeroline: false,
-            tickfont: { size: 10, color: '#6b7280' }
-        }
-    };
-
-    const container = document.getElementById('avgChart');
-    if (!container) {
-        console.error('❌ avgChart container not found');
-        return;
+    // Update subtitle with most visited branch name
+    const subtitleElement = document.querySelector('.summary-card.purple .card-subtitle');
+    if (subtitleElement && sortedBranches.length > 0) {
+        const mostVisitedBranch = sortedBranches[0].name;
+        subtitleElement.innerHTML = `أكثر فرع زيارة <strong>${mostVisitedBranch}</strong>`;
     }
-    
-    Plotly.newPlot('avgChart', [trace], layout, { displayModeBar: false, responsive: true });
 }
 
 // Create empty charts when no data is available
@@ -733,7 +764,7 @@ function createEmptyCharts() {
     const emptyData = Array(8).fill(0);
     
     // Clear existing charts first
-    const containers = ['spendChart', 'visitsChart', 'topChart', 'avgChart', 'topProductsChart', 'caloriesHeatmap'];
+    const containers = ['spendChart', 'visitsChart', 'branchVisitsChart', 'topProductsChart', 'caloriesHeatmap'];
     containers.forEach(id => {
         const container = document.getElementById(id);
         if (container) {
@@ -745,8 +776,7 @@ function createEmptyCharts() {
     setTimeout(() => {
         createSpendChart(emptyData, months);
         createVisitsChart(emptyData, months);
-        createTopChart([]); // Empty branch data
-        createAvgChart(emptyData, months);
+        createBranchVisitsChart([]); // Empty branch visits data
         createTopProductsChart(); // Create empty top products chart
         createCaloriesHeatmap(); // Create empty calories heatmap
     }, 100);
@@ -831,15 +861,27 @@ async function createTopProductsChart() {
             paper_bgcolor: 'transparent',
             plot_bgcolor: 'transparent',
             xaxis: {
-                showgrid: false,
+                title: 'الكمية',
+                titlefont: { size: 12, color: '#374151', weight: 'bold' },
+                showgrid: true,
+                gridcolor: 'rgba(107, 114, 128, 0.2)',
+                gridwidth: 1,
                 showticklabels: true,
-                zeroline: false,
+                zeroline: true,
+                zerolinecolor: 'rgba(107, 114, 128, 0.3)',
+                zerolinewidth: 1,
                 tickfont: { size: 10, color: '#6b7280' }
             },
             yaxis: {
-                showgrid: false,
+                title: '',
+                titlefont: { size: 12, color: '#374151', weight: 'bold' },
+                showgrid: true,
+                gridcolor: 'rgba(107, 114, 128, 0.2)',
+                gridwidth: 1,
                 showticklabels: true,
-                zeroline: false,
+                zeroline: true,
+                zerolinecolor: 'rgba(107, 114, 128, 0.3)',
+                zerolinewidth: 1,
                 tickfont: { size: 10, color: '#6b7280' },
                 automargin: true
             }
@@ -884,23 +926,35 @@ function createEmptyTopProductsChart() {
         }
     };
     
-    const layout = {
-        margin: { l: 80, r: 20, t: 20, b: 30 },
-        showlegend: false,
-        paper_bgcolor: 'transparent',
-        plot_bgcolor: 'transparent',
-        xaxis: {
-            showgrid: false,
-            showticklabels: false,
-            zeroline: false
-        },
-        yaxis: {
-            showgrid: false,
-            showticklabels: true,
-            zeroline: false,
-            tickfont: { size: 10, color: '#6b7280' }
-        }
-    };
+            const layout = {
+            margin: { l: 80, r: 20, t: 20, b: 30 },
+            showlegend: false,
+            paper_bgcolor: 'transparent',
+            plot_bgcolor: 'transparent',
+            xaxis: {
+                title: 'الكمية',
+                titlefont: { size: 12, color: '#374151', weight: 'bold' },
+                showgrid: true,
+                gridcolor: 'rgba(107, 114, 128, 0.2)',
+                gridwidth: 1,
+                showticklabels: false,
+                zeroline: true,
+                zerolinecolor: 'rgba(107, 114, 128, 0.3)',
+                zerolinewidth: 1
+            },
+            yaxis: {
+                title: '',
+                titlefont: { size: 12, color: '#374151', weight: 'bold' },
+                showgrid: true,
+                gridcolor: 'rgba(107, 114, 128, 0.2)',
+                gridwidth: 1,
+                showticklabels: true,
+                zeroline: true,
+                zerolinecolor: 'rgba(107, 114, 128, 0.3)',
+                zerolinewidth: 1,
+                tickfont: { size: 10, color: '#6b7280' }
+            }
+        };
     
     const container = document.getElementById('topProductsChart');
     if (!container) {
@@ -980,9 +1034,11 @@ async function createCaloriesHeatmap() {
         // Process calories data by hour
         const hourlyCalories = {};
         let totalCalories = 0;
+        let totalInvoices = 0;
         
         invoices.forEach(invoice => {
             const hour = new Date(invoice.timestamp).getHours();
+            totalInvoices++;
             
             if (invoice.products_and_quantities && Array.isArray(invoice.products_and_quantities)) {
                 invoice.products_and_quantities.forEach(product => {
@@ -997,6 +1053,9 @@ async function createCaloriesHeatmap() {
                 });
             }
         });
+        
+        // Calculate average calories
+        const averageCalories = totalInvoices > 0 ? Math.round(totalCalories / totalInvoices) : 0;
         
         // Create data for heatmap (24 hours)
         const hours = Array.from({length: 24}, (_, i) => i);
@@ -1016,7 +1075,7 @@ async function createCaloriesHeatmap() {
                 [0.8, '#ef4444'],
                 [1, '#dc2626']
             ],
-            showscale: true,
+            showscale: false,
             colorbar: {
                 title: 'السعرات',
                 titleside: 'right',
@@ -1028,25 +1087,42 @@ async function createCaloriesHeatmap() {
         };
         
         const layout = {
-            margin: { l: 30, r: 80, t: 20, b: 30 },
+            margin: { l: 20, r: 20, t: 40, b: 20 },
             showlegend: false,
             paper_bgcolor: 'transparent',
             plot_bgcolor: 'transparent',
             xaxis: {
-                title: 'ساعة اليوم',
-                showgrid: false,
+                title: {
+                    text: 'ساعة اليوم',
+                    font: { size: 12, color: '#374151' },
+                    standoff: 50,          // المسافة بين عنوان المحور وتكات الأرقام
+                  },
+                  automargin: true, 
+                titlefont: { size: 12, color: '#374151', weight: 'bold' },
+                showgrid: true,
+                gridcolor: 'rgba(107, 114, 128, 0.2)',
+                gridwidth: 1,
                 showticklabels: true,
-                zeroline: false,
+                zeroline: true,
+                zerolinecolor: 'rgba(107, 114, 128, 0.3)',
+                zerolinewidth: 1,
                 tickfont: { size: 10, color: '#6b7280' },
                 tickmode: 'array',
                 tickvals: [0, 6, 12, 18, 23],
-                ticktext: ['00:00', '06:00', '12:00', '18:00', '23:00']
+                ticktext: ['00:00', '06:00', '12:00', '18:00', '23:00'],
+                titlefont: { size: 12, color: '#374151', weight: 'bold' },
+                titleoffset: 50
             },
             yaxis: {
-                showgrid: false,
-                showticklabels: true,
-                zeroline: false,
-                tickfont: { size: 10, color: '#6b7280' }
+                title: 'السعرات الحرارية',
+                titlefont: { size: 12, color: '#374151', weight: 'bold' },
+                showgrid: true,
+                gridcolor: 'rgba(107, 114, 128, 0.2)',
+                gridwidth: 1,
+                showticklabels: false,
+                zeroline: true,
+                zerolinecolor: 'rgba(107, 114, 128, 0.3)',
+                zerolinewidth: 1
             }
         };
         
@@ -1061,7 +1137,7 @@ async function createCaloriesHeatmap() {
         // Update KPI value
         const kCalories = document.getElementById('kCalories');
         if (kCalories) {
-            kCalories.textContent = `${totalCalories.toLocaleString()} سعرة`;
+            kCalories.innerHTML = `${averageCalories.toLocaleString()} سعرة/يوم <span style="font-size: 14px; color: #6b7280;">(المتوسط)</span>`;
         }
         
     } catch (error) {
@@ -1085,23 +1161,35 @@ function createEmptyCaloriesHeatmap() {
         showscale: false
     };
     
-    const layout = {
-        margin: { l: 30, r: 20, t: 20, b: 30 },
-        showlegend: false,
-        paper_bgcolor: 'transparent',
-        plot_bgcolor: 'transparent',
-        xaxis: {
-            showgrid: false,
-            showticklabels: false,
-            zeroline: false
-        },
-        yaxis: {
-            showgrid: false,
-            showticklabels: true,
-            zeroline: false,
-            tickfont: { size: 10, color: '#6b7280' }
-        }
-    };
+            const layout = {
+            margin: { l: 20, r: 20, t: 40, b: 20 },
+            showlegend: false,
+            paper_bgcolor: 'transparent',
+            plot_bgcolor: 'transparent',
+            xaxis: {
+                title: 'ساعة اليوم',
+                titlefont: { size: 12, color: '#374151', weight: 'bold' },
+                showgrid: true,
+                gridcolor: 'rgba(107, 114, 128, 0.2)',
+                gridwidth: 1,
+                showticklabels: false,
+                zeroline: true,
+                zerolinecolor: 'rgba(107, 114, 128, 0.3)',
+                zerolinewidth: 1,
+                titleoffset: 50
+            },
+            yaxis: {
+                title: 'السعرات الحرارية',
+                titlefont: { size: 12, color: '#374151', weight: 'bold' },
+                showgrid: true,
+                gridcolor: 'rgba(107, 114, 128, 0.2)',
+                gridwidth: 1,
+                showticklabels: false,
+                zeroline: true,
+                zerolinecolor: 'rgba(107, 114, 128, 0.3)',
+                zerolinewidth: 1
+            }
+        };
     
     const container = document.getElementById('caloriesHeatmap');
     if (!container) {
@@ -1114,7 +1202,7 @@ function createEmptyCaloriesHeatmap() {
     // Update KPI value
     const kCalories = document.getElementById('kCalories');
     if (kCalories) {
-        kCalories.textContent = '0 سعرة';
+        kCalories.innerHTML = '0 سعرة/يوم <span style="font-size: 14px; color: #6b7280;">(المتوسط)</span>';
     }
 }
 
@@ -1367,7 +1455,7 @@ function showSuccessMessage(message) {
         position: fixed;
         top: 20px;
         right: 20px;
-        background: #10b981;
+        background: #4C1D95;
         color: white;
         padding: 12px 20px;
         border-radius: 8px;
