@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Category Chart - Fixed</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../js/database.js" type="module"></script>
+</head>
+<body>
+    <h1>Debug Category Chart - Fixed</h1>
+    <div id="debug-output"></div>
+
+    <script type="module">
+        import { db } from '../js/database.js';
+
+        async function debugCategoryChart() {
+            const output = document.getElementById('debug-output');
+            
+            try {
+                // 1. Get all invoices
+                console.log('=== DEBUGGING CATEGORY CHART - FIXED ===');
+                const { data: allInvoices, error: invoiceError } = await db.supabase
+                    .from('invoices')
+                    .select('*');
+                
+                if (invoiceError) {
+                    output.innerHTML += `<p>Error fetching invoices: ${invoiceError.message}</p>`;
+                    return;
+                }
+                
+                output.innerHTML += `<p>Total invoices: ${allInvoices.length}</p>`;
+                console.log('All invoices:', allInvoices);
+                
+                // 2. Filter valid invoices
+                const validInvoices = allInvoices.filter(invoice => 
+                    invoice.status === 'paid' || invoice.status === 'unpaid'
+                );
+                output.innerHTML += `<p>Valid invoices: ${validInvoices.length}</p>`;
+                
+                // 3. Get products
+                const products = await db.getProducts();
+                output.innerHTML += `<p>Total products: ${products.length}</p>`;
+                console.log('All products:', products);
+                
+                // 4. Create product map
+                const productMap = {};
+                products.forEach(product => {
+                    productMap[product.name] = product;
+                    productMap[product.id] = product;
+                });
+                output.innerHTML += `<p>Product map keys: ${Object.keys(productMap).join(', ')}</p>`;
+                
+                // 5. Process invoices with FIXED logic
+                const categoryCount = {};
+                let processedInvoices = 0;
+                let totalProducts = 0;
+                
+                validInvoices.forEach(invoice => {
+                    try {
+                        let productsData;
+                        
+                        // Handle both JSON strings and objects
+                        if (typeof invoice.products_and_quantities === 'string') {
+                            productsData = JSON.parse(invoice.products_and_quantities || '[]');
+                        } else if (typeof invoice.products_and_quantities === 'object') {
+                            productsData = invoice.products_and_quantities || [];
+                        } else {
+                            output.innerHTML += `<p>Unknown products_and_quantities type for invoice ${invoice.invoice_num}: ${typeof invoice.products_and_quantities}</p>`;
+                            productsData = [];
+                        }
+                        
+                        processedInvoices++;
+                        
+                        productsData.forEach(product => {
+                            totalProducts++;
+                            const productName = product.name;
+                            const productId = product.product_id;
+                            
+                            let productInfo = productMap[productName];
+                            if (!productInfo && productId) {
+                                productInfo = productMap[productId];
+                            }
+                            
+                            const category = productInfo?.category || 'غير محدد';
+                            const quantity = Number(product.quantity) || 1;
+                            
+                            categoryCount[category] = (categoryCount[category] || 0) + quantity;
+                            
+                            output.innerHTML += `<p>Product: ${productName} (ID: ${productId}) → Category: ${category}, Quantity: ${quantity}</p>`;
+                        });
+                    } catch (error) {
+                        output.innerHTML += `<p>Error parsing invoice ${invoice.invoice_num}: ${error.message}</p>`;
+                    }
+                });
+                
+                output.innerHTML += `<p><strong>Processed invoices: ${processedInvoices}</strong></p>`;
+                output.innerHTML += `<p><strong>Total products processed: ${totalProducts}</strong></p>`;
+                output.innerHTML += `<p><strong>Category count: ${JSON.stringify(categoryCount, null, 2)}</strong></p>`;
+                
+                console.log('Category count:', categoryCount);
+                
+            } catch (error) {
+                output.innerHTML += `<p>Error: ${error.message}</p>`;
+                console.error('Debug error:', error);
+            }
+        }
+        
+        // Run debug when page loads
+        document.addEventListener('DOMContentLoaded', debugCategoryChart);
+    </script>
+</body>
+</html>

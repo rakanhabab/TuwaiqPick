@@ -481,12 +481,12 @@ class DashboardService {
                 height: 250,
                 showlegend: true,
                 legend: {
-                    font: { family: 'Tajawal', size: 10 },
+                    font: { family: 'Tajawal', size: 9 },
                     orientation: 'h', // Horizontal legend
                     x: 0.5, // Center horizontally
-                    y: 0.9, // Position above the chart title with more space
+                    y: -0.15, // Position below the chart
                     xanchor: 'center',
-                    yanchor: 'bottom'
+                    yanchor: 'top'
                 }
             };
             
@@ -539,17 +539,35 @@ class DashboardService {
 
             validInvoices.forEach(invoice => {
                 try {
-                    const productsData = JSON.parse(invoice.products_and_quantities || '[]');
+                    let productsData;
+                    
+                    // Handle both JSON strings and objects
+                    if (typeof invoice.products_and_quantities === 'string') {
+                        productsData = JSON.parse(invoice.products_and_quantities || '[]');
+                    } else if (typeof invoice.products_and_quantities === 'object') {
+                        productsData = invoice.products_and_quantities || [];
+                    } else {
+                        console.log('Unknown products_and_quantities type for invoice:', invoice.invoice_num, typeof invoice.products_and_quantities);
+                        productsData = [];
+                    }
+                    
                     console.log('Products data for invoice:', invoice.invoice_num, productsData);
 
                     productsData.forEach(product => {
                         const productName = product.name;
-                        const productInfo = productMap[productName];
+                        const productId = product.product_id;
+                        
+                        // Try to find product by name first, then by ID
+                        let productInfo = productMap[productName];
+                        if (!productInfo && productId) {
+                            productInfo = productMap[productId];
+                        }
+                        
                         const category = productInfo?.category || 'غير محدد';
                         const quantity = Number(product.quantity) || 1;
 
                         categoryCount[category] = (categoryCount[category] || 0) + quantity;
-                        console.log(`Product: ${productName}, Category: ${category}, Quantity: ${quantity}`);
+                        console.log(`Product: ${productName} (ID: ${productId}), Category: ${category}, Quantity: ${quantity}`);
                     });
                 } catch (error) {
                     console.error('Error parsing products for invoice:', invoice.invoice_num, error);
@@ -570,7 +588,7 @@ class DashboardService {
                 values: counts,
                 labels: categories,
                 type: 'pie',
-                hole: 0.4,
+                hole: 0.35,
                 marker: {
                     colors: ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4']
                 }
@@ -578,14 +596,19 @@ class DashboardService {
 
             const layout = {
                 title: {
-                    text: 'المبيعات حسب الفئة',
+                    text: 'نسبة المنتجات المباعة حسب الفئة',
                     font: { size: 14, family: 'Tajawal' }
                 },
-                margin: { l: 30, r: 30, t: 40, b: 30 },
-                height: 250,
+                margin: { l: 30, r: 30, t: 40, b: 80 },
+                height: 300,
                 showlegend: true,
                 legend: {
-                    font: { family: 'Tajawal', size: 10 }
+                    font: { family: 'Tajawal', size: 9 },
+                    orientation: 'h', // Horizontal legend
+                    x: 0.5, // Center horizontally
+                    y: -0.12, // Position below the chart
+                    xanchor: 'center',
+                    yanchor: 'top'
                 }
             };
 
