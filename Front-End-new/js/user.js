@@ -30,68 +30,69 @@ let userAccount = {
     lastLogin: ""
 };
 
+// Current user data
+let currentUser = null;
+
 // Initialize page
 async function initializePage() {
-    await loadUserDataFromDatabase();
-    await loadUserKPIsFromDatabase();
-    await loadInvoicesFromDatabase();
-    await loadPaymentMethodsFromDatabase();
-    
-    setupSmoothScrolling();
-    setupAnimations();
-    setupMap();
-    setupSparklines();
-    setupAccountDropdown();
-    setupQRCode();
-    setupContactForm();
-    setupProductSearch();
-    setupInvoices();
+    try {
+        // Check if user is logged in
+        const isLoggedIn = await checkUserLogin();
+        if (!isLoggedIn) {
+            window.location.href = 'login.html';
+            return;
+        }
+
+        // Load all user data
+        await Promise.all([
+            loadUserDataFromDatabase(),
+            loadUserKPIsFromDatabase(),
+            loadInvoicesFromDatabase(),
+            loadPaymentMethodsFromDatabase()
+        ]);
+        
+        // Setup UI components
+        setupSmoothScrolling();
+        setupAnimations();
+        setupMap();
+        setupSparklines();
+        setupAccountDropdown();
+        setupQRCode();
+        setupContactForm();
+        setupProductSearch();
+        setupInvoices();
+        setupChat();
+        
+        console.log('✅ User page initialized successfully');
+    } catch (error) {
+        console.error('❌ Error initializing user page:', error);
+        showErrorMessage('حدث خطأ في تحميل البيانات. يرجى المحاولة مرة أخرى.');
+    }
 }
 
-// Setup smooth scrolling
-function setupSmoothScrolling() {
-    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-        anchor.addEventListener('click', function (e) {
-            e.preventDefault();
-            const target = document.querySelector(this.getAttribute('href'));
-            if (target) {
-                target.scrollIntoView({
-                    behavior: 'smooth',
-                    block: 'start'
-                });
-            }
-        });
-    });
-}
+// Check if user is logged in
+async function checkUserLogin() {
+    const currentUserStr = localStorage.getItem('current_user');
+    if (!currentUserStr) {
+        return false;
+    }
 
-// Setup animations
-function setupAnimations() {
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                entry.target.classList.add('fade-in');
-            }
-        });
-    });
-
-    document.querySelectorAll('.stat-card, .content-section').forEach(el => {
-        observer.observe(el);
-    });
+    try {
+        currentUser = JSON.parse(currentUserStr);
+        return currentUser && currentUser.id;
+    } catch (error) {
+        console.error('Error parsing user data:', error);
+        return false;
+    }
 }
 
 // Load user data from database
 async function loadUserDataFromDatabase() {
     try {
-        // Get current user from localStorage (set during login)
-        const currentUserStr = localStorage.getItem('current_user');
-        if (!currentUserStr) {
-            // Redirect to login if no user session
-            window.location.href = 'login.html';
-            return;
+        if (!currentUser) {
+            throw new Error('No current user found');
         }
 
-        const currentUser = JSON.parse(currentUserStr);
-        
         // Get fresh user data from database
         const { data: user, error } = await db.supabase
             .from('users')
@@ -101,34 +102,42 @@ async function loadUserDataFromDatabase() {
 
         if (error || !user) {
             console.error('Error fetching user data:', error);
-            // Redirect to login if user not found
-            window.location.href = 'login.html';
-            return;
+            throw new Error('User not found in database');
         }
 
+        // Update current user with fresh data
+        currentUser = { ...currentUser, ...user };
+        localStorage.setItem('current_user', JSON.stringify(currentUser));
+
         displayUserInfo(user);
+        console.log('✅ User data loaded successfully');
         
     } catch (error) {
         console.error('Error loading user data:', error);
-        // Redirect to login on error
-        window.location.href = 'login.html';
+        showErrorMessage('فشل في تحميل بيانات المستخدم');
     }
 }
 
 // Load user KPIs from database
 async function loadUserKPIsFromDatabase() {
     try {
-        // Get current user from localStorage
-        const currentUserStr = localStorage.getItem('current_user');
-        if (!currentUserStr) return;
+        if (!currentUser) return;
 
-        const currentUser = JSON.parse(currentUserStr);
-        
         // Get user data and invoices from database
         const [userData, invoices] = await Promise.all([
             db.supabase.from('users').select('num_visits, owed_balance').eq('id', currentUser.id).single(),
-            db.supabase.from('invoices').select('total_amount, branch_id, timestamp').eq('user_id', currentUser.id)
+            db.supabase.from('invoices').select('total_amount, branch_id, timestamp, branch_num').eq('user_id', currentUser.id)
         ]);
+
+        if (userData.error) {
+            console.error('Error fetching user data:', userData.error);
+            return;
+        }
+
+        if (invoices.error) {
+            console.error('Error fetching invoices:', invoices.error);
+            return;
+        }
 
         // Calculate KPIs from real data
         const visits = userData.data?.num_visits || 0;
@@ -173,6 +182,8 @@ async function loadUserKPIsFromDatabase() {
             mostVisitedBranch: mostVisitedBranch
         });
 
+        console.log('✅ User KPIs loaded successfully');
+        
     } catch (error) {
         console.error('Error loading user KPIs:', error);
         // Set default values on error
@@ -196,33 +207,46 @@ function updateKPIElements(kpis) {
     if (visitsEl) visitsEl.textContent = kpis.visits;
     if (avgEl) avgEl.textContent = db.formatCurrency(kpis.avgInvoice);
     if (topEl) topEl.textContent = kpis.mostVisitedBranch;
+
+    // Add animation to show data is loaded
+    [spendEl, visitsEl, avgEl, topEl].forEach(el => {
+        if (el) {
+            el.style.animation = 'fadeInUp 0.5s ease-out';
+        }
+    });
 }
 
 // Display user information
 function displayUserInfo(user) {
-    // Update user info in dropdown only (KPIs are handled by loadUserKPIsFromDatabase)
+    // Update user info in dropdown
     const userNameElement = document.getElementById('dropdownName');
     const userEmailElement = document.getElementById('dropdownEmail');
     
     if (userNameElement) {
-        userNameElement.textContent = `${user.first_name} ${user.last_name}`;
+        const fullName = `${user.first_name || ''} ${user.last_name || ''}`.trim();
+        userNameElement.textContent = fullName || 'مستخدم';
     }
     
     if (userEmailElement) {
-        userEmailElement.textContent = user.email;
+        userEmailElement.textContent = user.email || '';
     }
+
+    // Update user account data
+    userAccount = {
+        name: `${user.first_name || ''} ${user.last_name || ''}`.trim(),
+        email: user.email || '',
+        phone: user.phone || '',
+        balance: db.formatCurrency(user.owed_balance || 0),
+        lastLogin: new Date().toLocaleDateString('ar-SA')
+    };
 }
 
 // Load invoices from database
 async function loadInvoicesFromDatabase() {
     try {
-        // Get current user from localStorage
-        const currentUserStr = localStorage.getItem('current_user');
-        if (!currentUserStr) return;
+        if (!currentUser) return;
 
-        const currentUser = JSON.parse(currentUserStr);
-        
-        // Get invoices for current user
+        // Get invoices for current user with branch information
         const { data: invoices, error } = await db.supabase
             .from('invoices')
             .select(`
@@ -230,7 +254,8 @@ async function loadInvoicesFromDatabase() {
                 branches(name, address, lat, long)
             `)
             .eq('user_id', currentUser.id)
-            .order('timestamp', { ascending: false });
+            .order('timestamp', { ascending: false })
+            .limit(5); // Limit to latest 5 invoices
 
         if (error) {
             console.error('Error loading invoices:', error);
@@ -238,6 +263,8 @@ async function loadInvoicesFromDatabase() {
         }
 
         displayInvoices(invoices || []);
+        console.log('✅ Invoices loaded successfully');
+        
     } catch (error) {
         console.error('Error loading invoices:', error);
     }
@@ -263,10 +290,11 @@ function displayInvoices(invoices) {
     const recentInvoices = invoices.slice(0, 3);
     
     invoicesList.innerHTML = recentInvoices.map(invoice => `
-        <div class="invoice-item">
+        <div class="invoice-item" style="animation: fadeInUp 0.5s ease-out;">
             <div class="invoice-info">
-                <div class="invoice-id">#${invoice.id}</div>
+                <div class="invoice-id">#${invoice.id.slice(0, 8)}</div>
                 <div class="invoice-date">${db.formatDate(invoice.timestamp)}</div>
+                ${invoice.branches ? `<div class="invoice-branch" style="font-size: 12px; color: #8b5cf6;">${invoice.branches.name}</div>` : ''}
             </div>
             <div class="invoice-amount">${db.formatCurrency(invoice.total_amount)}</div>
             <button class="btn btn-purple btn-sm" onclick="window.location.href='invoice-view.html?id=${invoice.id}'">استعراض</button>
@@ -288,12 +316,8 @@ function getStatusText(status) {
 // Load payment methods from database
 async function loadPaymentMethodsFromDatabase() {
     try {
-        // Get current user from localStorage
-        const currentUserStr = localStorage.getItem('current_user');
-        if (!currentUserStr) return;
+        if (!currentUser) return;
 
-        const currentUser = JSON.parse(currentUserStr);
-        
         // Get payment methods for current user
         const { data: paymentMethods, error } = await db.supabase
             .from('payment_methods')
@@ -308,6 +332,8 @@ async function loadPaymentMethodsFromDatabase() {
         }
 
         displayPaymentMethods(paymentMethods || []);
+        console.log('✅ Payment methods loaded successfully');
+        
     } catch (error) {
         console.error('Error loading payment methods:', error);
     }
@@ -324,7 +350,7 @@ function displayPaymentMethods(methods) {
     }
     
     methodsContainer.innerHTML = methods.map(method => `
-        <div class="payment-method-card">
+        <div class="payment-method-card" style="animation: fadeInUp 0.5s ease-out;">
             <div class="card-info">
                 <h4>**** **** **** ${method.card_number.slice(-4)}</h4>
                 <p>${method.card_holder_name}</p>
@@ -343,28 +369,77 @@ async function setupMap() {
     if (typeof L !== 'undefined' && document.getElementById('map')) {
         try {
             const branches = await db.getBranches();
-        const map = L.map('map').setView([24.7136, 46.6753], 6); // Saudi Arabia center
-        
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '© OpenStreetMap contributors'
-        }).addTo(map);
+            const map = L.map('map').setView([24.7136, 46.6753], 6); // Saudi Arabia center
+            
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors'
+            }).addTo(map);
 
             // Add markers for real branches
-        branches.forEach(branch => {
+            branches.forEach(branch => {
                 if (branch.lat && branch.long) {
                     L.marker([branch.lat, branch.long])
-                .addTo(map)
-                .bindPopup(branch.name);
+                        .addTo(map)
+                        .bindPopup(branch.name);
                 }
-        });
+            });
+            
+            console.log('✅ Map setup successfully');
         } catch (error) {
             console.error('Error setting up map:', error);
         }
     }
 }
 
-// Setup sparklines
-function setupSparklines() {
+// Setup sparklines with real data
+async function setupSparklines() {
+    try {
+        if (!currentUser) return;
+
+        // Get invoice data for sparklines
+        const { data: invoices } = await db.supabase
+            .from('invoices')
+            .select('total_amount, timestamp')
+            .eq('user_id', currentUser.id)
+            .order('timestamp', { ascending: true });
+
+        if (!invoices || invoices.length === 0) {
+            // Use default data if no invoices
+            drawDefaultSparklines();
+            return;
+        }
+
+        // Generate sparkline data from real invoices
+        const monthlyData = {};
+        invoices.forEach(invoice => {
+            const month = new Date(invoice.timestamp).getMonth();
+            monthlyData[month] = (monthlyData[month] || 0) + invoice.total_amount;
+        });
+
+        // Convert to array for sparklines
+        const spendData = Array.from({ length: 12 }, (_, i) => monthlyData[i] || 0);
+        const visitsData = Array.from({ length: 12 }, (_, i) => 
+            invoices.filter(inv => new Date(inv.timestamp).getMonth() === i).length
+        );
+
+        // Draw sparklines
+        drawSparkline(document.getElementById('sparkSpend'), spendData);
+        drawSparkline(document.getElementById('sparkVisits'), visitsData);
+        drawSparkline(document.getElementById('sparkTop'), visitsData); // Use visits data for top branch
+        drawSparkline(document.getElementById('sparkAvg'), spendData.map((spend, i) => 
+            visitsData[i] > 0 ? spend / visitsData[i] : 0
+        ));
+
+        console.log('✅ Sparklines setup successfully');
+        
+    } catch (error) {
+        console.error('Error setting up sparklines:', error);
+        drawDefaultSparklines();
+    }
+}
+
+// Draw default sparklines
+function drawDefaultSparklines() {
     const sparklineData = {
         spend: [65, 59, 80, 81, 56, 55, 40, 45, 60, 70, 75, 80],
         visits: [28, 48, 40, 19, 86, 27, 90, 45, 60, 70, 75, 80],
@@ -382,17 +457,21 @@ function setupSparklines() {
 
 // Draw sparkline
 function drawSparkline(canvas, data) {
+    if (!canvas) return;
+    
     const ctx = canvas.getContext('2d');
     const width = canvas.width;
     const height = canvas.height;
     
     ctx.clearRect(0, 0, width, height);
     
+    if (data.length === 0) return;
+    
     const max = Math.max(...data);
     const min = Math.min(...data);
-    const range = max - min;
+    const range = max - min || 1;
     
-    ctx.strokeStyle = '#f97316';
+    ctx.strokeStyle = '#8b5cf6';
     ctx.lineWidth = 2;
     ctx.beginPath();
     
@@ -432,9 +511,11 @@ function setupAccountDropdown() {
 // Setup QR code
 function setupQRCode() {
     const qrContainer = document.getElementById('dropdownQR');
-    if (qrContainer && typeof QRCode !== 'undefined') {
+    if (qrContainer && typeof QRCode !== 'undefined' && currentUser) {
+        // Generate QR code with user ID
+        const qrText = `DukkanVision_User_${currentUser.id}`;
         new QRCode(qrContainer, {
-            text: "DukkanVision_User_12345",
+            text: qrText,
             width: 80,
             height: 80,
             colorDark: "#000000",
@@ -448,15 +529,39 @@ function setupQRCode() {
 function setupContactForm() {
     const form = document.getElementById('contactForm');
     if (form) {
-        form.addEventListener('submit', (e) => {
+        form.addEventListener('submit', async (e) => {
             e.preventDefault();
             const name = document.getElementById('contactName').value;
             const phone = document.getElementById('contactPhone').value;
             const message = document.getElementById('contactMessage').value;
             
-            // Here you would typically send the data to a server
-            console.log(`شكراً لك ${name}! تم إرسال رسالتك بنجاح.`);
-            form.reset();
+            try {
+                // Create support ticket
+                const ticketData = {
+                    user_id: currentUser.id,
+                    subject: `رسالة دعم من ${name}`,
+                    message: message,
+                    contact_phone: phone,
+                    status: 'open'
+                };
+
+                const { data: ticket, error } = await db.supabase
+                    .from('tickets')
+                    .insert([ticketData])
+                    .select()
+                    .single();
+
+                if (error) {
+                    throw error;
+                }
+
+                showSuccessMessage('تم إرسال رسالتك بنجاح! سنتواصل معك قريباً.');
+                form.reset();
+                
+            } catch (error) {
+                console.error('Error creating support ticket:', error);
+                showErrorMessage('فشل في إرسال الرسالة. يرجى المحاولة مرة أخرى.');
+            }
         });
     }
 }
@@ -479,193 +584,7 @@ function setupInvoices() {
     // The invoice buttons now use onclick="window.location.href='invoice.html?id=X'"
 }
 
-// Toggle account menu
-function toggleAccountMenu() {
-    const dropdown = document.getElementById('accountDropdown');
-    if (dropdown) {
-        dropdown.classList.toggle('show');
-    }
-}
-
-// Show account info
-function showAccountInfo() {
-    const modal = document.createElement('div');
-    modal.className = 'account-modal';
-    modal.innerHTML = `
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>معلومات الحساب</h3>
-                <button class="close-btn" onclick="closeModal()">×</button>
-            </div>
-            <div class="modal-body">
-                <div class="account-info">
-                    <div class="info-item">
-                        <span class="label">الاسم:</span>
-                        <span class="value">${userAccount.name}</span>
-                    </div>
-                    <div class="info-item">
-                        <span class="label">البريد الإلكتروني:</span>
-                        <span class="value">${userAccount.email}</span>
-                    </div>
-                    <div class="info-item">
-                        <span class="label">رقم الهاتف:</span>
-                        <span class="value">${userAccount.phone}</span>
-                    </div>
-                    <div class="info-item">
-                        <span class="label">الرصيد:</span>
-                        <span class="value balance">${userAccount.balance}</span>
-                    </div>
-                    <div class="info-item">
-                        <span class="label">آخر تسجيل دخول:</span>
-                        <span class="value">${userAccount.lastLogin}</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-    `;
-    
-    document.body.appendChild(modal);
-    setTimeout(() => modal.classList.add('show'), 10);
-}
-
-// Close modal
-function closeModal() {
-    const modal = document.querySelector('.account-modal');
-    if (modal) {
-        modal.classList.remove('show');
-        setTimeout(() => modal.remove(), 300);
-    }
-}
-
-// Logout function
-function logout() {
-    // Clear user data from localStorage
-    localStorage.removeItem('current_user');
-    localStorage.removeItem('twq_cart');
-    
-    // Redirect to login page
-    window.location.href = 'login.html';
-}
-
-// Show QR code
-function showQRCode() {
-    console.log('QR Code: DukkanVision_User_12345');
-}
-
-// Update data function
-function updateData() {
-    const btn = document.querySelector('.btn-purple');
-    if (btn) {
-        const originalText = btn.textContent;
-        btn.textContent = 'جاري التحديث...';
-        btn.disabled = true;
-        
-        setTimeout(() => {
-            // Update values
-            const values = {
-                kSpend: (Math.random() * 2000 + 1000).toFixed(2) + ' ر.س',
-                kVisits: Math.floor(Math.random() * 200 + 50),
-                kTop: 'Twq Pick - الرياض',
-                kAvg: (Math.random() * 100 + 50).toFixed(2) + ' ر.س'
-            };
-            
-            Object.keys(values).forEach(id => {
-                const element = document.getElementById(id);
-                if (element) {
-                    element.textContent = values[id];
-                }
-            });
-            
-            // Redraw sparklines
-            setupSparklines();
-            
-            btn.textContent = originalText;
-            btn.disabled = false;
-            
-            console.log('تم تحديث البيانات بنجاح!');
-        }, 2000);
-    }
-}
-
-// Search products
-function searchProducts() {
-    const searchInput = document.getElementById('productSearch');
-    const query = searchInput ? searchInput.value.trim() : '';
-    
-    if (query) {
-        console.log(`البحث عن: ${query}\nسيتم إضافة نتائج البحث هنا.`);
-    } else {
-        console.log('يرجى إدخال اسم المنتج للبحث.');
-    }
-}
-
-// Show subpage
-function showSubpage(page) {
-    console.log(`عرض صفحة: ${page}\nسيتم إضافة هذه الميزة قريباً.`);
-}
-
-// Show subpage
-function showSubpage(page) {
-    console.log(`عرض صفحة: ${page}`);
-    // Here you would typically show different content sections
-}
-
-// Toggle language
-function toggleLanguage() {
-    const currentLang = document.documentElement.lang === 'ar' ? 'ar' : 'en';
-    const newLang = currentLang === 'ar' ? 'en' : 'ar';
-    
-    document.documentElement.lang = newLang;
-    document.documentElement.dir = newLang === 'ar' ? 'rtl' : 'ltr';
-    
-    updatePageContent(newLang);
-}
-
-// Update page content based on language
-function updatePageContent(lang) {
-    const content = pageContent[lang];
-    if (!content) return;
-    
-    const mainTitle = document.querySelector('.main-content h1');
-    if (mainTitle) {
-        mainTitle.innerHTML = `${content.welcome} <span class="accent-orange">${content.title}</span>`;
-    }
-    
-    const description = document.querySelector('.main-content > .container > p');
-    if (description) {
-        description.textContent = content.description;
-    }
-}
-
-// Add loading animation
-function addLoadingAnimation() {
-    const loader = document.createElement('div');
-    loader.className = 'loading-spinner';
-    loader.innerHTML = '<div class="spinner"></div>';
-    document.body.appendChild(loader);
-    
-    setTimeout(() => {
-        loader.remove();
-    }, 2000);
-}
-
-// Initialize when DOM is loaded
-document.addEventListener('DOMContentLoaded', () => {
-    initializePage();
-    
-    // Update account info
-    const accName = document.getElementById('accName');
-    const accEmail = document.getElementById('accEmail');
-    const dropdownName = document.getElementById('dropdownName');
-    const dropdownEmail = document.getElementById('dropdownEmail');
-    
-    if (accName) accName.textContent = userAccount.name;
-    if (accEmail) accEmail.textContent = userAccount.email;
-    if (dropdownName) dropdownName.textContent = userAccount.name;
-    if (dropdownEmail) dropdownEmail.textContent = userAccount.email;
-});
-
-// Setup chat functionality - Using same approach as test_chat.html
+// Setup chat functionality
 function setupChat() {
     const chatInput = document.getElementById('chatInput');
     const chatMessages = document.getElementById('chatMessages');
@@ -703,14 +622,25 @@ function setupChat() {
             // Show loading message
             const loadingId = addMessage('جاري البحث عن إجابة...', 'bot');
             
-            // Get current user data
-            const currentUserStr = localStorage.getItem('current_user');
-            const currentUser = currentUserStr ? JSON.parse(currentUserStr) : null;
+            // Get user name from multiple possible sources
+            let userName = 'مستخدم';
+            if (currentUser) {
+                if (currentUser.first_name && currentUser.first_name.trim()) {
+                    userName = currentUser.first_name.trim();
+                } else if (currentUser.name && currentUser.name.trim()) {
+                    userName = currentUser.name.trim();
+                } else if (currentUser.email && currentUser.email.includes('@')) {
+                    const emailName = currentUser.email.split('@')[0];
+                    if (emailName && emailName.trim()) {
+                        userName = emailName.trim();
+                    }
+                }
+            }
             
             console.log('Sending request to RAG API:', {
                 question: query,
                 user_id: currentUser?.id || null,
-                user_name: currentUser?.name || 'مستخدم'
+                user_name: userName
             });
             
             // Call RAG API
@@ -724,7 +654,7 @@ function setupChat() {
                 body: JSON.stringify({
                     question: query,
                     user_id: currentUser?.id || null,
-                    user_name: currentUser?.name || 'مستخدم'
+                    user_name: userName
                 })
             });
             
@@ -778,28 +708,146 @@ function setupChat() {
         });
     }
 
-    // Make functions globally available for testing
-    window.handleSend = handleSend;
-    window.handleClear = handleClear;
+    console.log('✅ Chat functionality setup successfully');
 }
 
-// Scroll to section function
-function scrollToSection(sectionId) {
-    const section = document.getElementById(sectionId);
-    if (section) {
-        const navHeight = document.querySelector('.nav').offsetHeight;
-        const sectionTop = section.offsetTop;
-        const targetPosition = sectionTop - navHeight - 20; // 20px extra space
-        
-        window.scrollTo({
-            top: targetPosition,
-            behavior: 'smooth'
+// Setup smooth scrolling
+function setupSmoothScrolling() {
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            e.preventDefault();
+            const target = document.querySelector(this.getAttribute('href'));
+            if (target) {
+                target.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            }
         });
+    });
+}
+
+// Setup animations
+function setupAnimations() {
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('fade-in');
+            }
+        });
+    });
+
+    document.querySelectorAll('.stat-card, .content-section, .card').forEach(el => {
+        observer.observe(el);
+    });
+}
+
+// Utility functions
+function showSuccessMessage(message) {
+    // Create success notification
+    const notification = document.createElement('div');
+    notification.className = 'notification success';
+    notification.textContent = message;
+    notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: #10b981;
+        color: white;
+        padding: 12px 20px;
+        border-radius: 8px;
+        z-index: 10000;
+        animation: slideInRight 0.3s ease-out;
+    `;
+    
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        notification.remove();
+    }, 3000);
+}
+
+function showErrorMessage(message) {
+    // Create error notification
+    const notification = document.createElement('div');
+    notification.className = 'notification error';
+    notification.textContent = message;
+    notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: #ef4444;
+        color: white;
+        padding: 12px 20px;
+        border-radius: 8px;
+        z-index: 10000;
+        animation: slideInRight 0.3s ease-out;
+    `;
+    
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        notification.remove();
+    }, 3000);
+}
+
+// Global functions
+function toggleAccountMenu() {
+    const dropdown = document.getElementById('accountDropdown');
+    if (dropdown) {
+        dropdown.classList.toggle('show');
     }
 }
 
-// Logout function
-function logout() {
+function showAccountInfo() {
+    const modal = document.createElement('div');
+    modal.className = 'account-modal';
+    modal.innerHTML = `
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>معلومات الحساب</h3>
+                <button class="close-btn" onclick="closeModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="account-info">
+                    <div class="info-item">
+                        <span class="label">الاسم:</span>
+                        <span class="value">${userAccount.name}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="label">البريد الإلكتروني:</span>
+                        <span class="value">${userAccount.email}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="label">رقم الهاتف:</span>
+                        <span class="value">${userAccount.phone}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="label">الرصيد:</span>
+                        <span class="value balance">${userAccount.balance}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="label">آخر تسجيل دخول:</span>
+                        <span class="value">${userAccount.lastLogin}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+    setTimeout(() => modal.classList.add('show'), 10);
+}
+
+function closeModal() {
+    const modal = document.querySelector('.account-modal');
+    if (modal) {
+        modal.classList.remove('show');
+        setTimeout(() => modal.remove(), 300);
+    }
+}
+
+function logoutUser() {
     // Clear user data from localStorage
     localStorage.removeItem('current_user');
     localStorage.removeItem('twq_cart');
@@ -808,20 +856,19 @@ function logout() {
     window.location.href = 'login.html';
 }
 
-// Export functions for global access
-window.toggleLanguage = toggleLanguage;
-window.addLoadingAnimation = addLoadingAnimation;
-window.showAccountInfo = showAccountInfo;
-window.closeModal = closeModal;
-window.logout = logout;
-window.showQRCode = showQRCode;
-window.updateData = updateData;
-window.searchProducts = searchProducts;
-window.showSubpage = showSubpage;
-window.toggleAccountMenu = toggleAccountMenu;
-window.scrollToSection = scrollToSection;
-
-
+function scrollToSection(sectionId) {
+    const section = document.getElementById(sectionId);
+    if (section) {
+        const navHeight = document.querySelector('.nav').offsetHeight;
+        const sectionTop = section.offsetTop;
+        const targetPosition = sectionTop - navHeight - 20;
+        
+        window.scrollTo({
+            top: targetPosition,
+            behavior: 'smooth'
+        });
+    }
+}
 
 // Test connection to RAG API
 async function testRAGConnection() {
@@ -849,8 +896,10 @@ async function testRAGConnection() {
     }
 }
 
-// Initialize page when DOM is loaded
+// Initialize when DOM is loaded
 document.addEventListener('DOMContentLoaded', async () => {
+    console.log('🚀 Initializing user page...');
+    
     // Test RAG API connection first
     const isConnected = await testRAGConnection();
     if (!isConnected) {
@@ -865,9 +914,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
     
-    initializePage();
-    
-    // Setup chat functionality
-    setupChat();
+    // Initialize the page
+    await initializePage();
 });
+
+// Export functions for global access
+window.toggleAccountMenu = toggleAccountMenu;
+window.showAccountInfo = showAccountInfo;
+window.closeModal = closeModal;
+window.logoutUser = logoutUser;
+window.scrollToSection = scrollToSection;
 
