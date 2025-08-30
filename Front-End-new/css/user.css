@@ -119,6 +119,16 @@ input:focus, textarea:focus, select:focus { outline: none; border-color: #8b5cf6
   border-color: #8b5cf6;
 }
 
+.summary-card.orange {
+    background: #fff7ed;
+    border-color: #8b5cf6;
+}
+
+.summary-card.red {
+    background: #fef2f2;
+    border-color: #ef4444;
+}
+
 .card-title {
   font-size: 14px;
   font-weight: 600;

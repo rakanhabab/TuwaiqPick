@@ -549,6 +549,8 @@ async function setupPlotlyCharts() {
             createAvgChart(spendData.map((spend, i) => 
                 visitsData[i] > 0 ? spend / visitsData[i] : 0
             ), chartMonths);
+            createTopProductsChart(); // Create top products chart
+            createCaloriesHeatmap(); // Create calories heatmap
         }, 100);
         
         console.log('✅ All charts created successfully');
@@ -825,7 +827,7 @@ function createEmptyCharts() {
     const emptyData = Array(8).fill(0);
     
     // Clear existing charts first
-    const containers = ['spendChart', 'visitsChart', 'topChart', 'avgChart'];
+    const containers = ['spendChart', 'visitsChart', 'topChart', 'avgChart', 'topProductsChart', 'caloriesHeatmap'];
     containers.forEach(id => {
         const container = document.getElementById(id);
         if (container) {
@@ -839,7 +841,406 @@ function createEmptyCharts() {
         createVisitsChart(emptyData, months);
         createTopChart([]); // Empty branch data
         createAvgChart(emptyData, months);
+        createTopProductsChart(); // Create empty top products chart
+        createCaloriesHeatmap(); // Create empty calories heatmap
     }, 100);
+}
+
+// Create top products horizontal bar chart
+async function createTopProductsChart() {
+    console.log('🛍️ Creating top products chart...');
+    
+    try {
+        if (!currentUser) {
+            console.error('❌ No current user found for top products chart');
+            return;
+        }
+        
+        // Get invoices with products_and_quantities for current user
+        const { data: invoices, error } = await db.supabase
+            .from('invoices')
+            .select('products_and_quantities')
+            .eq('user_id', currentUser.id)
+            .eq('status', 'paid');
+        
+        if (error) {
+            console.error('❌ Error fetching invoices:', error);
+            createEmptyTopProductsChart();
+            return;
+        }
+        
+        if (!invoices || invoices.length === 0) {
+            console.log('📦 No paid invoices found for user');
+            createEmptyTopProductsChart();
+            return;
+        }
+        
+        console.log('📋 Found invoices with products:', invoices.length);
+        
+        if (error) {
+            console.error('❌ Error fetching invoice items:', error);
+            createEmptyTopProductsChart();
+            return;
+        }
+        
+        // Process product data from JSONB
+        const productCounts = {};
+        invoices.forEach(invoice => {
+            if (invoice.products_and_quantities && Array.isArray(invoice.products_and_quantities)) {
+                invoice.products_and_quantities.forEach(product => {
+                    if (product.name && product.quantity) {
+                        const productName = product.name;
+                        const quantity = parseInt(product.quantity) || 1;
+                        productCounts[productName] = (productCounts[productName] || 0) + quantity;
+                    }
+                });
+            }
+        });
+        
+        console.log('🛍️ Processed product counts:', productCounts);
+        
+        // Get top 5 products
+        const topProducts = Object.entries(productCounts)
+            .sort(([,a], [,b]) => b - a)
+            .slice(0, 5)
+            .map(([name, count]) => ({ name, count }));
+        
+        console.log('🛍️ Top products data:', topProducts);
+        
+        if (topProducts.length === 0) {
+            createEmptyTopProductsChart();
+            return;
+        }
+        
+        // Create horizontal bar chart
+        const trace = {
+            x: topProducts.map(p => p.count),
+            y: topProducts.map(p => p.name),
+            type: 'bar',
+            orientation: 'h',
+            marker: {
+                color: ['#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#feca57'],
+                line: {
+                    color: '#ffffff',
+                    width: 1
+                }
+            },
+            text: topProducts.map(p => p.count),
+            textposition: 'auto',
+            textfont: {
+                color: '#ffffff',
+                size: 12
+            }
+        };
+        
+        const layout = {
+            margin: { l: 80, r: 20, t: 20, b: 30 },
+            showlegend: false,
+            paper_bgcolor: 'transparent',
+            plot_bgcolor: 'transparent',
+            xaxis: {
+                showgrid: false,
+                showticklabels: true,
+                zeroline: false,
+                tickfont: { size: 10, color: '#6b7280' }
+            },
+            yaxis: {
+                showgrid: false,
+                showticklabels: true,
+                zeroline: false,
+                tickfont: { size: 10, color: '#6b7280' },
+                automargin: true
+            }
+        };
+        
+        const container = document.getElementById('topProductsChart');
+        if (!container) {
+            console.error('❌ topProductsChart container not found');
+            return;
+        }
+        
+        Plotly.newPlot('topProductsChart', [trace], layout, { displayModeBar: false, responsive: true });
+        console.log('✅ Top products chart created successfully');
+        
+        // Update KPI value
+        const kTopProducts = document.getElementById('kTopProducts');
+        if (kTopProducts) {
+            kTopProducts.textContent = `${topProducts.length} منتجات`;
+        }
+        
+    } catch (error) {
+        console.error('❌ Error creating top products chart:', error);
+        createEmptyTopProductsChart();
+    }
+}
+
+// Create empty top products chart
+function createEmptyTopProductsChart() {
+    console.log('📦 Creating empty top products chart');
+    
+    const trace = {
+        x: [1],
+        y: ['لا توجد بيانات'],
+        type: 'bar',
+        orientation: 'h',
+        marker: {
+            color: ['#e5e7eb']
+        },
+        text: ['0'],
+        textposition: 'auto',
+        textfont: {
+            color: '#6b7280',
+            size: 12
+        }
+    };
+    
+    const layout = {
+        margin: { l: 80, r: 20, t: 20, b: 30 },
+        showlegend: false,
+        paper_bgcolor: 'transparent',
+        plot_bgcolor: 'transparent',
+        xaxis: {
+            showgrid: false,
+            showticklabels: false,
+            zeroline: false
+        },
+        yaxis: {
+            showgrid: false,
+            showticklabels: true,
+            zeroline: false,
+            tickfont: { size: 10, color: '#6b7280' }
+        }
+    };
+    
+    const container = document.getElementById('topProductsChart');
+    if (!container) {
+        console.error('❌ topProductsChart container not found');
+        return;
+    }
+    
+    Plotly.newPlot('topProductsChart', [trace], layout, { displayModeBar: false, responsive: true });
+    console.log('✅ Empty top products chart created successfully');
+    
+    // Update KPI value
+    const kTopProducts = document.getElementById('kTopProducts');
+    if (kTopProducts) {
+        kTopProducts.textContent = '0 منتجات';
+    }
+}
+
+// Create calories heatmap chart
+async function createCaloriesHeatmap() {
+    console.log('🔥 Creating calories heatmap...');
+    
+    try {
+        if (!currentUser) {
+            console.error('❌ No current user found for calories heatmap');
+            return;
+        }
+        
+        // Get invoices with products_and_quantities and timestamp for current user
+        const { data: invoices, error } = await db.supabase
+            .from('invoices')
+            .select(`
+                products_and_quantities,
+                timestamp
+            `)
+            .eq('user_id', currentUser.id)
+            .eq('status', 'paid');
+        
+        if (error) {
+            console.error('❌ Error fetching invoices for calories:', error);
+            createEmptyCaloriesHeatmap();
+            return;
+        }
+        
+        if (!invoices || invoices.length === 0) {
+            console.log('📦 No paid invoices found for calories heatmap');
+            createEmptyCaloriesHeatmap();
+            return;
+        }
+        
+        console.log('📋 Found invoices for calories:', invoices.length);
+        
+        // Extract all unique product IDs from invoices
+        const productIds = new Set();
+        invoices.forEach(invoice => {
+            if (invoice.products_and_quantities && Array.isArray(invoice.products_and_quantities)) {
+                invoice.products_and_quantities.forEach(product => {
+                    if (product.product_id) {
+                        productIds.add(product.product_id);
+                    }
+                });
+            }
+        });
+        
+        console.log('🆔 Unique product IDs found:', productIds.size);
+        
+        // Fetch calories for all products
+        const { data: products, error: productsError } = await db.supabase
+            .from('products')
+            .select('id, calories')
+            .in('id', Array.from(productIds));
+        
+        if (productsError) {
+            console.error('❌ Error fetching products for calories:', productsError);
+            createEmptyCaloriesHeatmap();
+            return;
+        }
+        
+        // Create a map of product_id to calories
+        const productCaloriesMap = {};
+        products.forEach(product => {
+            productCaloriesMap[product.id] = parseInt(product.calories) || 0;
+        });
+        
+        console.log('🔥 Product calories map:', productCaloriesMap);
+        
+        // Process calories data by hour
+        const hourlyCalories = {};
+        let totalCalories = 0;
+        
+        invoices.forEach(invoice => {
+            const hour = new Date(invoice.timestamp).getHours();
+            
+            if (invoice.products_and_quantities && Array.isArray(invoice.products_and_quantities)) {
+                invoice.products_and_quantities.forEach(product => {
+                    if (product.product_id && product.quantity) {
+                        const quantity = parseInt(product.quantity) || 1;
+                        const calories = productCaloriesMap[product.product_id] || 0;
+                        const totalProductCalories = quantity * calories;
+                        
+                        hourlyCalories[hour] = (hourlyCalories[hour] || 0) + totalProductCalories;
+                        totalCalories += totalProductCalories;
+                    }
+                });
+            }
+        });
+        
+        console.log('🔥 Processed hourly calories:', hourlyCalories);
+        console.log('🔥 Total calories:', totalCalories);
+        
+        // Create data for heatmap (24 hours)
+        const hours = Array.from({length: 24}, (_, i) => i);
+        const caloriesData = hours.map(hour => hourlyCalories[hour] || 0);
+        
+        // Create heatmap trace
+        const trace = {
+            x: hours,
+            y: ['السعرات الحرارية'],
+            z: [caloriesData],
+            type: 'heatmap',
+            colorscale: [
+                [0, '#fef2f2'],
+                [0.2, '#fecaca'],
+                [0.4, '#fca5a5'],
+                [0.6, '#f87171'],
+                [0.8, '#ef4444'],
+                [1, '#dc2626']
+            ],
+            showscale: true,
+            colorbar: {
+                title: 'السعرات',
+                titleside: 'right',
+                thickness: 10,
+                len: 0.5,
+                x: 1.1,
+                y: 0.5
+            }
+        };
+        
+        const layout = {
+            margin: { l: 30, r: 80, t: 20, b: 30 },
+            showlegend: false,
+            paper_bgcolor: 'transparent',
+            plot_bgcolor: 'transparent',
+            xaxis: {
+                title: 'ساعة اليوم',
+                showgrid: false,
+                showticklabels: true,
+                zeroline: false,
+                tickfont: { size: 10, color: '#6b7280' },
+                tickmode: 'array',
+                tickvals: [0, 6, 12, 18, 23],
+                ticktext: ['00:00', '06:00', '12:00', '18:00', '23:00']
+            },
+            yaxis: {
+                showgrid: false,
+                showticklabels: true,
+                zeroline: false,
+                tickfont: { size: 10, color: '#6b7280' }
+            }
+        };
+        
+        const container = document.getElementById('caloriesHeatmap');
+        if (!container) {
+            console.error('❌ caloriesHeatmap container not found');
+            return;
+        }
+        
+        Plotly.newPlot('caloriesHeatmap', [trace], layout, { displayModeBar: false, responsive: true });
+        console.log('✅ Calories heatmap created successfully');
+        
+        // Update KPI value
+        const kCalories = document.getElementById('kCalories');
+        if (kCalories) {
+            kCalories.textContent = `${totalCalories.toLocaleString()} سعرة`;
+        }
+        
+    } catch (error) {
+        console.error('❌ Error creating calories heatmap:', error);
+        createEmptyCaloriesHeatmap();
+    }
+}
+
+// Create empty calories heatmap
+function createEmptyCaloriesHeatmap() {
+    console.log('🔥 Creating empty calories heatmap');
+    
+    const hours = Array.from({length: 24}, (_, i) => i);
+    const emptyData = Array(24).fill(0);
+    
+    const trace = {
+        x: hours,
+        y: ['لا توجد بيانات'],
+        z: [emptyData],
+        type: 'heatmap',
+        colorscale: [[0, '#e5e7eb'], [1, '#e5e7eb']],
+        showscale: false
+    };
+    
+    const layout = {
+        margin: { l: 30, r: 20, t: 20, b: 30 },
+        showlegend: false,
+        paper_bgcolor: 'transparent',
+        plot_bgcolor: 'transparent',
+        xaxis: {
+            showgrid: false,
+            showticklabels: false,
+            zeroline: false
+        },
+        yaxis: {
+            showgrid: false,
+            showticklabels: true,
+            zeroline: false,
+            tickfont: { size: 10, color: '#6b7280' }
+        }
+    };
+    
+    const container = document.getElementById('caloriesHeatmap');
+    if (!container) {
+        console.error('❌ caloriesHeatmap container not found');
+        return;
+    }
+    
+    Plotly.newPlot('caloriesHeatmap', [trace], layout, { displayModeBar: false, responsive: true });
+    console.log('✅ Empty calories heatmap created successfully');
+    
+    // Update KPI value
+    const kCalories = document.getElementById('kCalories');
+    if (kCalories) {
+        kCalories.textContent = '0 سعرة';
+    }
 }
 
 // Setup account dropdown
